@@ -1,0 +1,12 @@
+# Java compiled files
+*.class
+
+# VS Code
+.vscode/
+
+# MySQL / database credentials
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
