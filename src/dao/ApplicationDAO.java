@@ -81,6 +81,7 @@ public class ApplicationDAO {
             while (resultSet.next()) {
 
                 Application application = new Application(
+                        resultSet.getInt("application_id"),
                         resultSet.getInt("user_id"),
                         resultSet.getString("company_name"),
                         resultSet.getString("job_role"),
@@ -124,6 +125,7 @@ public List<Application> searchByCompany(String companyName) {
         while (resultSet.next()) {
 
             Application application = new Application(
+                    resultSet.getInt("application_id"),
                     resultSet.getInt("user_id"),
                     resultSet.getString("company_name"),
                     resultSet.getString("job_role"),
@@ -140,6 +142,118 @@ public List<Application> searchByCompany(String companyName) {
     } catch (SQLException e) {
 
         System.out.println("Search failed!");
+        e.printStackTrace();
+    }
+
+    return applications;
+}
+// Update an existing application
+public boolean updateApplication(
+        int applicationId,
+        String companyName,
+        String jobRole,
+        String status,
+        String jobLink,
+        String notes) {
+
+    String sql = """
+            UPDATE applications
+            SET company_name = ?,
+                job_role = ?,
+                status = ?,
+                job_link = ?,
+                notes = ?
+            WHERE application_id = ?
+            """;
+
+    try (Connection connection = DatabaseConnection.getConnection();
+         PreparedStatement statement =
+                 connection.prepareStatement(sql)) {
+
+        statement.setString(1, companyName);
+        statement.setString(2, jobRole);
+        statement.setString(3, status);
+        statement.setString(4, jobLink);
+        statement.setString(5, notes);
+        statement.setInt(6, applicationId);
+
+        int rowsUpdated = statement.executeUpdate();
+
+        return rowsUpdated > 0;
+
+    } catch (SQLException e) {
+
+        System.out.println("Failed to update application!");
+        e.printStackTrace();
+
+        return false;
+    }
+}
+// Delete an application
+public boolean deleteApplication(int applicationId) {
+
+    String sql = """
+            DELETE FROM applications
+            WHERE application_id = ?
+            """;
+
+    try (Connection connection = DatabaseConnection.getConnection();
+         PreparedStatement statement =
+                 connection.prepareStatement(sql)) {
+
+        statement.setInt(1, applicationId);
+
+        int rowsDeleted = statement.executeUpdate();
+
+        return rowsDeleted > 0;
+
+    } catch (SQLException e) {
+
+        System.out.println("Failed to delete application!");
+        e.printStackTrace();
+
+        return false;
+    }
+}
+// Get applications for a specific user
+public List<Application> getApplicationsByUser(int userId) {
+
+    List<Application> applications = new ArrayList<>();
+
+    String sql = """
+            SELECT *
+            FROM applications
+            WHERE user_id = ?
+            """;
+
+    try (Connection connection = DatabaseConnection.getConnection();
+         PreparedStatement statement =
+                 connection.prepareStatement(sql)) {
+
+        statement.setInt(1, userId);
+
+        ResultSet resultSet = statement.executeQuery();
+
+        while (resultSet.next()) {
+
+            Application application = new Application(
+                    resultSet.getInt("application_id"),
+                    resultSet.getInt("user_id"),
+                    resultSet.getString("company_name"),
+                    resultSet.getString("job_role"),
+                    resultSet.getDate("application_date").toLocalDate(),
+                    resultSet.getDate("deadline").toLocalDate(),
+                    resultSet.getString("status"),
+                    resultSet.getString("job_link"),
+                    resultSet.getString("notes")
+            );
+
+            applications.add(application);
+        }
+
+    } catch (SQLException e) {
+
+        System.out.println("Failed to fetch user applications!");
         e.printStackTrace();
     }
 
