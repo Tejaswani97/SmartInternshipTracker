@@ -2,7 +2,8 @@ package dao;
 
 import model.Application;
 import util.DatabaseConnection;
-
+import java.util.Map;
+import java.util.HashMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -104,7 +105,7 @@ public class ApplicationDAO {
         return applications;
     }
     // Search applications by company name
-public List<Application> searchByCompany(String companyName) {
+public List<Application> searchByCompany(String companyName,int userId) {
 
     List<Application> applications = new ArrayList<>();
 
@@ -112,6 +113,7 @@ public List<Application> searchByCompany(String companyName) {
             SELECT *
             FROM applications
             WHERE company_name LIKE ?
+            AND user_id = ?
             """;
 
     try (Connection connection = DatabaseConnection.getConnection();
@@ -119,6 +121,7 @@ public List<Application> searchByCompany(String companyName) {
                  connection.prepareStatement(sql)) {
 
         statement.setString(1, "%" + companyName + "%");
+        statement.setInt(2, userId);
 
         ResultSet resultSet = statement.executeQuery();
 
@@ -150,11 +153,12 @@ public List<Application> searchByCompany(String companyName) {
 // Update an existing application
 public boolean updateApplication(
         int applicationId,
+        int userId,
         String companyName,
         String jobRole,
         String status,
         String jobLink,
-        String notes) {
+        String notes){
 
     String sql = """
             UPDATE applications
@@ -164,6 +168,7 @@ public boolean updateApplication(
                 job_link = ?,
                 notes = ?
             WHERE application_id = ?
+            AND user_id = ?
             """;
 
     try (Connection connection = DatabaseConnection.getConnection();
@@ -176,6 +181,7 @@ public boolean updateApplication(
         statement.setString(4, jobLink);
         statement.setString(5, notes);
         statement.setInt(6, applicationId);
+        statement.setInt(7, userId);
 
         int rowsUpdated = statement.executeUpdate();
 
@@ -190,11 +196,12 @@ public boolean updateApplication(
     }
 }
 // Delete an application
-public boolean deleteApplication(int applicationId) {
+public boolean deleteApplication(int applicationId,int userId) {
 
     String sql = """
             DELETE FROM applications
             WHERE application_id = ?
+            AND user_id = ?
             """;
 
     try (Connection connection = DatabaseConnection.getConnection();
@@ -202,6 +209,7 @@ public boolean deleteApplication(int applicationId) {
                  connection.prepareStatement(sql)) {
 
         statement.setInt(1, applicationId);
+        statement.setInt(2, userId);
 
         int rowsDeleted = statement.executeUpdate();
 
@@ -254,6 +262,88 @@ public List<Application> getApplicationsByUser(int userId) {
     } catch (SQLException e) {
 
         System.out.println("Failed to fetch user applications!");
+        e.printStackTrace();
+    }
+
+    return applications;
+}
+// Get application statistics for a specific user
+public Map<String, Integer> getApplicationStatistics(int userId) {
+
+    Map<String, Integer> statistics = new HashMap<>();
+
+    String sql = """
+            SELECT status, COUNT(*) AS count
+            FROM applications
+            WHERE user_id = ?
+            GROUP BY status
+            """;
+
+    try (Connection connection = DatabaseConnection.getConnection();
+         PreparedStatement statement =
+                 connection.prepareStatement(sql)) {
+
+        statement.setInt(1, userId);
+
+        ResultSet resultSet = statement.executeQuery();
+
+        while (resultSet.next()) {
+
+            String status = resultSet.getString("status");
+            int count = resultSet.getInt("count");
+
+            statistics.put(status, count);
+        }
+
+    } catch (SQLException e) {
+
+        System.out.println("Failed to fetch application statistics!");
+        e.printStackTrace();
+    }
+
+    return statistics;
+}
+// Get upcoming deadlines for a specific user
+public List<Application> getUpcomingDeadlines(int userId) {
+
+    List<Application> applications = new ArrayList<>();
+
+    String sql = """
+            SELECT *
+            FROM applications
+            WHERE user_id = ?
+            AND deadline >= CURDATE()
+            ORDER BY deadline ASC
+            """;
+
+    try (Connection connection = DatabaseConnection.getConnection();
+         PreparedStatement statement =
+                 connection.prepareStatement(sql)) {
+
+        statement.setInt(1, userId);
+
+        ResultSet resultSet = statement.executeQuery();
+
+        while (resultSet.next()) {
+
+            Application application = new Application(
+                    resultSet.getInt("application_id"),
+                    resultSet.getInt("user_id"),
+                    resultSet.getString("company_name"),
+                    resultSet.getString("job_role"),
+                    resultSet.getDate("application_date").toLocalDate(),
+                    resultSet.getDate("deadline").toLocalDate(),
+                    resultSet.getString("status"),
+                    resultSet.getString("job_link"),
+                    resultSet.getString("notes")
+            );
+
+            applications.add(application);
+        }
+
+    } catch (SQLException e) {
+
+        System.out.println("Failed to fetch upcoming deadlines!");
         e.printStackTrace();
     }
 

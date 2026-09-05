@@ -5,6 +5,7 @@ import model.User;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -65,7 +66,9 @@ public class Main {
             System.out.println("3. Search by Company");
             System.out.println("4. Update Application");
             System.out.println("5. Delete Application");
-            System.out.println("6. Exit");
+            System.out.println("6. Dashboard");
+            System.out.println("7. Upcoming Deadlines");
+            System.out.println("8. Exit");
             System.out.println("========================================");
 
             System.out.print("Enter your choice: ");
@@ -206,7 +209,7 @@ public class Main {
                     String searchCompany = scanner.nextLine();
 
                     List<Application> searchResults =
-                            applicationDAO.searchByCompany(searchCompany);
+                            applicationDAO.searchByCompany(searchCompany, userId);
 
                     if (searchResults.isEmpty()) {
 
@@ -278,6 +281,7 @@ public class Main {
                     boolean updated =
                             applicationDAO.updateApplication(
                                     updateId,
+                                    userId,
                                     newCompany,
                                     newRole,
                                     newStatus,
@@ -316,7 +320,7 @@ public class Main {
                     if (confirmation.equalsIgnoreCase("yes")) {
 
                         boolean deleted =
-                                applicationDAO.deleteApplication(deleteId);
+                                applicationDAO.deleteApplication(deleteId, userId);
 
                         if (deleted) {
                             System.out.println(
@@ -338,14 +342,93 @@ public class Main {
 
                 case 6:
 
-                    running = false;
+    System.out.println();
+    System.out.println("========== DASHBOARD ==========");
 
-                    System.out.println();
-                    System.out.println(
-                            "Thank you for using Smart Internship Tracker!"
+    Map<String, Integer> statistics =
+            applicationDAO.getApplicationStatistics(userId);
+
+    int applied =
+            statistics.getOrDefault("Applied", 0);
+
+    int shortlisted =
+            statistics.getOrDefault("Shortlisted", 0);
+
+    int interview =
+            statistics.getOrDefault("Interview", 0);
+
+    int rejected =
+            statistics.getOrDefault("Rejected", 0);
+
+    int total =
+            applied + shortlisted + interview + rejected;
+
+    System.out.println();
+    System.out.println("Total Applications : " + total);
+    System.out.println();
+    System.out.println("Applied            : " + applied);
+    System.out.println("Shortlisted        : " + shortlisted);
+    System.out.println("Interview          : " + interview);
+    System.out.println("Rejected           : " + rejected);
+
+    System.out.println();
+    System.out.println("===============================");
+
+    break;
+
+
+    case 7:
+
+    System.out.println();
+    System.out.println("===== UPCOMING DEADLINES =====");
+
+    List<Application> upcoming =
+            applicationDAO.getUpcomingDeadlines(userId);
+
+    if (upcoming.isEmpty()) {
+
+        System.out.println("No upcoming deadlines!");
+
+    } else {
+
+        LocalDate today = LocalDate.now();
+
+        for (Application app : upcoming) {
+
+            long daysLeft =
+                    java.time.temporal.ChronoUnit.DAYS.between(
+                            today,
+                            app.getDeadline()
                     );
 
-                    break;
+            System.out.println();
+            System.out.println(
+                    "Company: " + app.getCompanyName()
+            );
+
+            System.out.println(
+                    "Role: " + app.getJobRole()
+            );
+
+            System.out.println(
+                    "Deadline: " + app.getDeadline()
+            );
+
+            System.out.println(
+                    "Days Left: " + daysLeft
+            );
+
+            System.out.println(
+                    "Status: " + app.getStatus()
+            );
+
+            System.out.println(
+                    "--------------------------------"
+            );
+        }
+    }
+
+    break;
 
 
                 default:
