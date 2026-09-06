@@ -11,22 +11,28 @@ import java.util.List;
 public class ApplicationsFrame extends JFrame {
 
     private int userId;
+
     private JTable applicationsTable;
     private DefaultTableModel tableModel;
+
+    private JTextField searchField;
 
     public ApplicationsFrame(int userId) {
 
         this.userId = userId;
 
         setTitle("Smart Internship Tracker - My Applications");
-        setSize(900, 500);
+        setSize(950, 550);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Main panel
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        JPanel mainPanel =
+                new JPanel(new BorderLayout(10, 10));
+
         mainPanel.setBorder(
-                BorderFactory.createEmptyBorder(15, 15, 15, 15)
+                BorderFactory.createEmptyBorder(
+                        15, 15, 15, 15
+                )
         );
 
         // Title
@@ -41,7 +47,31 @@ public class ApplicationsFrame extends JFrame {
                 SwingConstants.CENTER
         );
 
-        mainPanel.add(titleLabel, BorderLayout.NORTH);
+        mainPanel.add(
+                titleLabel,
+                BorderLayout.NORTH
+        );
+
+        // Search panel
+        JPanel searchPanel =
+                new JPanel(new FlowLayout());
+
+        searchField =
+                new JTextField(20);
+
+        JButton searchButton =
+                new JButton("Search");
+
+        JButton showAllButton =
+                new JButton("Show All");
+
+        searchPanel.add(
+                new JLabel("Company:")
+        );
+
+        searchPanel.add(searchField);
+        searchPanel.add(searchButton);
+        searchPanel.add(showAllButton);
 
         // Table
         String[] columns = {
@@ -53,16 +83,20 @@ public class ApplicationsFrame extends JFrame {
                 "Status"
         };
 
-        tableModel = new DefaultTableModel(columns, 0) {
+        tableModel =
+                new DefaultTableModel(
+                        columns,
+                        0
+                ) {
 
-            @Override
-            public boolean isCellEditable(
-                    int row,
-                    int column) {
+                    @Override
+                    public boolean isCellEditable(
+                            int row,
+                            int column) {
 
-                return false;
-            }
-        };
+                        return false;
+                    }
+                };
 
         applicationsTable =
                 new JTable(tableModel);
@@ -72,8 +106,22 @@ public class ApplicationsFrame extends JFrame {
         JScrollPane scrollPane =
                 new JScrollPane(applicationsTable);
 
-        mainPanel.add(
+        // Center panel
+        JPanel centerPanel =
+                new JPanel(new BorderLayout());
+
+        centerPanel.add(
+                searchPanel,
+                BorderLayout.NORTH
+        );
+
+        centerPanel.add(
                 scrollPane,
+                BorderLayout.CENTER
+        );
+
+        mainPanel.add(
+                centerPanel,
                 BorderLayout.CENTER
         );
 
@@ -84,10 +132,18 @@ public class ApplicationsFrame extends JFrame {
         JButton refreshButton =
                 new JButton("Refresh");
 
+        JButton updateButton =
+                new JButton("Update");
+
+        JButton deleteButton =
+                new JButton("Delete");
+
         JButton backButton =
                 new JButton("Back");
 
         buttonPanel.add(refreshButton);
+        buttonPanel.add(updateButton);
+        buttonPanel.add(deleteButton);
         buttonPanel.add(backButton);
 
         mainPanel.add(
@@ -95,23 +151,44 @@ public class ApplicationsFrame extends JFrame {
                 BorderLayout.SOUTH
         );
 
-        // Button actions
+        // Search
+        searchButton.addActionListener(
+                e -> searchApplications()
+        );
+
+        // Show all
+        showAllButton.addActionListener(
+                e -> loadApplications()
+        );
+
+        // Refresh
         refreshButton.addActionListener(
                 e -> loadApplications()
         );
 
+        // Update
+        updateButton.addActionListener(
+                e -> updateSelectedApplication()
+        );
+
+        // Delete
+        deleteButton.addActionListener(
+                e -> deleteSelectedApplication()
+        );
+
+        // Back
         backButton.addActionListener(
                 e -> dispose()
         );
 
         add(mainPanel);
 
-        // Load data when window opens
         loadApplications();
 
         setVisible(true);
     }
 
+    // Load all applications
     private void loadApplications() {
 
         tableModel.setRowCount(0);
@@ -120,7 +197,42 @@ public class ApplicationsFrame extends JFrame {
                 new ApplicationDAO();
 
         List<Application> applications =
-                applicationDAO.getApplicationsByUser(userId);
+                applicationDAO
+                        .getApplicationsByUser(userId);
+
+        addApplicationsToTable(applications);
+    }
+
+    // Search applications by company
+    private void searchApplications() {
+
+        String company =
+                searchField.getText().trim();
+
+        if (company.isEmpty()) {
+
+            loadApplications();
+
+            return;
+        }
+
+        tableModel.setRowCount(0);
+
+        ApplicationDAO applicationDAO =
+                new ApplicationDAO();
+
+        List<Application> applications =
+                applicationDAO.searchByCompany(
+                        company,
+                        userId
+                );
+
+        addApplicationsToTable(applications);
+    }
+
+    // Add applications to table
+    private void addApplicationsToTable(
+            List<Application> applications) {
 
         for (Application application : applications) {
 
@@ -135,5 +247,159 @@ public class ApplicationsFrame extends JFrame {
 
             tableModel.addRow(row);
         }
+    }
+
+    // Update selected application
+    private void updateSelectedApplication() {
+
+    int selectedRow =
+            applicationsTable.getSelectedRow();
+
+    if (selectedRow == -1) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Please select an application first!"
+        );
+
+        return;
+    }
+
+    int applicationId =
+            (int) tableModel.getValueAt(
+                    selectedRow,
+                    0
+            );
+
+    String currentCompany =
+            tableModel.getValueAt(
+                    selectedRow,
+                    1
+            ).toString();
+
+    String currentRole =
+            tableModel.getValueAt(
+                    selectedRow,
+                    2
+            ).toString();
+
+    String currentStatus =
+            tableModel.getValueAt(
+                    selectedRow,
+                    5
+            ).toString();
+
+    String company =
+            JOptionPane.showInputDialog(
+                    this,
+                    "Company Name:",
+                    currentCompany
+            );
+
+    if (company == null || company.trim().isEmpty()) {
+        return;
+    }
+
+    String role =
+            JOptionPane.showInputDialog(
+                    this,
+                    "Job Role:",
+                    currentRole
+            );
+
+    if (role == null || role.trim().isEmpty()) {
+        return;
+    }
+
+    String status =
+            JOptionPane.showInputDialog(
+                    this,
+                    "Status (Applied / Shortlisted / Interview / Rejected):",
+                    currentStatus
+            );
+
+    if (status == null || status.trim().isEmpty()) {
+        return;
+    }
+
+    String jobLink =
+            JOptionPane.showInputDialog(
+                    this,
+                    "Job Link:",
+                    ""
+            );
+
+    if (jobLink == null) {
+        return;
+    }
+
+    String notes =
+            JOptionPane.showInputDialog(
+                    this,
+                    "Notes:",
+                    ""
+            );
+
+    if (notes == null) {
+        return;
+    }
+
+    ApplicationDAO applicationDAO =
+            new ApplicationDAO();
+
+    boolean success =
+            applicationDAO.updateApplication(
+                    applicationId,
+                    userId,
+                    company.trim(),
+                    role.trim(),
+                    status.trim(),
+                    jobLink.trim(),
+                    notes.trim()
+            );
+
+    if (success) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Application updated successfully!"
+        );
+
+        loadApplications();
+
+    } else {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Failed to update application!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+}
+
+   
+
+          
+    // Delete selected application
+    private void deleteSelectedApplication() {
+
+        int selectedRow =
+                applicationsTable.getSelectedRow();
+
+        if (selectedRow == -1) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select an application first!"
+            );
+
+            return;
+        }
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Delete feature coming next!"
+        );
     }
 }
