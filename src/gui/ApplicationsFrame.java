@@ -382,24 +382,82 @@ public class ApplicationsFrame extends JFrame {
 
           
     // Delete selected application
-    private void deleteSelectedApplication() {
+   // Delete selected application
+private void deleteSelectedApplication() {
 
-        int selectedRow =
-                applicationsTable.getSelectedRow();
+    int selectedRow =
+            applicationsTable.getSelectedRow();
 
-        if (selectedRow == -1) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Please select an application first!"
-            );
-
-            return;
-        }
+    // Step 1: Check if user selected a row
+    if (selectedRow == -1) {
 
         JOptionPane.showMessageDialog(
                 this,
-                "Delete feature coming next!"
+                "Please select an application first!"
+        );
+
+        return;
+    }
+
+    // Step 2: Get application ID from selected row
+    int applicationId =
+            (int) tableModel.getValueAt(
+                    selectedRow,
+                    0
+            );
+
+    // Step 3: Get company name for confirmation message
+    String companyName =
+            tableModel.getValueAt(
+                    selectedRow,
+                    1
+            ).toString();
+
+    // Step 4: Ask user for confirmation
+    int choice =
+            JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to delete "
+                            + companyName
+                            + " application?",
+                    "Confirm Delete",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+    // Step 5: If user chooses NO
+    if (choice != JOptionPane.YES_OPTION) {
+        return;
+    }
+
+    // Step 6: Delete from database
+    ApplicationDAO applicationDAO =
+            new ApplicationDAO();
+
+    boolean success =
+            applicationDAO.deleteApplication(
+                    applicationId,
+                    userId
+            );
+
+    // Step 7: Show result
+    if (success) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Application deleted successfully!"
+        );
+
+        // Refresh table
+        loadApplications();
+
+    } else {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Failed to delete application!",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
         );
     }
+}
 }
