@@ -349,4 +349,50 @@ public List<Application> getUpcomingDeadlines(int userId) {
 
     return applications;
 }
+// Filter applications by status for a specific user
+public List<Application> filterByStatus(String status, int userId) {
+
+    List<Application> applications = new ArrayList<>();
+
+    String sql = """
+            SELECT *
+            FROM applications
+            WHERE user_id = ?
+            AND status = ?
+            """;
+
+    try (Connection connection = DatabaseConnection.getConnection();
+         PreparedStatement statement =
+                 connection.prepareStatement(sql)) {
+
+        statement.setInt(1, userId);
+        statement.setString(2, status);
+
+        ResultSet resultSet = statement.executeQuery();
+
+        while (resultSet.next()) {
+
+            Application application = new Application(
+                    resultSet.getInt("application_id"),
+                    resultSet.getInt("user_id"),
+                    resultSet.getString("company_name"),
+                    resultSet.getString("job_role"),
+                    resultSet.getDate("application_date").toLocalDate(),
+                    resultSet.getDate("deadline").toLocalDate(),
+                    resultSet.getString("status"),
+                    resultSet.getString("job_link"),
+                    resultSet.getString("notes")
+            );
+
+            applications.add(application);
+        }
+
+    } catch (SQLException e) {
+
+        System.out.println("Filter failed!");
+        e.printStackTrace();
+    }
+
+    return applications;
+}
 }

@@ -16,6 +16,7 @@ public class ApplicationsFrame extends JFrame {
     private DefaultTableModel tableModel;
 
     private JTextField searchField;
+    private JComboBox<String> statusBox;
 
     public ApplicationsFrame(int userId) {
 
@@ -72,6 +73,23 @@ public class ApplicationsFrame extends JFrame {
         searchPanel.add(searchField);
         searchPanel.add(searchButton);
         searchPanel.add(showAllButton);
+        searchPanel.add(new JLabel("Status:"));
+
+String[] statuses = {
+        "All",
+        "Applied",
+        "Shortlisted",
+        "Interview",
+        "Rejected"
+};
+
+statusBox = new JComboBox<>(statuses);
+
+JButton filterButton =
+        new JButton("Filter");
+
+searchPanel.add(statusBox);
+searchPanel.add(filterButton);
 
         // Table
         String[] columns = {
@@ -155,6 +173,9 @@ public class ApplicationsFrame extends JFrame {
         searchButton.addActionListener(
                 e -> searchApplications()
         );
+        filterButton.addActionListener(
+        e -> filterApplications()
+);
 
         // Show all
         showAllButton.addActionListener(
@@ -229,6 +250,31 @@ public class ApplicationsFrame extends JFrame {
 
         addApplicationsToTable(applications);
     }
+       // Filter applications by status
+private void filterApplications() {
+
+    String status =
+            statusBox.getSelectedItem().toString();
+
+    if (status.equals("All")) {
+
+        loadApplications();
+        return;
+    }
+
+    tableModel.setRowCount(0);
+
+    ApplicationDAO applicationDAO =
+            new ApplicationDAO();
+
+    List<Application> applications =
+            applicationDAO.filterByStatus(
+                    status,
+                    userId
+            );
+
+    addApplicationsToTable(applications);
+}
 
     // Add applications to table
     private void addApplicationsToTable(
@@ -460,4 +506,5 @@ private void deleteSelectedApplication() {
         );
     }
 }
+
 }
