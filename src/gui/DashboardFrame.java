@@ -5,6 +5,10 @@ import dao.ApplicationDAO;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Map;
+import model.Application;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 public class DashboardFrame extends JFrame {
 
@@ -85,9 +89,12 @@ public class DashboardFrame extends JFrame {
 
         JButton logoutButton =
                 new JButton("Logout");
+        JButton deadlineButton =
+        new JButton("Upcoming Deadlines");
 
         buttonPanel.add(applicationsButton);
         buttonPanel.add(addButton);
+        buttonPanel.add(deadlineButton);
         buttonPanel.add(logoutButton);
 
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -109,6 +116,9 @@ public class DashboardFrame extends JFrame {
 
             new LoginFrame();
         });
+        deadlineButton.addActionListener(e ->
+        showDeadlineAlerts()
+        );
 
         add(mainPanel);
 
@@ -146,4 +156,88 @@ public class DashboardFrame extends JFrame {
 
         return label;
     }
+    private void showDeadlineAlerts() {
+
+    ApplicationDAO applicationDAO =
+            new ApplicationDAO();
+
+    List<Application> applications =
+            applicationDAO.getUpcomingDeadlines(userId);
+
+    if (applications.isEmpty()) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "No upcoming deadlines found!",
+                "Deadline Alerts",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+
+        return;
+    }
+
+    LocalDate today = LocalDate.now();
+
+    StringBuilder message =
+            new StringBuilder();
+
+    message.append("UPCOMING DEADLINES\n");
+    message.append("========================\n\n");
+
+    for (Application application : applications) {
+
+        long daysLeft =
+                ChronoUnit.DAYS.between(
+                        today,
+                        application.getDeadline()
+                );
+
+        message.append(
+                application.getCompanyName()
+        );
+
+        message.append(" - ");
+
+        message.append(
+                application.getJobRole()
+        );
+
+        message.append("\n");
+
+        message.append(
+                "Deadline: "
+        );
+
+        message.append(
+                application.getDeadline()
+        );
+
+        message.append("\n");
+
+        if (daysLeft == 0) {
+
+            message.append("⚠ Due today!");
+
+        } else if (daysLeft == 1) {
+
+            message.append("⚠ 1 day left");
+
+        } else {
+
+            message.append(
+                    "Days left: " + daysLeft
+            );
+        }
+
+        message.append("\n");
+        message.append("------------------------\n");
+    }
+
+    JOptionPane.showMessageDialog(
+            this,
+            message.toString(),
+            "Deadline Alerts",
+            JOptionPane.INFORMATION_MESSAGE
+    );
+}
 }
