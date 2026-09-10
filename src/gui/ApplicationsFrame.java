@@ -945,165 +945,53 @@ public class ApplicationsFrame extends JFrame {
 
     private void updateSelectedApplication() {
 
-        int selectedRow =
-                applicationsTable
-                        .getSelectedRow();
+    int selectedRow =
+            applicationsTable.getSelectedRow();
 
+    if (selectedRow == -1) {
 
-        if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(
+                this,
+                "Please select an application first!"
+        );
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Please select an application first!"
-            );
-
-            return;
-        }
-
-
-        int applicationId =
-                (int) tableModel.getValueAt(
-                        selectedRow,
-                        0
-                );
-
-
-        String currentCompany =
-                tableModel.getValueAt(
-                        selectedRow,
-                        1
-                ).toString();
-
-
-        String currentRole =
-                tableModel.getValueAt(
-                        selectedRow,
-                        2
-                ).toString();
-
-
-        String currentStatus =
-                tableModel.getValueAt(
-                        selectedRow,
-                        5
-                ).toString();
-
-
-        String company =
-                JOptionPane.showInputDialog(
-                        this,
-                        "Company Name:",
-                        currentCompany
-                );
-
-
-        if (
-                company == null
-                        || company.trim().isEmpty()
-        ) {
-
-            return;
-        }
-
-
-        String role =
-                JOptionPane.showInputDialog(
-                        this,
-                        "Job Role:",
-                        currentRole
-                );
-
-
-        if (
-                role == null
-                        || role.trim().isEmpty()
-        ) {
-
-            return;
-        }
-
-
-        String status =
-                JOptionPane.showInputDialog(
-                        this,
-                        "Status (Applied / Shortlisted / Interview / Rejected):",
-                        currentStatus
-                );
-
-
-        if (
-                status == null
-                        || status.trim().isEmpty()
-        ) {
-
-            return;
-        }
-
-
-        String jobLink =
-                JOptionPane.showInputDialog(
-                        this,
-                        "Job Link:",
-                        ""
-                );
-
-
-        if (jobLink == null) {
-
-            return;
-        }
-
-
-        String notes =
-                JOptionPane.showInputDialog(
-                        this,
-                        "Notes:",
-                        ""
-                );
-
-
-        if (notes == null) {
-
-            return;
-        }
-
-
-        ApplicationDAO applicationDAO =
-                new ApplicationDAO();
-
-
-        boolean success =
-                applicationDAO.updateApplication(
-                        applicationId,
-                        userId,
-                        company.trim(),
-                        role.trim(),
-                        status.trim(),
-                        jobLink.trim(),
-                        notes.trim()
-                );
-
-
-        if (success) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Application updated successfully!"
-            );
-
-            loadApplications();
-
-        } else {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Failed to update application!",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
+        return;
     }
 
+    int applicationId =
+            (int) tableModel.getValueAt(
+                    selectedRow,
+                    0
+            );
+
+    String company =
+            tableModel.getValueAt(
+                    selectedRow,
+                    1
+            ).toString();
+
+    String role =
+            tableModel.getValueAt(
+                    selectedRow,
+                    2
+            ).toString();
+
+    String status =
+            tableModel.getValueAt(
+                    selectedRow,
+                    5
+            ).toString();
+
+    new UpdateApplicationFrame(
+            userId,
+            applicationId,
+            company,
+            role,
+            status,
+            "",
+            ""
+    );
+}
 
     // =========================
     // DELETE
