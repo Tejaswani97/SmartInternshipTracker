@@ -75,7 +75,106 @@ public class DashboardFrame extends JFrame {
 
         statsPanel.add(createStatLabel("Rejected", rejected));
 
-        mainPanel.add(statsPanel, BorderLayout.CENTER);
+          // Dashboard center area
+JPanel centerPanel =
+        new JPanel(new BorderLayout(10, 10));
+
+centerPanel.add(
+        statsPanel,
+        BorderLayout.NORTH
+);
+
+// Deadline preview
+JTextArea deadlineArea =
+        new JTextArea();
+
+deadlineArea.setEditable(false);
+deadlineArea.setFont(
+        new Font("Arial", Font.PLAIN, 15)
+);
+
+deadlineArea.setBorder(
+        BorderFactory.createTitledBorder(
+                "Upcoming Deadlines"
+        )
+);
+
+List<Application> upcoming =
+        applicationDAO.getUpcomingDeadlines(userId);
+
+LocalDate today = LocalDate.now();
+
+if (upcoming.isEmpty()) {
+
+    deadlineArea.setText(
+            "No upcoming deadlines."
+    );
+
+} else {
+
+    StringBuilder text =
+            new StringBuilder();
+
+    for (Application application : upcoming) {
+
+        long daysLeft =
+                ChronoUnit.DAYS.between(
+                        today,
+                        application.getDeadline()
+                );
+
+        text.append(
+                application.getCompanyName()
+        );
+
+        text.append(" - ");
+
+        text.append(
+                application.getJobRole()
+        );
+
+        text.append("\nDeadline: ");
+
+        text.append(
+                application.getDeadline()
+        );
+
+        text.append("\n");
+
+        if (daysLeft == 0) {
+
+            text.append("⚠ Due today!");
+
+        } else if (daysLeft == 1) {
+
+            text.append("⚠ 1 day left");
+
+        } else {
+
+            text.append(
+                    "Days left: " + daysLeft
+            );
+        }
+
+        text.append(
+                "\n------------------------------\n"
+        );
+    }
+
+    deadlineArea.setText(
+            text.toString()
+    );
+}
+
+centerPanel.add(
+        new JScrollPane(deadlineArea),
+        BorderLayout.CENTER
+);
+
+mainPanel.add(
+        centerPanel,
+        BorderLayout.CENTER
+);
 
         // Buttons
         JPanel buttonPanel =

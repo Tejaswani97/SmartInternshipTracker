@@ -11,11 +11,12 @@ public class LoginFrame extends JFrame {
     private JTextField emailField;
     private JPasswordField passwordField;
     private JButton loginButton;
+    private JButton registerButton;
 
     public LoginFrame() {
 
         setTitle("Smart Internship Tracker");
-        setSize(450, 350);
+        setSize(450, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -23,6 +24,7 @@ public class LoginFrame extends JFrame {
         panel.setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
+
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
@@ -45,64 +47,111 @@ public class LoginFrame extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 1;
 
-        panel.add(new JLabel("Email:"), gbc);
+        panel.add(
+                new JLabel("Email:"),
+                gbc
+        );
 
         emailField = new JTextField(20);
 
         gbc.gridx = 1;
 
-        panel.add(emailField, gbc);
+        panel.add(
+                emailField,
+                gbc
+        );
 
         // Password
         gbc.gridx = 0;
         gbc.gridy = 2;
 
-        panel.add(new JLabel("Password:"), gbc);
+        panel.add(
+                new JLabel("Password:"),
+                gbc
+        );
 
-        passwordField = new JPasswordField(20);
+        passwordField =
+                new JPasswordField(20);
 
         gbc.gridx = 1;
 
-        panel.add(passwordField, gbc);
+        panel.add(
+                passwordField,
+                gbc
+        );
 
         // Login button
-        loginButton = new JButton("Login");
+        loginButton =
+                new JButton("Login");
 
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.gridwidth = 2;
 
-        panel.add(loginButton, gbc);
+        panel.add(
+                loginButton,
+                gbc
+        );
+
+        // Register button
+        registerButton =
+                new JButton("Create New Account");
+
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+
+        panel.add(
+                registerButton,
+                gbc
+        );
 
         add(panel);
 
         // Login button action
-        loginButton.addActionListener(e -> loginUser());
+        loginButton.addActionListener(
+                e -> loginUser()
+        );
+
+        // Register button action
+        registerButton.addActionListener(
+                e -> new RegisterFrame()
+        );
 
         setVisible(true);
     }
 
     private void loginUser() {
 
-        String email = emailField.getText();
+        String email =
+                emailField.getText().trim();
 
         String password =
-                new String(passwordField.getPassword());
+                new String(
+                        passwordField.getPassword()
+                );
 
-        if (email.isEmpty() || password.isEmpty()) {
+        if (email.isEmpty()
+                || password.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Please enter email and password!"
+                    "Please enter email and password!",
+                    "Missing Information",
+                    JOptionPane.WARNING_MESSAGE
             );
 
             return;
         }
 
-        UserDAO userDAO = new UserDAO();
+        UserDAO userDAO =
+                new UserDAO();
 
         User user =
-                userDAO.loginUser(email, password);
+                userDAO.loginUser(
+                        email,
+                        password
+                );
 
         if (user != null) {
 
@@ -112,8 +161,9 @@ public class LoginFrame extends JFrame {
                             + user.getName()
             );
 
-            // We will open Dashboard here next
-            new DashboardFrame(user.getUserId());
+            new DashboardFrame(
+                    user.getUserId()
+            );
 
             dispose();
 
