@@ -1317,7 +1317,7 @@ public class ApplicationsFrame extends JFrame {
 
         return button;
     }
-    private void showApplicationDetails() {
+private void showApplicationDetails() {
 
     int selectedRow =
             applicationsTable.getSelectedRow();
@@ -1334,52 +1334,84 @@ public class ApplicationsFrame extends JFrame {
         return;
     }
 
-    String id =
-            tableModel.getValueAt(
-                    selectedRow, 0
-            ).toString();
+    int applicationId =
+            (int) tableModel.getValueAt(
+                    selectedRow,
+                    0
+            );
 
-    String company =
-            tableModel.getValueAt(
-                    selectedRow, 1
-            ).toString();
+    ApplicationDAO applicationDAO =
+            new ApplicationDAO();
 
-    String role =
-            tableModel.getValueAt(
-                    selectedRow, 2
-            ).toString();
+    Application application =
+            applicationDAO.getApplicationById(
+                    applicationId,
+                    userId
+            );
 
-    String applicationDate =
-            tableModel.getValueAt(
-                    selectedRow, 3
-            ).toString();
+    if (application == null) {
 
-    String deadline =
-            tableModel.getValueAt(
-                    selectedRow, 4
-            ).toString();
+        JOptionPane.showMessageDialog(
+                this,
+                "Unable to load application details.",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+        );
 
-    String status =
-            tableModel.getValueAt(
-                    selectedRow, 5
-            ).toString();
+        return;
+    }
 
-    String details =
-            "APPLICATION DETAILS\n"
-                    + "==============================\n\n"
-                    + "Application ID: " + id + "\n\n"
-                    + "Company: " + company + "\n\n"
-                    + "Job Role: " + role + "\n\n"
+    JTextArea detailsArea =
+            new JTextArea();
+
+    detailsArea.setEditable(false);
+    detailsArea.setLineWrap(true);
+    detailsArea.setWrapStyleWord(true);
+    detailsArea.setFont(
+            new Font(
+                    "Arial",
+                    Font.PLAIN,
+                    14
+            )
+    );
+
+    detailsArea.setText(
+            "APPLICATION DETAILS\n\n"
+                    + "Company: "
+                    + application.getCompanyName()
+                    + "\n\n"
+                    + "Job Role: "
+                    + application.getJobRole()
+                    + "\n\n"
                     + "Application Date: "
-                    + applicationDate + "\n\n"
+                    + application.getApplicationDate()
+                    + "\n\n"
                     + "Deadline: "
-                    + deadline + "\n\n"
+                    + application.getDeadline()
+                    + "\n\n"
                     + "Status: "
-                    + status;
+                    + application.getStatus()
+                    + "\n\n"
+                    + "Job Link: "
+                    + application.getJobLink()
+                    + "\n\n"
+                    + "Notes: "
+                    + application.getNotes()
+    );
+
+    JScrollPane scrollPane =
+            new JScrollPane(detailsArea);
+
+    scrollPane.setPreferredSize(
+            new Dimension(
+                    500,
+                    400
+            )
+    );
 
     JOptionPane.showMessageDialog(
             this,
-            details,
+            scrollPane,
             "Application Details",
             JOptionPane.INFORMATION_MESSAGE
     );

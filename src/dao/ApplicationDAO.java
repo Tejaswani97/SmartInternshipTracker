@@ -395,4 +395,48 @@ public List<Application> filterByStatus(String status, int userId) {
 
     return applications;
 }
+// Get one application by ID for a specific user
+public Application getApplicationById(
+        int applicationId,
+        int userId) {
+
+    String sql = """
+            SELECT *
+            FROM applications
+            WHERE application_id = ?
+            AND user_id = ?
+            """;
+
+    try (Connection connection = DatabaseConnection.getConnection();
+         PreparedStatement statement =
+                 connection.prepareStatement(sql)) {
+
+        statement.setInt(1, applicationId);
+        statement.setInt(2, userId);
+
+        ResultSet resultSet = statement.executeQuery();
+
+        if (resultSet.next()) {
+
+            return new Application(
+                    resultSet.getInt("application_id"),
+                    resultSet.getInt("user_id"),
+                    resultSet.getString("company_name"),
+                    resultSet.getString("job_role"),
+                    resultSet.getDate("application_date").toLocalDate(),
+                    resultSet.getDate("deadline").toLocalDate(),
+                    resultSet.getString("status"),
+                    resultSet.getString("job_link"),
+                    resultSet.getString("notes")
+            );
+        }
+
+    } catch (SQLException e) {
+
+        System.out.println("Failed to fetch application details!");
+        e.printStackTrace();
+    }
+
+    return null;
+}
 }
