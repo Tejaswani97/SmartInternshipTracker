@@ -669,10 +669,16 @@ public class ApplicationsFrame extends JFrame {
                 createSecondaryButton(
                         "Back"
                 );
+        JButton detailsButton =
+        createSecondaryButton("View Details");
 
 
         buttonPanel.add(
                 refreshButton
+        );
+
+        buttonPanel.add(
+                detailsButton
         );
 
         buttonPanel.add(
@@ -783,6 +789,9 @@ public class ApplicationsFrame extends JFrame {
                     new LoginFrame();
                 }
         );
+        detailsButton.addActionListener(
+        e -> showApplicationDetails()
+        ); 
 
 
         add(rootPanel);
@@ -1308,4 +1317,71 @@ public class ApplicationsFrame extends JFrame {
 
         return button;
     }
+    private void showApplicationDetails() {
+
+    int selectedRow =
+            applicationsTable.getSelectedRow();
+
+    if (selectedRow == -1) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Please select an application first!",
+                "No Application Selected",
+                JOptionPane.WARNING_MESSAGE
+        );
+
+        return;
+    }
+
+    String id =
+            tableModel.getValueAt(
+                    selectedRow, 0
+            ).toString();
+
+    String company =
+            tableModel.getValueAt(
+                    selectedRow, 1
+            ).toString();
+
+    String role =
+            tableModel.getValueAt(
+                    selectedRow, 2
+            ).toString();
+
+    String applicationDate =
+            tableModel.getValueAt(
+                    selectedRow, 3
+            ).toString();
+
+    String deadline =
+            tableModel.getValueAt(
+                    selectedRow, 4
+            ).toString();
+
+    String status =
+            tableModel.getValueAt(
+                    selectedRow, 5
+            ).toString();
+
+    String details =
+            "APPLICATION DETAILS\n"
+                    + "==============================\n\n"
+                    + "Application ID: " + id + "\n\n"
+                    + "Company: " + company + "\n\n"
+                    + "Job Role: " + role + "\n\n"
+                    + "Application Date: "
+                    + applicationDate + "\n\n"
+                    + "Deadline: "
+                    + deadline + "\n\n"
+                    + "Status: "
+                    + status;
+
+    JOptionPane.showMessageDialog(
+            this,
+            details,
+            "Application Details",
+            JOptionPane.INFORMATION_MESSAGE
+    );
+}
 }

@@ -44,7 +44,8 @@ public class DashboardFrame extends JFrame {
             new Color(220, 38, 38);
 
 
-    public DashboardFrame(int userId) {
+    public DashboardFrame(int userId, String userName,
+        String userEmail) {
 
         this.userId = userId;
 
@@ -226,7 +227,7 @@ public class DashboardFrame extends JFrame {
 
         JLabel welcomeLabel =
                 new JLabel(
-                        "Welcome back 👋"
+                        "Welcome back, " + userName + " 👋"
                 );
 
         welcomeLabel.setFont(
@@ -244,7 +245,8 @@ public class DashboardFrame extends JFrame {
 
         JLabel subtitleLabel =
                 new JLabel(
-                        "Here's an overview of your internship applications."
+                        userEmail
+                        + "  •  Here's an overview of your internship applications."
                 );
 
         subtitleLabel.setFont(
