@@ -2,6 +2,7 @@ package gui;
 
 import dao.ApplicationDAO;
 import model.Application;
+import model.User;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -10,7 +11,7 @@ import java.time.LocalDate;
 
 public class AddApplicationFrame extends JFrame {
 
-    private final int userId;
+    private final User user;
 
     private JTextField companyField;
     private JTextField roleField;
@@ -21,11 +22,6 @@ public class AddApplicationFrame extends JFrame {
     private JComboBox<String> statusBox;
 
     private JTextArea notesArea;
-
-
-    // =========================
-    // THEME
-    // =========================
 
     private static final Color BACKGROUND_COLOR =
             new Color(245, 247, 250);
@@ -46,9 +42,9 @@ public class AddApplicationFrame extends JFrame {
             new Color(229, 231, 235);
 
 
-    public AddApplicationFrame(int userId) {
+    public AddApplicationFrame(User user) {
 
-        this.userId = userId;
+        this.user = user;
 
         setTitle(
                 "Smart Internship Tracker - Add Application"
@@ -63,34 +59,26 @@ public class AddApplicationFrame extends JFrame {
         setLocationRelativeTo(null);
 
 
-        // =========================
-        // ROOT
-        // =========================
-
-        JPanel rootPanel =
+        JPanel root =
                 new JPanel(
                         new BorderLayout()
                 );
 
-        rootPanel.setBackground(
+        root.setBackground(
                 BACKGROUND_COLOR
         );
 
 
-        // =========================
-        // HEADER
-        // =========================
+        // Header
 
-        JPanel headerPanel =
+        JPanel header =
                 new JPanel(
                         new BorderLayout()
                 );
 
-        headerPanel.setBackground(
-                BACKGROUND_COLOR
-        );
+        header.setOpaque(false);
 
-        headerPanel.setBorder(
+        header.setBorder(
                 new EmptyBorder(
                         25,
                         30,
@@ -100,12 +88,12 @@ public class AddApplicationFrame extends JFrame {
         );
 
 
-        JLabel titleLabel =
+        JLabel title =
                 new JLabel(
                         "Add Internship Application"
                 );
 
-        titleLabel.setFont(
+        title.setFont(
                 new Font(
                         "Arial",
                         Font.BOLD,
@@ -113,25 +101,17 @@ public class AddApplicationFrame extends JFrame {
                 )
         );
 
-        titleLabel.setForeground(
+        title.setForeground(
                 TEXT_COLOR
         );
 
 
-        JLabel subtitleLabel =
+        JLabel subtitle =
                 new JLabel(
-                        "Enter the details of your internship application."
+                        "Add a new opportunity to your tracker."
                 );
 
-        subtitleLabel.setFont(
-                new Font(
-                        "Arial",
-                        Font.PLAIN,
-                        14
-                )
-        );
-
-        subtitleLabel.setForeground(
+        subtitle.setForeground(
                 MUTED_TEXT_COLOR
         );
 
@@ -148,34 +128,28 @@ public class AddApplicationFrame extends JFrame {
                 )
         );
 
-        headerText.add(
-                titleLabel
-        );
+        headerText.add(title);
 
         headerText.add(
                 Box.createVerticalStrut(5)
         );
 
-        headerText.add(
-                subtitleLabel
-        );
+        headerText.add(subtitle);
 
 
-        headerPanel.add(
+        header.add(
                 headerText,
                 BorderLayout.WEST
         );
 
 
-        rootPanel.add(
-                headerPanel,
+        root.add(
+                header,
                 BorderLayout.NORTH
         );
 
 
-        // =========================
-        // FORM CARD
-        // =========================
+        // Form
 
         JPanel card =
                 new JPanel(
@@ -218,13 +192,10 @@ public class AddApplicationFrame extends JFrame {
         gbc.weightx = 1;
 
 
-        // =========================
-        // COMPANY
-        // =========================
+        // Company
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.weightx = 0.3;
 
         card.add(
                 createLabel("Company"),
@@ -235,7 +206,6 @@ public class AddApplicationFrame extends JFrame {
                 createTextField();
 
         gbc.gridx = 1;
-        gbc.weightx = 0.7;
 
         card.add(
                 companyField,
@@ -243,9 +213,7 @@ public class AddApplicationFrame extends JFrame {
         );
 
 
-        // =========================
-        // ROLE
-        // =========================
+        // Role
 
         gbc.gridx = 0;
         gbc.gridy = 1;
@@ -266,15 +234,15 @@ public class AddApplicationFrame extends JFrame {
         );
 
 
-        // =========================
-        // APPLICATION DATE
-        // =========================
+        // Application Date
 
         gbc.gridx = 0;
         gbc.gridy = 2;
 
         card.add(
-                createLabel("Application Date"),
+                createLabel(
+                        "Application Date"
+                ),
                 gbc
         );
 
@@ -282,7 +250,7 @@ public class AddApplicationFrame extends JFrame {
                 createTextField();
 
         applicationDateField.setToolTipText(
-                "Format: YYYY-MM-DD"
+                "YYYY-MM-DD"
         );
 
         gbc.gridx = 1;
@@ -293,9 +261,7 @@ public class AddApplicationFrame extends JFrame {
         );
 
 
-        // =========================
-        // DEADLINE
-        // =========================
+        // Deadline
 
         gbc.gridx = 0;
         gbc.gridy = 3;
@@ -309,7 +275,7 @@ public class AddApplicationFrame extends JFrame {
                 createTextField();
 
         deadlineField.setToolTipText(
-                "Format: YYYY-MM-DD"
+                "YYYY-MM-DD"
         );
 
         gbc.gridx = 1;
@@ -320,9 +286,7 @@ public class AddApplicationFrame extends JFrame {
         );
 
 
-        // =========================
-        // STATUS
-        // =========================
+        // Status
 
         gbc.gridx = 0;
         gbc.gridy = 4;
@@ -332,18 +296,14 @@ public class AddApplicationFrame extends JFrame {
                 gbc
         );
 
-
-        String[] statuses = {
-                "Applied",
-                "Shortlisted",
-                "Interview",
-                "Rejected"
-        };
-
-
         statusBox =
                 new JComboBox<>(
-                        statuses
+                        new String[]{
+                                "Applied",
+                                "Shortlisted",
+                                "Interview",
+                                "Rejected"
+                        }
                 );
 
         statusBox.setPreferredSize(
@@ -353,7 +313,6 @@ public class AddApplicationFrame extends JFrame {
                 )
         );
 
-
         gbc.gridx = 1;
 
         card.add(
@@ -362,9 +321,7 @@ public class AddApplicationFrame extends JFrame {
         );
 
 
-        // =========================
-        // JOB LINK
-        // =========================
+        // Job Link
 
         gbc.gridx = 0;
         gbc.gridy = 5;
@@ -385,9 +342,7 @@ public class AddApplicationFrame extends JFrame {
         );
 
 
-        // =========================
-        // NOTES
-        // =========================
+        // Notes
 
         gbc.gridx = 0;
         gbc.gridy = 6;
@@ -408,128 +363,103 @@ public class AddApplicationFrame extends JFrame {
 
         notesArea.setWrapStyleWord(true);
 
-        notesArea.setFont(
-                new Font(
-                        "Arial",
-                        Font.PLAIN,
-                        13
-                )
-        );
-
-        notesArea.setForeground(
-                TEXT_COLOR
-        );
-
-        notesArea.setBorder(
-                BorderFactory.createLineBorder(
-                        BORDER_COLOR
-                )
-        );
-
-
-        JScrollPane notesScrollPane =
+        JScrollPane notesScroll =
                 new JScrollPane(
                         notesArea
                 );
 
-
         gbc.gridx = 1;
+
         gbc.fill =
                 GridBagConstraints.BOTH;
 
         card.add(
-                notesScrollPane,
+                notesScroll,
                 gbc
         );
 
 
-        // =========================
-        // BUTTONS
-        // =========================
+        // Buttons
 
-        JPanel buttonPanel =
+        JPanel buttons =
                 new JPanel(
                         new FlowLayout(
-                                FlowLayout.RIGHT,
-                                10,
-                                5
+                                FlowLayout.RIGHT
                         )
                 );
 
-        buttonPanel.setOpaque(false);
+        buttons.setOpaque(false);
 
 
-        JButton cancelButton =
-                createSecondaryButton(
+        JButton cancel =
+                new JButton(
                         "Cancel"
                 );
 
-
-        JButton saveButton =
-                createSaveButton(
+        JButton save =
+                new JButton(
                         "Save Application"
                 );
 
 
-        buttonPanel.add(
-                cancelButton
+        styleSecondaryButton(
+                cancel
         );
 
-        buttonPanel.add(
-                saveButton
+        stylePrimaryButton(
+                save
         );
+
+
+        buttons.add(cancel);
+
+        buttons.add(save);
 
 
         gbc.gridx = 0;
         gbc.gridy = 7;
+
         gbc.gridwidth = 2;
+
         gbc.fill =
                 GridBagConstraints.HORIZONTAL;
 
-        gbc.insets =
-                new Insets(
-                        20,
-                        8,
-                        5,
-                        8
-                );
-
-
         card.add(
-                buttonPanel,
+                buttons,
                 gbc
         );
 
 
-        rootPanel.add(
+        root.add(
                 card,
                 BorderLayout.CENTER
         );
 
 
-        // =========================
-        // ACTIONS
-        // =========================
+        // Actions
 
-        saveButton.addActionListener(
+        cancel.addActionListener(
+                e -> {
+
+                    dispose();
+
+                    new DashboardFrame(
+                            user
+                    );
+                }
+        );
+
+
+        save.addActionListener(
                 e -> saveApplication()
         );
 
 
-        cancelButton.addActionListener(
-                e -> dispose()
-        );
-
-
-        add(rootPanel);
+        add(root);
 
         setVisible(true);
     }
 
-
-    // =========================
-    // SAVE APPLICATION
-    // =========================
 
     private void saveApplication() {
 
@@ -538,46 +468,36 @@ public class AddApplicationFrame extends JFrame {
                         .getText()
                         .trim();
 
-
         String role =
                 roleField
                         .getText()
                         .trim();
-
 
         String applicationDateText =
                 applicationDateField
                         .getText()
                         .trim();
 
-
         String deadlineText =
                 deadlineField
                         .getText()
                         .trim();
-
 
         String status =
                 statusBox
                         .getSelectedItem()
                         .toString();
 
-
         String link =
                 linkField
                         .getText()
                         .trim();
-
 
         String notes =
                 notesArea
                         .getText()
                         .trim();
 
-
-        // =========================
-        // BASIC VALIDATION
-        // =========================
 
         if (
                 company.isEmpty()
@@ -604,18 +524,17 @@ public class AddApplicationFrame extends JFrame {
                             applicationDateText
                     );
 
-
             LocalDate deadline =
                     LocalDate.parse(
                             deadlineText
                     );
 
 
-            // Deadline shouldn't be before application date
-
-            if (deadline.isBefore(
-                    applicationDate
-            )) {
+            if (
+                    deadline.isBefore(
+                            applicationDate
+                    )
+            ) {
 
                 JOptionPane.showMessageDialog(
                         this,
@@ -630,7 +549,7 @@ public class AddApplicationFrame extends JFrame {
 
             Application application =
                     new Application(
-                            userId,
+                            user.getUserId(),
                             company,
                             role,
                             applicationDate,
@@ -641,15 +560,14 @@ public class AddApplicationFrame extends JFrame {
                     );
 
 
-            ApplicationDAO applicationDAO =
+            ApplicationDAO dao =
                     new ApplicationDAO();
 
 
             boolean success =
-                    applicationDAO
-                            .addApplication(
-                                    application
-                            );
+                    dao.addApplication(
+                            application
+                    );
 
 
             if (success) {
@@ -662,6 +580,10 @@ public class AddApplicationFrame extends JFrame {
                 );
 
                 dispose();
+
+                new DashboardFrame(
+                        user
+                );
 
             } else {
 
@@ -680,8 +602,7 @@ public class AddApplicationFrame extends JFrame {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Please enter valid dates using YYYY-MM-DD.\n"
-                            + "Example: 2026-09-25",
+                    "Please enter dates in YYYY-MM-DD format.",
                     "Invalid Date",
                     JOptionPane.WARNING_MESSAGE
             );
@@ -689,19 +610,12 @@ public class AddApplicationFrame extends JFrame {
     }
 
 
-    // =========================
-    // LABEL
-    // =========================
-
     private JLabel createLabel(
             String text
     ) {
 
         JLabel label =
-                new JLabel(
-                        text
-                );
-
+                new JLabel(text);
 
         label.setFont(
                 new Font(
@@ -711,39 +625,18 @@ public class AddApplicationFrame extends JFrame {
                 )
         );
 
-
         label.setForeground(
                 TEXT_COLOR
         );
-
 
         return label;
     }
 
 
-    // =========================
-    // TEXT FIELD
-    // =========================
-
     private JTextField createTextField() {
 
         JTextField field =
                 new JTextField();
-
-
-        field.setFont(
-                new Font(
-                        "Arial",
-                        Font.PLAIN,
-                        13
-                )
-        );
-
-
-        field.setForeground(
-                TEXT_COLOR
-        );
-
 
         field.setPreferredSize(
                 new Dimension(
@@ -752,24 +645,13 @@ public class AddApplicationFrame extends JFrame {
                 )
         );
 
-
         return field;
     }
 
 
-    // =========================
-    // SAVE BUTTON
-    // =========================
-
-    private JButton createSaveButton(
-            String text
+    private void stylePrimaryButton(
+            JButton button
     ) {
-
-        JButton button =
-                new JButton(
-                        text
-                );
-
 
         button.setFont(
                 new Font(
@@ -778,50 +660,22 @@ public class AddApplicationFrame extends JFrame {
                         13
                 )
         );
-
 
         button.setForeground(
                 Color.WHITE
         );
 
-
         button.setBackground(
                 ACCENT_COLOR
         );
 
-
-        button.setFocusPainted(
-                false
-        );
-
-
-        button.setBorder(
-                BorderFactory.createEmptyBorder(
-                        9,
-                        18,
-                        9,
-                        18
-                )
-        );
-
-
-        return button;
+        button.setFocusPainted(false);
     }
 
 
-    // =========================
-    // SECONDARY BUTTON
-    // =========================
-
-    private JButton createSecondaryButton(
-            String text
+    private void styleSecondaryButton(
+            JButton button
     ) {
-
-        JButton button =
-                new JButton(
-                        text
-                );
-
 
         button.setFont(
                 new Font(
@@ -831,11 +685,9 @@ public class AddApplicationFrame extends JFrame {
                 )
         );
 
-
         button.setForeground(
                 TEXT_COLOR
         );
-
 
         button.setBackground(
                 new Color(
@@ -845,22 +697,6 @@ public class AddApplicationFrame extends JFrame {
                 )
         );
 
-
-        button.setFocusPainted(
-                false
-        );
-
-
-        button.setBorder(
-                BorderFactory.createEmptyBorder(
-                        9,
-                        18,
-                        9,
-                        18
-                )
-        );
-
-
-        return button;
+        button.setFocusPainted(false);
     }
 }

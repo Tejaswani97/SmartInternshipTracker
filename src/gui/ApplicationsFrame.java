@@ -2,6 +2,7 @@ package gui;
 
 import dao.ApplicationDAO;
 import model.Application;
+import model.User;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public class ApplicationsFrame extends JFrame {
 
-    private final int userId;
+    private final User user;
 
     private JTable applicationsTable;
     private DefaultTableModel tableModel;
@@ -45,10 +46,13 @@ public class ApplicationsFrame extends JFrame {
     private static final Color BORDER_COLOR =
             new Color(229, 231, 235);
 
+    private static final Color DELETE_COLOR =
+            new Color(220, 38, 38);
 
-    public ApplicationsFrame(int userId) {
 
-        this.userId = userId;
+    public ApplicationsFrame(User user) {
+
+        this.user = user;
 
         setTitle(
                 "Smart Internship Tracker - My Applications"
@@ -82,21 +86,19 @@ public class ApplicationsFrame extends JFrame {
         // =========================
 
         JPanel sidebar =
-                new JPanel();
+                new JPanel(
+                        new GridBagLayout()
+                );
 
         sidebar.setPreferredSize(
-                new Dimension(220, 0)
+                new Dimension(
+                        220,
+                        0
+                )
         );
 
         sidebar.setBackground(
                 SIDEBAR_COLOR
-        );
-
-        sidebar.setLayout(
-                new BoxLayout(
-                        sidebar,
-                        BoxLayout.Y_AXIS
-                )
         );
 
         sidebar.setBorder(
@@ -108,6 +110,28 @@ public class ApplicationsFrame extends JFrame {
                 )
         );
 
+
+        GridBagConstraints sideGbc =
+                new GridBagConstraints();
+
+        sideGbc.gridx = 0;
+        sideGbc.weightx = 1;
+        sideGbc.fill =
+                GridBagConstraints.HORIZONTAL;
+
+        sideGbc.anchor =
+                GridBagConstraints.NORTHWEST;
+
+        sideGbc.insets =
+                new Insets(
+                        0,
+                        0,
+                        8,
+                        0
+                );
+
+
+        // Logo
 
         JLabel logoLabel =
                 new JLabel(
@@ -126,22 +150,40 @@ public class ApplicationsFrame extends JFrame {
                 Color.WHITE
         );
 
-        logoLabel.setAlignmentX(
-                Component.CENTER_ALIGNMENT
-        );
+        sideGbc.gridy = 0;
 
         sidebar.add(
-                logoLabel
+                logoLabel,
+                sideGbc
         );
+
+
+        // Space
+
+        sideGbc.gridy = 1;
+
+        sideGbc.weighty = 0;
 
         sidebar.add(
-                Box.createVerticalStrut(40)
+                Box.createVerticalStrut(
+                        25
+                ),
+                sideGbc
         );
 
+
+        // =========================
+        // SIDEBAR BUTTONS
+        // =========================
 
         JButton dashboardButton =
                 createSidebarButton(
                         "Dashboard"
+                );
+
+        JButton profileButton =
+                createSidebarButton(
+                        "My Profile"
                 );
 
         JButton applicationsButton =
@@ -165,40 +207,72 @@ public class ApplicationsFrame extends JFrame {
                 );
 
 
-        sidebar.add(
-                dashboardButton
+        addSidebarButton(
+                sidebar,
+                dashboardButton,
+                2
         );
 
-        sidebar.add(
-                Box.createVerticalStrut(10)
+        addSidebarButton(
+                sidebar,
+                profileButton,
+                3
         );
 
-        sidebar.add(
-                applicationsButton
+        addSidebarButton(
+                sidebar,
+                applicationsButton,
+                4
         );
 
-        sidebar.add(
-                Box.createVerticalStrut(10)
+        addSidebarButton(
+                sidebar,
+                addButton,
+                5
         );
 
-        sidebar.add(
-                addButton
+        addSidebarButton(
+                sidebar,
+                deadlineButton,
+                6
         );
 
-        sidebar.add(
-                Box.createVerticalStrut(10)
-        );
+
+        // Push logout to bottom
+
+        GridBagConstraints glueGbc =
+                new GridBagConstraints();
+
+        glueGbc.gridx = 0;
+        glueGbc.gridy = 7;
+
+        glueGbc.weighty = 1;
+        glueGbc.fill =
+                GridBagConstraints.VERTICAL;
 
         sidebar.add(
-                deadlineButton
+                Box.createVerticalGlue(),
+                glueGbc
         );
 
-        sidebar.add(
-                Box.createVerticalGlue()
-        );
+
+        GridBagConstraints logoutGbc =
+                new GridBagConstraints();
+
+        logoutGbc.gridx = 0;
+        logoutGbc.gridy = 8;
+
+        logoutGbc.weightx = 1;
+
+        logoutGbc.fill =
+                GridBagConstraints.HORIZONTAL;
+
+        logoutGbc.anchor =
+                GridBagConstraints.SOUTHWEST;
 
         sidebar.add(
-                logoutButton
+                logoutButton,
+                logoutGbc
         );
 
 
@@ -298,12 +372,15 @@ public class ApplicationsFrame extends JFrame {
                 )
         );
 
+
         headerText.add(
                 titleLabel
         );
 
         headerText.add(
-                Box.createVerticalStrut(5)
+                Box.createVerticalStrut(
+                        5
+                )
         );
 
         headerText.add(
@@ -324,7 +401,7 @@ public class ApplicationsFrame extends JFrame {
 
 
         // =========================
-        // MAIN CARD
+        // APPLICATION CARD
         // =========================
 
         JPanel applicationsCard =
@@ -355,7 +432,7 @@ public class ApplicationsFrame extends JFrame {
 
 
         // =========================
-        // SEARCH / FILTER
+        // FILTER PANEL
         // =========================
 
         JPanel filterPanel =
@@ -384,7 +461,7 @@ public class ApplicationsFrame extends JFrame {
 
         searchField =
                 new JTextField(
-                        16
+                        15
                 );
 
 
@@ -410,18 +487,15 @@ public class ApplicationsFrame extends JFrame {
         );
 
 
-        String[] statuses = {
-                "All",
-                "Applied",
-                "Shortlisted",
-                "Interview",
-                "Rejected"
-        };
-
-
         statusBox =
                 new JComboBox<>(
-                        statuses
+                        new String[]{
+                                "All",
+                                "Applied",
+                                "Shortlisted",
+                                "Interview",
+                                "Rejected"
+                        }
                 );
 
 
@@ -456,7 +530,9 @@ public class ApplicationsFrame extends JFrame {
         );
 
         filterPanel.add(
-                Box.createHorizontalStrut(15)
+                Box.createHorizontalStrut(
+                        15
+                )
         );
 
         filterPanel.add(
@@ -556,8 +632,6 @@ public class ApplicationsFrame extends JFrame {
         );
 
 
-        // Table header
-
         applicationsTable
                 .getTableHeader()
                 .setFont(
@@ -567,6 +641,7 @@ public class ApplicationsFrame extends JFrame {
                                 13
                         )
                 );
+
 
         applicationsTable
                 .getTableHeader()
@@ -578,11 +653,13 @@ public class ApplicationsFrame extends JFrame {
                         )
                 );
 
+
         applicationsTable
                 .getTableHeader()
                 .setForeground(
                         TEXT_COLOR
                 );
+
 
         applicationsTable
                 .getTableHeader()
@@ -594,14 +671,13 @@ public class ApplicationsFrame extends JFrame {
                 );
 
 
-        // Center align ID
-
         DefaultTableCellRenderer centerRenderer =
                 new DefaultTableCellRenderer();
 
         centerRenderer.setHorizontalAlignment(
                 SwingConstants.CENTER
         );
+
 
         applicationsTable
                 .getColumnModel()
@@ -653,6 +729,12 @@ public class ApplicationsFrame extends JFrame {
                 );
 
 
+        JButton detailsButton =
+                createSecondaryButton(
+                        "View Details"
+                );
+
+
         JButton updateButton =
                 createActionButton(
                         "Update"
@@ -669,8 +751,6 @@ public class ApplicationsFrame extends JFrame {
                 createSecondaryButton(
                         "Back"
                 );
-        JButton detailsButton =
-        createSecondaryButton("View Details");
 
 
         buttonPanel.add(
@@ -717,69 +797,123 @@ public class ApplicationsFrame extends JFrame {
         // =========================
 
         searchButton.addActionListener(
-                e -> searchApplications()
+                e ->
+                        searchApplications()
         );
 
 
         showAllButton.addActionListener(
-                e -> loadApplications()
+                e ->
+                        loadApplications()
         );
 
 
         filterButton.addActionListener(
-                e -> filterApplications()
+                e ->
+                        filterApplications()
         );
 
 
         refreshButton.addActionListener(
-                e -> loadApplications()
+                e ->
+                        loadApplications()
+        );
+
+
+        detailsButton.addActionListener(
+                e ->
+                        showApplicationDetails()
         );
 
 
         updateButton.addActionListener(
-                e -> updateSelectedApplication()
+                e ->
+                        updateSelectedApplication()
         );
 
 
         deleteButton.addActionListener(
-                e -> deleteSelectedApplication()
+                e ->
+                        deleteSelectedApplication()
         );
 
+
+        // Back → Dashboard
 
         backButton.addActionListener(
-                e -> dispose()
+                e -> {
+
+                    dispose();
+
+                    new DashboardFrame(
+                            user
+                    );
+                }
         );
 
+
+        // Dashboard
 
         dashboardButton.addActionListener(
-                e -> dispose()
+                e -> {
+
+                    dispose();
+
+                    new DashboardFrame(
+                            user
+                    );
+                }
         );
 
+
+        // Profile
+
+        profileButton.addActionListener(
+                e ->
+                        new ProfileFrame(
+                                user
+                        )
+        );
+
+
+        // Applications
 
         applicationsButton.addActionListener(
-                e -> loadApplications()
+                e ->
+                        loadApplications()
         );
 
+
+        // Add
 
         addButton.addActionListener(
-                e -> new AddApplicationFrame(
-                        userId
-                )
+                e -> {
+
+                    dispose();
+
+                    new AddApplicationFrame(
+                            user
+                    );
+                }
         );
 
+
+        // Deadlines
 
         deadlineButton.addActionListener(
                 e -> {
 
                     JOptionPane.showMessageDialog(
                             this,
-                            "Use the Upcoming Deadlines section on the dashboard.",
+                            "Upcoming deadlines are displayed on the dashboard.",
                             "Upcoming Deadlines",
                             JOptionPane.INFORMATION_MESSAGE
                     );
                 }
         );
 
+
+        // Logout
 
         logoutButton.addActionListener(
                 e -> {
@@ -789,9 +923,6 @@ public class ApplicationsFrame extends JFrame {
                     new LoginFrame();
                 }
         );
-        detailsButton.addActionListener(
-        e -> showApplicationDetails()
-        ); 
 
 
         add(rootPanel);
@@ -803,6 +934,45 @@ public class ApplicationsFrame extends JFrame {
 
 
     // =========================
+    // SIDEBAR HELPER
+    // =========================
+
+    private void addSidebarButton(
+            JPanel sidebar,
+            JButton button,
+            int row
+    ) {
+
+        GridBagConstraints gbc =
+                new GridBagConstraints();
+
+        gbc.gridx = 0;
+        gbc.gridy = row;
+
+        gbc.weightx = 1;
+
+        gbc.fill =
+                GridBagConstraints.HORIZONTAL;
+
+        gbc.anchor =
+                GridBagConstraints.WEST;
+
+        gbc.insets =
+                new Insets(
+                        0,
+                        0,
+                        8,
+                        0
+                );
+
+        sidebar.add(
+                button,
+                gbc
+        );
+    }
+
+
+    // =========================
     // LOAD APPLICATIONS
     // =========================
 
@@ -810,14 +980,13 @@ public class ApplicationsFrame extends JFrame {
 
         tableModel.setRowCount(0);
 
-        ApplicationDAO applicationDAO =
+        ApplicationDAO dao =
                 new ApplicationDAO();
 
         List<Application> applications =
-                applicationDAO
-                        .getApplicationsByUser(
-                                userId
-                        );
+                dao.getApplicationsByUser(
+                        user.getUserId()
+                );
 
         addApplicationsToTable(
                 applications
@@ -847,16 +1016,16 @@ public class ApplicationsFrame extends JFrame {
 
         tableModel.setRowCount(0);
 
-        ApplicationDAO applicationDAO =
+
+        ApplicationDAO dao =
                 new ApplicationDAO();
 
 
         List<Application> applications =
-                applicationDAO
-                        .searchByCompany(
-                                company,
-                                userId
-                        );
+                dao.searchByCompany(
+                        company,
+                        user.getUserId()
+                );
 
 
         addApplicationsToTable(
@@ -866,7 +1035,7 @@ public class ApplicationsFrame extends JFrame {
 
 
     // =========================
-    // FILTER BY STATUS
+    // FILTER
     // =========================
 
     private void filterApplications() {
@@ -888,16 +1057,15 @@ public class ApplicationsFrame extends JFrame {
         tableModel.setRowCount(0);
 
 
-        ApplicationDAO applicationDAO =
+        ApplicationDAO dao =
                 new ApplicationDAO();
 
 
         List<Application> applications =
-                applicationDAO
-                        .filterByStatus(
-                                status,
-                                userId
-                        );
+                dao.filterByStatus(
+                        status,
+                        user.getUserId()
+                );
 
 
         addApplicationsToTable(
@@ -919,32 +1087,140 @@ public class ApplicationsFrame extends JFrame {
                 applications
         ) {
 
-            Object[] row = {
-
-                    application
-                            .getApplicationId(),
-
-                    application
-                            .getCompanyName(),
-
-                    application
-                            .getJobRole(),
-
-                    application
-                            .getApplicationDate(),
-
-                    application
-                            .getDeadline(),
-
-                    application
-                            .getStatus()
-            };
-
-
             tableModel.addRow(
-                    row
+                    new Object[]{
+                            application.getApplicationId(),
+                            application.getCompanyName(),
+                            application.getJobRole(),
+                            application.getApplicationDate(),
+                            application.getDeadline(),
+                            application.getStatus()
+                    }
             );
         }
+    }
+
+
+    // =========================
+    // VIEW DETAILS
+    // =========================
+
+    private void showApplicationDetails() {
+
+        int selectedRow =
+                applicationsTable
+                        .getSelectedRow();
+
+
+        if (selectedRow == -1) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select an application first.",
+                    "No Application Selected",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+
+        int applicationId =
+                (int) tableModel.getValueAt(
+                        selectedRow,
+                        0
+                );
+
+
+        ApplicationDAO dao =
+                new ApplicationDAO();
+
+
+        Application application =
+                dao.getApplicationById(
+                        applicationId,
+                        user.getUserId()
+                );
+
+
+        if (application == null) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to load application.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            return;
+        }
+
+
+        JTextArea details =
+                new JTextArea();
+
+
+        details.setEditable(false);
+
+        details.setLineWrap(true);
+
+        details.setWrapStyleWord(true);
+
+
+        details.setFont(
+                new Font(
+                        "Arial",
+                        Font.PLAIN,
+                        14
+                )
+        );
+
+
+        details.setText(
+                "APPLICATION DETAILS\n\n"
+                        + "Company: "
+                        + application.getCompanyName()
+                        + "\n\n"
+                        + "Job Role: "
+                        + application.getJobRole()
+                        + "\n\n"
+                        + "Application Date: "
+                        + application.getApplicationDate()
+                        + "\n\n"
+                        + "Deadline: "
+                        + application.getDeadline()
+                        + "\n\n"
+                        + "Status: "
+                        + application.getStatus()
+                        + "\n\n"
+                        + "Job Link: "
+                        + application.getJobLink()
+                        + "\n\n"
+                        + "Notes: "
+                        + application.getNotes()
+        );
+
+
+        JScrollPane detailsScroll =
+                new JScrollPane(
+                        details
+                );
+
+
+        detailsScroll.setPreferredSize(
+                new Dimension(
+                        500,
+                        400
+                )
+        );
+
+
+        JOptionPane.showMessageDialog(
+                this,
+                detailsScroll,
+                "Application Details",
+                JOptionPane.INFORMATION_MESSAGE
+        );
     }
 
 
@@ -954,53 +1230,61 @@ public class ApplicationsFrame extends JFrame {
 
     private void updateSelectedApplication() {
 
-    int selectedRow =
-            applicationsTable.getSelectedRow();
+        int selectedRow =
+                applicationsTable
+                        .getSelectedRow();
 
-    if (selectedRow == -1) {
 
-        JOptionPane.showMessageDialog(
-                this,
-                "Please select an application first!"
-        );
+        if (selectedRow == -1) {
 
-        return;
-    }
-
-    int applicationId =
-            (int) tableModel.getValueAt(
-                    selectedRow,
-                    0
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select an application first."
             );
 
-    String company =
-            tableModel.getValueAt(
-                    selectedRow,
-                    1
-            ).toString();
+            return;
+        }
 
-    String role =
-            tableModel.getValueAt(
-                    selectedRow,
-                    2
-            ).toString();
 
-    String status =
-            tableModel.getValueAt(
-                    selectedRow,
-                    5
-            ).toString();
+        int applicationId =
+                (int) tableModel.getValueAt(
+                        selectedRow,
+                        0
+                );
 
-    new UpdateApplicationFrame(
-            userId,
-            applicationId,
-            company,
-            role,
-            status,
-            "",
-            ""
-    );
-}
+
+        String company =
+                tableModel.getValueAt(
+                        selectedRow,
+                        1
+                ).toString();
+
+
+        String role =
+                tableModel.getValueAt(
+                        selectedRow,
+                        2
+                ).toString();
+
+
+        String status =
+                tableModel.getValueAt(
+                        selectedRow,
+                        5
+                ).toString();
+
+
+        new UpdateApplicationFrame(
+                user.getUserId(),
+                applicationId,
+                company,
+                role,
+                status,
+                "",
+                ""
+        );
+    }
+
 
     // =========================
     // DELETE
@@ -1017,7 +1301,7 @@ public class ApplicationsFrame extends JFrame {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Please select an application first!"
+                    "Please select an application first."
             );
 
             return;
@@ -1031,7 +1315,7 @@ public class ApplicationsFrame extends JFrame {
                 );
 
 
-        String companyName =
+        String company =
                 tableModel.getValueAt(
                         selectedRow,
                         1
@@ -1041,8 +1325,8 @@ public class ApplicationsFrame extends JFrame {
         int choice =
                 JOptionPane.showConfirmDialog(
                         this,
-                        "Are you sure you want to delete "
-                                + companyName
+                        "Delete "
+                                + company
                                 + " application?",
                         "Confirm Delete",
                         JOptionPane.YES_NO_OPTION
@@ -1050,22 +1334,21 @@ public class ApplicationsFrame extends JFrame {
 
 
         if (
-                choice
-                        != JOptionPane.YES_OPTION
+                choice != JOptionPane.YES_OPTION
         ) {
 
             return;
         }
 
 
-        ApplicationDAO applicationDAO =
+        ApplicationDAO dao =
                 new ApplicationDAO();
 
 
         boolean success =
-                applicationDAO.deleteApplication(
+                dao.deleteApplication(
                         applicationId,
-                        userId
+                        user.getUserId()
                 );
 
 
@@ -1082,7 +1365,7 @@ public class ApplicationsFrame extends JFrame {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Failed to delete application!",
+                    "Failed to delete application.",
                     "Error",
                     JOptionPane.ERROR_MESSAGE
             );
@@ -1123,13 +1406,8 @@ public class ApplicationsFrame extends JFrame {
         );
 
 
-        button.setBorder(
-                BorderFactory.createEmptyBorder(
-                        12,
-                        15,
-                        12,
-                        15
-                )
+        button.setHorizontalAlignment(
+                SwingConstants.LEFT
         );
 
 
@@ -1138,8 +1416,29 @@ public class ApplicationsFrame extends JFrame {
         );
 
 
-        button.setAlignmentX(
-                Component.CENTER_ALIGNMENT
+        button.setBorder(
+                BorderFactory.createEmptyBorder(
+                        12,
+                        15,
+                        12,
+                        12
+                )
+        );
+
+
+        button.setPreferredSize(
+                new Dimension(
+                        190,
+                        45
+                )
+        );
+
+
+        button.setMinimumSize(
+                new Dimension(
+                        190,
+                        45
+                )
         );
 
 
@@ -1292,11 +1591,7 @@ public class ApplicationsFrame extends JFrame {
 
 
         button.setBackground(
-                new Color(
-                        220,
-                        38,
-                        38
-                )
+                DELETE_COLOR
         );
 
 
@@ -1317,103 +1612,4 @@ public class ApplicationsFrame extends JFrame {
 
         return button;
     }
-private void showApplicationDetails() {
-
-    int selectedRow =
-            applicationsTable.getSelectedRow();
-
-    if (selectedRow == -1) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Please select an application first!",
-                "No Application Selected",
-                JOptionPane.WARNING_MESSAGE
-        );
-
-        return;
-    }
-
-    int applicationId =
-            (int) tableModel.getValueAt(
-                    selectedRow,
-                    0
-            );
-
-    ApplicationDAO applicationDAO =
-            new ApplicationDAO();
-
-    Application application =
-            applicationDAO.getApplicationById(
-                    applicationId,
-                    userId
-            );
-
-    if (application == null) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Unable to load application details.",
-                "Error",
-                JOptionPane.ERROR_MESSAGE
-        );
-
-        return;
-    }
-
-    JTextArea detailsArea =
-            new JTextArea();
-
-    detailsArea.setEditable(false);
-    detailsArea.setLineWrap(true);
-    detailsArea.setWrapStyleWord(true);
-    detailsArea.setFont(
-            new Font(
-                    "Arial",
-                    Font.PLAIN,
-                    14
-            )
-    );
-
-    detailsArea.setText(
-            "APPLICATION DETAILS\n\n"
-                    + "Company: "
-                    + application.getCompanyName()
-                    + "\n\n"
-                    + "Job Role: "
-                    + application.getJobRole()
-                    + "\n\n"
-                    + "Application Date: "
-                    + application.getApplicationDate()
-                    + "\n\n"
-                    + "Deadline: "
-                    + application.getDeadline()
-                    + "\n\n"
-                    + "Status: "
-                    + application.getStatus()
-                    + "\n\n"
-                    + "Job Link: "
-                    + application.getJobLink()
-                    + "\n\n"
-                    + "Notes: "
-                    + application.getNotes()
-    );
-
-    JScrollPane scrollPane =
-            new JScrollPane(detailsArea);
-
-    scrollPane.setPreferredSize(
-            new Dimension(
-                    500,
-                    400
-            )
-    );
-
-    JOptionPane.showMessageDialog(
-            this,
-            scrollPane,
-            "Application Details",
-            JOptionPane.INFORMATION_MESSAGE
-    );
-}
 }
