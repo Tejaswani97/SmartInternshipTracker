@@ -161,11 +161,7 @@ public class LoginFrame extends JFrame {
                             + user.getName()
             );
 
-            new DashboardFrame(
-                    user.getUserId(),
-                user.getName(),
-                 user.getEmail()
-            );
+            new DashboardFrame(user);
 
             dispose();
 

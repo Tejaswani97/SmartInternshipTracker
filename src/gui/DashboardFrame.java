@@ -2,6 +2,7 @@ package gui;
 
 import dao.ApplicationDAO;
 import model.Application;
+import model.User;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -13,7 +14,7 @@ import java.util.Map;
 
 public class DashboardFrame extends JFrame {
 
-    private final int userId;
+    private final User user;
 
     // =========================
     // THEME
@@ -44,22 +45,36 @@ public class DashboardFrame extends JFrame {
             new Color(220, 38, 38);
 
 
-    public DashboardFrame(int userId, String userName,
-        String userEmail) {
+    public DashboardFrame(User user) {
 
-        this.userId = userId;
+        this.user = user;
 
-        setTitle("Smart Internship Tracker");
-        setSize(1100, 700);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        int userId = user.getUserId();
+
+        setTitle(
+                "Smart Internship Tracker"
+        );
+
+        setSize(
+                1100,
+                700
+        );
+
+        setDefaultCloseOperation(
+                JFrame.EXIT_ON_CLOSE
+        );
+
         setLocationRelativeTo(null);
+
 
         // =========================
         // ROOT PANEL
         // =========================
 
         JPanel rootPanel =
-                new JPanel(new BorderLayout());
+                new JPanel(
+                        new BorderLayout()
+                );
 
         rootPanel.setBackground(
                 BACKGROUND_COLOR
@@ -74,7 +89,10 @@ public class DashboardFrame extends JFrame {
                 new JPanel();
 
         sidebar.setPreferredSize(
-                new Dimension(220, 0)
+                new Dimension(
+                        220,
+                        0
+                )
         );
 
         sidebar.setBackground(
@@ -101,7 +119,9 @@ public class DashboardFrame extends JFrame {
         // Logo
 
         JLabel logoLabel =
-                new JLabel("SMART TRACKER");
+                new JLabel(
+                        "SMART TRACKER"
+                );
 
         logoLabel.setFont(
                 new Font(
@@ -119,18 +139,30 @@ public class DashboardFrame extends JFrame {
                 Component.CENTER_ALIGNMENT
         );
 
-        sidebar.add(logoLabel);
-
         sidebar.add(
-                Box.createVerticalStrut(40)
+                logoLabel
         );
 
 
-        // Sidebar buttons
+        sidebar.add(
+                Box.createVerticalStrut(
+                        40
+                )
+        );
+
+
+        // =========================
+        // SIDEBAR BUTTONS
+        // =========================
 
         JButton dashboardButton =
                 createSidebarButton(
                         "Dashboard"
+                );
+
+        JButton profileButton =
+                createSidebarButton(
+                        "My Profile"
                 );
 
         JButton applicationsButton =
@@ -154,31 +186,63 @@ public class DashboardFrame extends JFrame {
                 );
 
 
-        sidebar.add(dashboardButton);
-
         sidebar.add(
-                Box.createVerticalStrut(10)
+                dashboardButton
         );
 
-        sidebar.add(applicationsButton);
-
         sidebar.add(
-                Box.createVerticalStrut(10)
+                Box.createVerticalStrut(
+                        10
+                )
         );
 
-        sidebar.add(addButton);
 
         sidebar.add(
-                Box.createVerticalStrut(10)
+                profileButton
         );
 
-        sidebar.add(deadlineButton);
+        sidebar.add(
+                Box.createVerticalStrut(
+                        10
+                )
+        );
+
+
+        sidebar.add(
+                applicationsButton
+        );
+
+        sidebar.add(
+                Box.createVerticalStrut(
+                        10
+                )
+        );
+
+
+        sidebar.add(
+                addButton
+        );
+
+        sidebar.add(
+                Box.createVerticalStrut(
+                        10
+                )
+        );
+
+
+        sidebar.add(
+                deadlineButton
+        );
+
 
         sidebar.add(
                 Box.createVerticalGlue()
         );
 
-        sidebar.add(logoutButton);
+
+        sidebar.add(
+                logoutButton
+        );
 
 
         rootPanel.add(
@@ -222,12 +286,16 @@ public class DashboardFrame extends JFrame {
                         new BorderLayout()
                 );
 
-        headerPanel.setOpaque(false);
+        headerPanel.setOpaque(
+                false
+        );
 
 
         JLabel welcomeLabel =
                 new JLabel(
-                        "Welcome back, " + userName + " 👋"
+                        "Welcome back, "
+                                + user.getName()
+                                + " 👋"
                 );
 
         welcomeLabel.setFont(
@@ -245,8 +313,8 @@ public class DashboardFrame extends JFrame {
 
         JLabel subtitleLabel =
                 new JLabel(
-                        userEmail
-                        + "  •  Here's an overview of your internship applications."
+                        user.getEmail()
+                                + "  •  Here's an overview of your internship applications."
                 );
 
         subtitleLabel.setFont(
@@ -265,7 +333,9 @@ public class DashboardFrame extends JFrame {
         JPanel headerText =
                 new JPanel();
 
-        headerText.setOpaque(false);
+        headerText.setOpaque(
+                false
+        );
 
         headerText.setLayout(
                 new BoxLayout(
@@ -274,13 +344,18 @@ public class DashboardFrame extends JFrame {
                 )
         );
 
+
         headerText.add(
                 welcomeLabel
         );
 
+
         headerText.add(
-                Box.createVerticalStrut(5)
+                Box.createVerticalStrut(
+                        5
+                )
         );
+
 
         headerText.add(
                 subtitleLabel
@@ -300,7 +375,7 @@ public class DashboardFrame extends JFrame {
 
 
         // =========================
-        // CENTER PANEL
+        // CENTER
         // =========================
 
         JPanel centerPanel =
@@ -311,7 +386,9 @@ public class DashboardFrame extends JFrame {
                         )
                 );
 
-        centerPanel.setOpaque(false);
+        centerPanel.setOpaque(
+                false
+        );
 
 
         // =========================
@@ -328,7 +405,9 @@ public class DashboardFrame extends JFrame {
                         )
                 );
 
-        statsPanel.setOpaque(false);
+        statsPanel.setOpaque(
+                false
+        );
 
 
         ApplicationDAO applicationDAO =
@@ -348,17 +427,20 @@ public class DashboardFrame extends JFrame {
                         0
                 );
 
+
         int shortlisted =
                 statistics.getOrDefault(
                         "Shortlisted",
                         0
                 );
 
+
         int interview =
                 statistics.getOrDefault(
                         "Interview",
                         0
                 );
+
 
         int rejected =
                 statistics.getOrDefault(
@@ -381,12 +463,14 @@ public class DashboardFrame extends JFrame {
                 )
         );
 
+
         statsPanel.add(
                 createStatCard(
                         "Applied",
                         applied
                 )
         );
+
 
         statsPanel.add(
                 createStatCard(
@@ -395,12 +479,14 @@ public class DashboardFrame extends JFrame {
                 )
         );
 
+
         statsPanel.add(
                 createStatCard(
                         "Interview",
                         interview
                 )
         );
+
 
         statsPanel.add(
                 createStatCard(
@@ -417,7 +503,7 @@ public class DashboardFrame extends JFrame {
 
 
         // =========================
-        // DEADLINE CARDS
+        // DEADLINE SECTION
         // =========================
 
         JPanel deadlinePanel =
@@ -431,6 +517,7 @@ public class DashboardFrame extends JFrame {
         deadlinePanel.setBackground(
                 CARD_COLOR
         );
+
 
         deadlinePanel.setBorder(
                 BorderFactory.createCompoundBorder(
@@ -471,10 +558,9 @@ public class DashboardFrame extends JFrame {
         );
 
 
-        // Container for deadline cards
-
         JPanel deadlineCardsPanel =
                 new JPanel();
+
 
         deadlineCardsPanel.setLayout(
                 new BoxLayout(
@@ -482,6 +568,7 @@ public class DashboardFrame extends JFrame {
                         BoxLayout.Y_AXIS
                 )
         );
+
 
         deadlineCardsPanel.setBackground(
                 CARD_COLOR
@@ -527,16 +614,20 @@ public class DashboardFrame extends JFrame {
                     )
             );
 
+
             deadlineCardsPanel.add(
                     emptyLabel
             );
 
+
         } else {
+
 
             for (
                     Application application :
                     upcoming
             ) {
+
 
                 long daysLeft =
                         ChronoUnit.DAYS.between(
@@ -547,7 +638,7 @@ public class DashboardFrame extends JFrame {
 
 
                 // =========================
-                // SINGLE DEADLINE CARD
+                // DEADLINE CARD
                 // =========================
 
                 JPanel card =
@@ -557,6 +648,7 @@ public class DashboardFrame extends JFrame {
                                         5
                                 )
                         );
+
 
                 card.setBackground(
                         new Color(
@@ -590,14 +682,16 @@ public class DashboardFrame extends JFrame {
                 );
 
 
-                // =========================
                 // LEFT SIDE
-                // =========================
 
                 JPanel leftPanel =
                         new JPanel();
 
-                leftPanel.setOpaque(false);
+
+                leftPanel.setOpaque(
+                        false
+                );
+
 
                 leftPanel.setLayout(
                         new BoxLayout(
@@ -613,6 +707,7 @@ public class DashboardFrame extends JFrame {
                                         .getCompanyName()
                         );
 
+
                 companyLabel.setFont(
                         new Font(
                                 "Arial",
@@ -620,6 +715,7 @@ public class DashboardFrame extends JFrame {
                                 16
                         )
                 );
+
 
                 companyLabel.setForeground(
                         TEXT_COLOR
@@ -632,6 +728,7 @@ public class DashboardFrame extends JFrame {
                                         .getJobRole()
                         );
 
+
                 roleLabel.setFont(
                         new Font(
                                 "Arial",
@@ -639,6 +736,7 @@ public class DashboardFrame extends JFrame {
                                 13
                         )
                 );
+
 
                 roleLabel.setForeground(
                         MUTED_TEXT_COLOR
@@ -649,23 +747,29 @@ public class DashboardFrame extends JFrame {
                         companyLabel
                 );
 
+
                 leftPanel.add(
-                        Box.createVerticalStrut(5)
+                        Box.createVerticalStrut(
+                                5
+                        )
                 );
+
 
                 leftPanel.add(
                         roleLabel
                 );
 
 
-                // =========================
                 // RIGHT SIDE
-                // =========================
 
                 JPanel rightPanel =
                         new JPanel();
 
-                rightPanel.setOpaque(false);
+
+                rightPanel.setOpaque(
+                        false
+                );
+
 
                 rightPanel.setLayout(
                         new BoxLayout(
@@ -682,6 +786,7 @@ public class DashboardFrame extends JFrame {
                                         .getDeadline()
                         );
 
+
                 deadlineLabel.setFont(
                         new Font(
                                 "Arial",
@@ -689,6 +794,7 @@ public class DashboardFrame extends JFrame {
                                 12
                         )
                 );
+
 
                 deadlineLabel.setForeground(
                         MUTED_TEXT_COLOR
@@ -703,10 +809,12 @@ public class DashboardFrame extends JFrame {
                     daysText =
                             "⚠ Due today!";
 
+
                 } else if (daysLeft == 1) {
 
                     daysText =
                             "⚠ 1 day left";
+
 
                 } else {
 
@@ -721,6 +829,7 @@ public class DashboardFrame extends JFrame {
                         new JLabel(
                                 daysText
                         );
+
 
                 daysLabel.setFont(
                         new Font(
@@ -737,6 +846,7 @@ public class DashboardFrame extends JFrame {
                             URGENT_COLOR
                     );
 
+
                 } else {
 
                     daysLabel.setForeground(
@@ -749,21 +859,24 @@ public class DashboardFrame extends JFrame {
                         deadlineLabel
                 );
 
+
                 rightPanel.add(
-                        Box.createVerticalStrut(8)
+                        Box.createVerticalStrut(
+                                8
+                        )
                 );
+
 
                 rightPanel.add(
                         daysLabel
                 );
 
 
-                // Add sides to card
-
                 card.add(
                         leftPanel,
                         BorderLayout.CENTER
                 );
+
 
                 card.add(
                         rightPanel,
@@ -775,8 +888,11 @@ public class DashboardFrame extends JFrame {
                         card
                 );
 
+
                 deadlineCardsPanel.add(
-                        Box.createVerticalStrut(10)
+                        Box.createVerticalStrut(
+                                10
+                        )
                 );
             }
         }
@@ -787,9 +903,11 @@ public class DashboardFrame extends JFrame {
                         deadlineCardsPanel
                 );
 
+
         deadlineScroll.setBorder(
                 null
         );
+
 
         deadlineScroll.setHorizontalScrollBarPolicy(
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
@@ -824,55 +942,68 @@ public class DashboardFrame extends JFrame {
         // BUTTON ACTIONS
         // =========================
 
-        applicationsButton
-                .addActionListener(
-                        e ->
-                                new ApplicationsFrame(
-                                        userId
-                                )
-                );
+        dashboardButton.addActionListener(
+                e -> {
+                    // Already on dashboard
+                }
+        );
 
 
-        addButton
-                .addActionListener(
-                        e ->
-                                new AddApplicationFrame(
-                                        userId
-                                )
-                );
+        profileButton.addActionListener(
+                e ->
+                        new ProfileFrame(
+                                user
+                        )
+        );
 
 
-        deadlineButton
-                .addActionListener(
-                        e ->
-                                showDeadlineAlerts()
-                );
+        applicationsButton.addActionListener(
+                e ->
+                        new ApplicationsFrame(
+                                userId
+                        )
+        );
 
 
-        logoutButton
-                .addActionListener(
-                        e -> {
+        addButton.addActionListener(
+                e ->
+                        new AddApplicationFrame(
+                                userId
+                        )
+        );
 
-                            dispose();
 
-                            new LoginFrame();
-                        }
-                );
+        deadlineButton.addActionListener(
+                e ->
+                        showDeadlineAlerts()
+        );
+
+
+        logoutButton.addActionListener(
+                e -> {
+
+                    dispose();
+
+                    new LoginFrame();
+                }
+        );
 
 
         // =========================
         // FINAL SETUP
         // =========================
 
-        add(rootPanel);
+        add(
+                rootPanel
+        );
 
         setVisible(true);
     }
 
 
-    // =========================================================
+    // =========================
     // STAT CARD
-    // =========================================================
+    // =========================
 
     private JPanel createStatCard(
             String title,
@@ -883,6 +1014,7 @@ public class DashboardFrame extends JFrame {
                 new JPanel(
                         new BorderLayout()
                 );
+
 
         card.setBackground(
                 CARD_COLOR
@@ -909,6 +1041,7 @@ public class DashboardFrame extends JFrame {
                         title
                 );
 
+
         titleLabel.setFont(
                 new Font(
                         "Arial",
@@ -917,6 +1050,7 @@ public class DashboardFrame extends JFrame {
                 )
         );
 
+
         titleLabel.setForeground(
                 MUTED_TEXT_COLOR
         );
@@ -924,8 +1058,11 @@ public class DashboardFrame extends JFrame {
 
         JLabel valueLabel =
                 new JLabel(
-                        String.valueOf(value)
+                        String.valueOf(
+                                value
+                        )
                 );
+
 
         valueLabel.setFont(
                 new Font(
@@ -934,6 +1071,7 @@ public class DashboardFrame extends JFrame {
                         28
                 )
         );
+
 
         valueLabel.setForeground(
                 ACCENT_COLOR
@@ -945,6 +1083,7 @@ public class DashboardFrame extends JFrame {
                 BorderLayout.NORTH
         );
 
+
         card.add(
                 valueLabel,
                 BorderLayout.CENTER
@@ -955,9 +1094,9 @@ public class DashboardFrame extends JFrame {
     }
 
 
-    // =========================================================
+    // =========================
     // SIDEBAR BUTTON
-    // =========================================================
+    // =========================
 
     private JButton createSidebarButton(
             String text
@@ -968,6 +1107,7 @@ public class DashboardFrame extends JFrame {
                         text
                 );
 
+
         button.setFont(
                 new Font(
                         "Arial",
@@ -976,13 +1116,16 @@ public class DashboardFrame extends JFrame {
                 )
         );
 
+
         button.setForeground(
                 Color.WHITE
         );
 
+
         button.setBackground(
                 SIDEBAR_COLOR
         );
+
 
         button.setBorder(
                 BorderFactory.createEmptyBorder(
@@ -993,11 +1136,16 @@ public class DashboardFrame extends JFrame {
                 )
         );
 
-        button.setFocusPainted(false);
+
+        button.setFocusPainted(
+                false
+        );
+
 
         button.setAlignmentX(
                 Component.CENTER_ALIGNMENT
         );
+
 
         button.setMaximumSize(
                 new Dimension(
@@ -1011,9 +1159,9 @@ public class DashboardFrame extends JFrame {
     }
 
 
-    // =========================================================
-    // DEADLINE ALERT POPUP
-    // =========================================================
+    // =========================
+    // DEADLINE ALERTS
+    // =========================
 
     private void showDeadlineAlerts() {
 
@@ -1024,7 +1172,7 @@ public class DashboardFrame extends JFrame {
         List<Application> applications =
                 applicationDAO
                         .getUpcomingDeadlines(
-                                userId
+                                user.getUserId()
                         );
 
 
@@ -1053,6 +1201,7 @@ public class DashboardFrame extends JFrame {
                 "UPCOMING DEADLINES\n"
         );
 
+
         message.append(
                 "========================\n\n"
         );
@@ -1062,6 +1211,7 @@ public class DashboardFrame extends JFrame {
                 Application application :
                 applications
         ) {
+
 
             long daysLeft =
                     ChronoUnit.DAYS.between(
@@ -1076,9 +1226,11 @@ public class DashboardFrame extends JFrame {
                             .getCompanyName()
             );
 
+
             message.append(
                     " - "
             );
+
 
             message.append(
                     application
@@ -1089,6 +1241,7 @@ public class DashboardFrame extends JFrame {
             message.append(
                     "\nDeadline: "
             );
+
 
             message.append(
                     application
@@ -1107,11 +1260,13 @@ public class DashboardFrame extends JFrame {
                         "⚠ Due today!"
                 );
 
+
             } else if (daysLeft == 1) {
 
                 message.append(
                         "⚠ 1 day left"
                 );
+
 
             } else {
 
