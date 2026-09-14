@@ -13,498 +13,354 @@ public class AddApplicationFrame extends JFrame {
 
     private final User user;
 
+    private final Color SIDEBAR = new Color(31, 41, 55);
+    private final Color BACKGROUND = new Color(245, 247, 250);
+    private final Color CARD = Color.WHITE;
+    private final Color TEXT = new Color(31, 41, 55);
+    private final Color MUTED = new Color(107, 114, 128);
+    private final Color BLUE = new Color(59, 130, 246);
+    private final Color BORDER = new Color(229, 231, 235);
+
     private JTextField companyField;
     private JTextField roleField;
     private JTextField applicationDateField;
     private JTextField deadlineField;
-    private JTextField linkField;
-
-    private JComboBox<String> statusBox;
-
+    private JTextField jobLinkField;
     private JTextArea notesArea;
-
-    private static final Color BACKGROUND_COLOR =
-            new Color(245, 247, 250);
-
-    private static final Color CARD_COLOR =
-            Color.WHITE;
-
-    private static final Color TEXT_COLOR =
-            new Color(31, 41, 55);
-
-    private static final Color MUTED_TEXT_COLOR =
-            new Color(107, 114, 128);
-
-    private static final Color ACCENT_COLOR =
-            new Color(59, 130, 246);
-
-    private static final Color BORDER_COLOR =
-            new Color(229, 231, 235);
-
+    private JComboBox<String> statusCombo;
 
     public AddApplicationFrame(User user) {
 
         this.user = user;
 
-        setTitle(
-                "Smart Internship Tracker - Add Application"
-        );
-
-        setSize(700, 650);
-
-        setDefaultCloseOperation(
-                JFrame.DISPOSE_ON_CLOSE
-        );
-
+        setTitle("Smart Internship Tracker - Add Application");
+        setSize(1200, 750);
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        buildUI();
+    }
 
-        JPanel root =
-                new JPanel(
-                        new BorderLayout()
-                );
+    private void buildUI() {
 
-        root.setBackground(
-                BACKGROUND_COLOR
+        JPanel root = new JPanel(new BorderLayout());
+        root.setBackground(BACKGROUND);
+
+        root.add(createSidebar(), BorderLayout.WEST);
+        root.add(createMainContent(), BorderLayout.CENTER);
+
+        setContentPane(root);
+    }
+
+    private JPanel createSidebar() {
+
+        JPanel sidebar = new JPanel(new BorderLayout());
+        sidebar.setBackground(SIDEBAR);
+        sidebar.setPreferredSize(new Dimension(220, 750));
+
+        JPanel top = new JPanel();
+        top.setOpaque(false);
+        top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
+        top.setBorder(new EmptyBorder(30, 20, 20, 20));
+
+        JLabel logo = new JLabel("SmartIntern");
+        logo.setForeground(Color.WHITE);
+        logo.setFont(new Font("SansSerif", Font.BOLD, 21));
+        logo.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel tracker = new JLabel("Internship Tracker");
+        tracker.setForeground(new Color(156, 163, 175));
+        tracker.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        tracker.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        top.add(logo);
+        top.add(Box.createVerticalStrut(2));
+        top.add(tracker);
+        top.add(Box.createVerticalStrut(30));
+
+        top.add(createSidebarButton("Dashboard", false, e -> {
+            dispose();
+            new DashboardFrame(user).setVisible(true);
+        }));
+
+        top.add(Box.createVerticalStrut(8));
+
+        top.add(createSidebarButton("My Profile", false, e -> {
+            new ProfileFrame(user).setVisible(true);
+        }));
+
+        top.add(Box.createVerticalStrut(8));
+
+        top.add(createSidebarButton("My Applications", false, e -> {
+            dispose();
+            new ApplicationsFrame(user).setVisible(true);
+        }));
+
+        top.add(Box.createVerticalStrut(8));
+
+        top.add(createSidebarButton("Add Application", true, e -> {
+        }));
+
+        top.add(Box.createVerticalStrut(8));
+
+        top.add(createSidebarButton("Upcoming Deadlines", false, e -> {
+            showUpcomingDeadlines();
+        }));
+
+        top.add(Box.createVerticalStrut(8));
+
+        top.add(createSidebarButton("Analytics", false, e -> {
+            dispose();
+            new AnalyticsFrame(user).setVisible(true);
+        }));
+
+        sidebar.add(top, BorderLayout.NORTH);
+
+        JPanel bottom = new JPanel();
+        bottom.setOpaque(false);
+        bottom.setLayout(new BoxLayout(bottom, BoxLayout.Y_AXIS));
+        bottom.setBorder(new EmptyBorder(15, 20, 25, 20));
+
+        bottom.add(createSidebarButton("Logout", false, e -> {
+            dispose();
+            new LoginFrame().setVisible(true);
+        }));
+
+        sidebar.add(bottom, BorderLayout.SOUTH);
+
+        return sidebar;
+    }
+
+    private JButton createSidebarButton(
+            String text,
+            boolean selected,
+            java.awt.event.ActionListener action) {
+
+        JButton button = new JButton(text);
+
+        button.setAlignmentX(Component.LEFT_ALIGNMENT);
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+        button.setPreferredSize(new Dimension(180, 42));
+
+        button.setForeground(Color.WHITE);
+        button.setBackground(selected
+                ? new Color(55, 65, 81)
+                : SIDEBAR);
+
+        button.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        button.setBorder(BorderFactory.createEmptyBorder(0, 14, 0, 10));
+        button.setFocusPainted(false);
+        button.setOpaque(true);
+
+        button.addActionListener(action);
+
+        return button;
+    }
+
+    private JPanel createMainContent() {
+
+        JPanel main = new JPanel(new BorderLayout(0, 20));
+        main.setBackground(BACKGROUND);
+        main.setBorder(new EmptyBorder(30, 35, 30, 35));
+
+        JLabel title = new JLabel("Add New Application");
+        title.setFont(new Font("SansSerif", Font.BOLD, 28));
+        title.setForeground(TEXT);
+
+        JLabel subtitle = new JLabel(
+                "Enter the details of your internship application"
+        );
+        subtitle.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        subtitle.setForeground(MUTED);
+
+        JPanel header = new JPanel();
+        header.setBackground(BACKGROUND);
+        header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
+
+        header.add(title);
+        header.add(Box.createVerticalStrut(5));
+        header.add(subtitle);
+
+        main.add(header, BorderLayout.NORTH);
+
+        JPanel formCard = new JPanel(new GridBagLayout());
+        formCard.setBackground(CARD);
+        formCard.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(25, 30, 25, 30)
+        ));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+
+        companyField = new JTextField();
+        roleField = new JTextField();
+        applicationDateField = new JTextField();
+        deadlineField = new JTextField();
+        jobLinkField = new JTextField();
+
+        statusCombo = new JComboBox<>(
+                new String[]{
+                        "Applied",
+                        "Shortlisted",
+                        "Interview",
+                        "Rejected"
+                }
         );
 
+        notesArea = new JTextArea(5, 20);
+        notesArea.setLineWrap(true);
+        notesArea.setWrapStyleWord(true);
 
-        // Header
-
-        JPanel header =
-                new JPanel(
-                        new BorderLayout()
-                );
-
-        header.setOpaque(false);
-
-        header.setBorder(
-                new EmptyBorder(
-                        25,
-                        30,
-                        15,
-                        30
-                )
+        addFormRow(
+                formCard,
+                gbc,
+                0,
+                "Company Name",
+                companyField
         );
 
-
-        JLabel title =
-                new JLabel(
-                        "Add Internship Application"
-                );
-
-        title.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        26
-                )
+        addFormRow(
+                formCard,
+                gbc,
+                1,
+                "Job Role",
+                roleField
         );
 
-        title.setForeground(
-                TEXT_COLOR
+        addFormRow(
+                formCard,
+                gbc,
+                2,
+                "Application Date",
+                applicationDateField
         );
 
-
-        JLabel subtitle =
-                new JLabel(
-                        "Add a new opportunity to your tracker."
-                );
-
-        subtitle.setForeground(
-                MUTED_TEXT_COLOR
+        addFormRow(
+                formCard,
+                gbc,
+                3,
+                "Deadline",
+                deadlineField
         );
 
-
-        JPanel headerText =
-                new JPanel();
-
-        headerText.setOpaque(false);
-
-        headerText.setLayout(
-                new BoxLayout(
-                        headerText,
-                        BoxLayout.Y_AXIS
-                )
+        addFormRow(
+                formCard,
+                gbc,
+                4,
+                "Status",
+                statusCombo
         );
 
-        headerText.add(title);
-
-        headerText.add(
-                Box.createVerticalStrut(5)
+        addFormRow(
+                formCard,
+                gbc,
+                5,
+                "Job Link",
+                jobLinkField
         );
-
-        headerText.add(subtitle);
-
-
-        header.add(
-                headerText,
-                BorderLayout.WEST
-        );
-
-
-        root.add(
-                header,
-                BorderLayout.NORTH
-        );
-
-
-        // Form
-
-        JPanel card =
-                new JPanel(
-                        new GridBagLayout()
-                );
-
-        card.setBackground(
-                CARD_COLOR
-        );
-
-        card.setBorder(
-                BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(
-                                BORDER_COLOR
-                        ),
-                        new EmptyBorder(
-                                25,
-                                30,
-                                25,
-                                30
-                        )
-                )
-        );
-
-
-        GridBagConstraints gbc =
-                new GridBagConstraints();
-
-        gbc.insets =
-                new Insets(
-                        8,
-                        8,
-                        8,
-                        8
-                );
-
-        gbc.fill =
-                GridBagConstraints.HORIZONTAL;
-
-        gbc.weightx = 1;
-
-
-        // Company
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-
-        card.add(
-                createLabel("Company"),
-                gbc
-        );
-
-        companyField =
-                createTextField();
-
-        gbc.gridx = 1;
-
-        card.add(
-                companyField,
-                gbc
-        );
-
-
-        // Role
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-
-        card.add(
-                createLabel("Job Role"),
-                gbc
-        );
-
-        roleField =
-                createTextField();
-
-        gbc.gridx = 1;
-
-        card.add(
-                roleField,
-                gbc
-        );
-
-
-        // Application Date
-
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-
-        card.add(
-                createLabel(
-                        "Application Date"
-                ),
-                gbc
-        );
-
-        applicationDateField =
-                createTextField();
-
-        applicationDateField.setToolTipText(
-                "YYYY-MM-DD"
-        );
-
-        gbc.gridx = 1;
-
-        card.add(
-                applicationDateField,
-                gbc
-        );
-
-
-        // Deadline
-
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-
-        card.add(
-                createLabel("Deadline"),
-                gbc
-        );
-
-        deadlineField =
-                createTextField();
-
-        deadlineField.setToolTipText(
-                "YYYY-MM-DD"
-        );
-
-        gbc.gridx = 1;
-
-        card.add(
-                deadlineField,
-                gbc
-        );
-
-
-        // Status
-
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-
-        card.add(
-                createLabel("Status"),
-                gbc
-        );
-
-        statusBox =
-                new JComboBox<>(
-                        new String[]{
-                                "Applied",
-                                "Shortlisted",
-                                "Interview",
-                                "Rejected"
-                        }
-                );
-
-        statusBox.setPreferredSize(
-                new Dimension(
-                        0,
-                        36
-                )
-        );
-
-        gbc.gridx = 1;
-
-        card.add(
-                statusBox,
-                gbc
-        );
-
-
-        // Job Link
-
-        gbc.gridx = 0;
-        gbc.gridy = 5;
-
-        card.add(
-                createLabel("Job Link"),
-                gbc
-        );
-
-        linkField =
-                createTextField();
-
-        gbc.gridx = 1;
-
-        card.add(
-                linkField,
-                gbc
-        );
-
-
-        // Notes
 
         gbc.gridx = 0;
         gbc.gridy = 6;
-
-        card.add(
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        formCard.add(
                 createLabel("Notes"),
                 gbc
         );
 
-
-        notesArea =
-                new JTextArea(
-                        5,
-                        20
-                );
-
-        notesArea.setLineWrap(true);
-
-        notesArea.setWrapStyleWord(true);
-
-        JScrollPane notesScroll =
-                new JScrollPane(
-                        notesArea
-                );
-
         gbc.gridx = 1;
+        gbc.weightx = 1;
+        gbc.weighty = 1;
+        gbc.fill = GridBagConstraints.BOTH;
 
-        gbc.fill =
-                GridBagConstraints.BOTH;
+        JScrollPane notesScroll = new JScrollPane(notesArea);
+        formCard.add(notesScroll, gbc);
 
-        card.add(
-                notesScroll,
-                gbc
+        JPanel buttonPanel = new JPanel(
+                new FlowLayout(FlowLayout.RIGHT)
         );
+        buttonPanel.setBackground(BACKGROUND);
 
+        JButton cancelButton = new JButton("Cancel");
+        JButton saveButton = new JButton("Save Application");
 
-        // Buttons
+        saveButton.setBackground(BLUE);
+        saveButton.setForeground(Color.WHITE);
+        saveButton.setFocusPainted(false);
 
-        JPanel buttons =
-                new JPanel(
-                        new FlowLayout(
-                                FlowLayout.RIGHT
-                        )
-                );
+        cancelButton.addActionListener(e -> {
+            dispose();
+            new DashboardFrame(user).setVisible(true);
+        });
 
-        buttons.setOpaque(false);
+        saveButton.addActionListener(e -> saveApplication());
 
+        buttonPanel.add(cancelButton);
+        buttonPanel.add(saveButton);
 
-        JButton cancel =
-                new JButton(
-                        "Cancel"
-                );
+        JPanel center = new JPanel(new BorderLayout(0, 15));
+        center.setBackground(BACKGROUND);
+        center.add(formCard, BorderLayout.CENTER);
+        center.add(buttonPanel, BorderLayout.SOUTH);
 
-        JButton save =
-                new JButton(
-                        "Save Application"
-                );
+        main.add(center, BorderLayout.CENTER);
 
-
-        styleSecondaryButton(
-                cancel
-        );
-
-        stylePrimaryButton(
-                save
-        );
-
-
-        buttons.add(cancel);
-
-        buttons.add(save);
-
-
-        gbc.gridx = 0;
-        gbc.gridy = 7;
-
-        gbc.gridwidth = 2;
-
-        gbc.fill =
-                GridBagConstraints.HORIZONTAL;
-
-        card.add(
-                buttons,
-                gbc
-        );
-
-
-        root.add(
-                card,
-                BorderLayout.CENTER
-        );
-
-
-        // Actions
-
-        cancel.addActionListener(
-                e -> {
-
-                    dispose();
-
-                    new DashboardFrame(
-                            user
-                    );
-                }
-        );
-
-
-        save.addActionListener(
-                e -> saveApplication()
-        );
-
-
-        add(root);
-
-        setVisible(true);
+        return main;
     }
 
+    private void addFormRow(
+            JPanel panel,
+            GridBagConstraints gbc,
+            int row,
+            String label,
+            JComponent component) {
+
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        panel.add(createLabel(label), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+
+        component.setPreferredSize(new Dimension(400, 38));
+
+        panel.add(component, gbc);
+    }
+
+    private JLabel createLabel(String text) {
+
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("SansSerif", Font.BOLD, 13));
+        label.setForeground(TEXT);
+
+        return label;
+    }
 
     private void saveApplication() {
 
-        String company =
-                companyField
-                        .getText()
-                        .trim();
-
-        String role =
-                roleField
-                        .getText()
-                        .trim();
-
+        String company = companyField.getText().trim();
+        String role = roleField.getText().trim();
         String applicationDateText =
-                applicationDateField
-                        .getText()
-                        .trim();
-
+                applicationDateField.getText().trim();
         String deadlineText =
-                deadlineField
-                        .getText()
-                        .trim();
-
+                deadlineField.getText().trim();
         String status =
-                statusBox
-                        .getSelectedItem()
-                        .toString();
+                (String) statusCombo.getSelectedItem();
+        String jobLink = jobLinkField.getText().trim();
+        String notes = notesArea.getText().trim();
 
-        String link =
-                linkField
-                        .getText()
-                        .trim();
-
-        String notes =
-                notesArea
-                        .getText()
-                        .trim();
-
-
-        if (
-                company.isEmpty()
-                        || role.isEmpty()
-                        || applicationDateText.isEmpty()
-                        || deadlineText.isEmpty()
-        ) {
+        if (company.isEmpty()
+                || role.isEmpty()
+                || applicationDateText.isEmpty()
+                || deadlineText.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
@@ -516,59 +372,40 @@ public class AddApplicationFrame extends JFrame {
             return;
         }
 
-
         try {
 
             LocalDate applicationDate =
-                    LocalDate.parse(
-                            applicationDateText
-                    );
+                    LocalDate.parse(applicationDateText);
 
             LocalDate deadline =
-                    LocalDate.parse(
-                            deadlineText
-                    );
+                    LocalDate.parse(deadlineText);
 
-
-            if (
-                    deadline.isBefore(
-                            applicationDate
-                    )
-            ) {
+            if (deadline.isBefore(applicationDate)) {
 
                 JOptionPane.showMessageDialog(
                         this,
-                        "Deadline cannot be before application date.",
-                        "Invalid Date",
+                        "Deadline cannot be before the application date.",
+                        "Invalid Dates",
                         JOptionPane.WARNING_MESSAGE
                 );
 
                 return;
             }
 
+            Application application = new Application(
+                    user.getUserId(),
+                    company,
+                    role,
+                    applicationDate,
+                    deadline,
+                    status,
+                    jobLink,
+                    notes
+            );
 
-            Application application =
-                    new Application(
-                            user.getUserId(),
-                            company,
-                            role,
-                            applicationDate,
-                            deadline,
-                            status,
-                            link,
-                            notes
-                    );
+            ApplicationDAO dao = new ApplicationDAO();
 
-
-            ApplicationDAO dao =
-                    new ApplicationDAO();
-
-
-            boolean success =
-                    dao.addApplication(
-                            application
-                    );
-
+            boolean success = dao.addApplication(application);
 
             if (success) {
 
@@ -580,10 +417,7 @@ public class AddApplicationFrame extends JFrame {
                 );
 
                 dispose();
-
-                new DashboardFrame(
-                        user
-                );
+                new DashboardFrame(user).setVisible(true);
 
             } else {
 
@@ -595,10 +429,7 @@ public class AddApplicationFrame extends JFrame {
                 );
             }
 
-
-        } catch (
-                java.time.format.DateTimeParseException e
-        ) {
+        } catch (Exception ex) {
 
             JOptionPane.showMessageDialog(
                     this,
@@ -609,94 +440,46 @@ public class AddApplicationFrame extends JFrame {
         }
     }
 
+    private void showUpcomingDeadlines() {
 
-    private JLabel createLabel(
-            String text
-    ) {
+        ApplicationDAO dao = new ApplicationDAO();
 
-        JLabel label =
-                new JLabel(text);
+        var applications =
+                dao.getUpcomingDeadlines(user.getUserId());
 
-        label.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        13
-                )
+        if (applications.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No upcoming deadlines."
+            );
+
+            return;
+        }
+
+        StringBuilder message = new StringBuilder();
+
+        for (Application app : applications) {
+
+            message.append(app.getCompanyName())
+                    .append(" - ")
+                    .append(app.getJobRole())
+                    .append("\nDeadline: ")
+                    .append(app.getDeadline())
+                    .append("\n\n");
+        }
+
+        JTextArea area = new JTextArea(message.toString());
+        area.setEditable(false);
+
+        JScrollPane scroll = new JScrollPane(area);
+        scroll.setPreferredSize(new Dimension(450, 350));
+
+        JOptionPane.showMessageDialog(
+                this,
+                scroll,
+                "Upcoming Deadlines",
+                JOptionPane.INFORMATION_MESSAGE
         );
-
-        label.setForeground(
-                TEXT_COLOR
-        );
-
-        return label;
-    }
-
-
-    private JTextField createTextField() {
-
-        JTextField field =
-                new JTextField();
-
-        field.setPreferredSize(
-                new Dimension(
-                        0,
-                        36
-                )
-        );
-
-        return field;
-    }
-
-
-    private void stylePrimaryButton(
-            JButton button
-    ) {
-
-        button.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        13
-                )
-        );
-
-        button.setForeground(
-                Color.WHITE
-        );
-
-        button.setBackground(
-                ACCENT_COLOR
-        );
-
-        button.setFocusPainted(false);
-    }
-
-
-    private void styleSecondaryButton(
-            JButton button
-    ) {
-
-        button.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        13
-                )
-        );
-
-        button.setForeground(
-                TEXT_COLOR
-        );
-
-        button.setBackground(
-                new Color(
-                        243,
-                        244,
-                        246
-                )
-        );
-
-        button.setFocusPainted(false);
     }
 }

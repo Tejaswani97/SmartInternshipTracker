@@ -12,1041 +12,404 @@ public class AnalyticsFrame extends JFrame {
 
     private final User user;
 
-    // =========================
-    // THEME
-    // =========================
-
-    private static final Color SIDEBAR_COLOR =
-            new Color(31, 41, 55);
-
-    private static final Color BACKGROUND_COLOR =
-            new Color(245, 247, 250);
-
-    private static final Color CARD_COLOR =
-            Color.WHITE;
-
-    private static final Color TEXT_COLOR =
-            new Color(31, 41, 55);
-
-    private static final Color MUTED_TEXT_COLOR =
-            new Color(107, 114, 128);
-
-    private static final Color ACCENT_COLOR =
-            new Color(59, 130, 246);
-
-    private static final Color BORDER_COLOR =
-            new Color(229, 231, 235);
-
-    private static final Color GREEN_COLOR =
-            new Color(22, 163, 74);
-
-    private static final Color ORANGE_COLOR =
-            new Color(234, 88, 12);
-
-    private static final Color PURPLE_COLOR =
-            new Color(124, 58, 237);
-
-    private static final Color RED_COLOR =
-            new Color(220, 38, 38);
-
+    private final Color SIDEBAR = new Color(31, 41, 55);
+    private final Color BACKGROUND = new Color(245, 247, 250);
+    private final Color CARD = Color.WHITE;
+    private final Color TEXT = new Color(31, 41, 55);
+    private final Color MUTED = new Color(107, 114, 128);
+    private final Color BLUE = new Color(59, 130, 246);
+    private final Color BORDER = new Color(229, 231, 235);
 
     public AnalyticsFrame(User user) {
 
         this.user = user;
 
-        int userId = user.getUserId();
-
-        setTitle(
-                "Smart Internship Tracker - Analytics"
-        );
-
-        setSize(
-                1000,
-                650
-        );
-
-        setDefaultCloseOperation(
-                JFrame.DISPOSE_ON_CLOSE
-        );
-
+        setTitle("Smart Internship Tracker - Analytics");
+        setSize(1200, 750);
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-
-        // =========================
-        // ROOT
-        // =========================
-
-        JPanel root =
-                new JPanel(
-                        new BorderLayout()
-                );
-
-        root.setBackground(
-                BACKGROUND_COLOR
-        );
-
-
-        // =========================
-        // SIDEBAR
-        // =========================
-
-        JPanel sidebar =
-                new JPanel();
-
-        sidebar.setPreferredSize(
-                new Dimension(
-                        220,
-                        0
-                )
-        );
-
-        sidebar.setBackground(
-                SIDEBAR_COLOR
-        );
-
-        sidebar.setLayout(
-                new BoxLayout(
-                        sidebar,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-        sidebar.setBorder(
-                new EmptyBorder(
-                        25,
-                        15,
-                        25,
-                        15
-                )
-        );
-
-
-        JLabel logo =
-                new JLabel(
-                        "SMART TRACKER"
-                );
-
-        logo.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        20
-                )
-        );
-
-        logo.setForeground(
-                Color.WHITE
-        );
-
-        sidebar.add(logo);
-
-        sidebar.add(
-                Box.createVerticalStrut(
-                        35
-                )
-        );
-
-
-        JButton dashboardButton =
-                createSidebarButton(
-                        "Dashboard"
-                );
-
-        JButton profileButton =
-                createSidebarButton(
-                        "My Profile"
-                );
-
-        JButton applicationsButton =
-                createSidebarButton(
-                        "My Applications"
-                );
-
-        JButton addButton =
-                createSidebarButton(
-                        "Add Application"
-                );
-
-        JButton analyticsButton =
-                createSidebarButton(
-                        "Analytics"
-                );
-
-        JButton logoutButton =
-                createSidebarButton(
-                        "Logout"
-                );
-
-
-        sidebar.add(
-                dashboardButton
-        );
-
-        sidebar.add(
-                Box.createVerticalStrut(
-                        8
-                )
-        );
-
-        sidebar.add(
-                profileButton
-        );
-
-        sidebar.add(
-                Box.createVerticalStrut(
-                        8
-                )
-        );
-
-        sidebar.add(
-                applicationsButton
-        );
-
-        sidebar.add(
-                Box.createVerticalStrut(
-                        8
-                )
-        );
-
-        sidebar.add(
-                addButton
-        );
-
-        sidebar.add(
-                Box.createVerticalStrut(
-                        8
-                )
-        );
-
-        sidebar.add(
-                analyticsButton
-        );
-
-        sidebar.add(
-                Box.createVerticalGlue()
-        );
-
-        sidebar.add(
-                logoutButton
-        );
-
-
-        root.add(
-                sidebar,
-                BorderLayout.WEST
-        );
-
-
-        // =========================
-        // CONTENT
-        // =========================
-
-        JPanel content =
-                new JPanel(
-                        new BorderLayout(
-                                20,
-                                20
-                        )
-                );
-
-        content.setBackground(
-                BACKGROUND_COLOR
-        );
-
-        content.setBorder(
-                new EmptyBorder(
-                        30,
-                        30,
-                        30,
-                        30
-                )
-        );
-
-
-        // =========================
-        // HEADER
-        // =========================
-
-        JLabel title =
-                new JLabel(
-                        "Application Analytics"
-                );
-
-        title.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        28
-                )
-        );
-
-        title.setForeground(
-                TEXT_COLOR
-        );
-
-
-        JLabel subtitle =
-                new JLabel(
-                        "Track the progress of your internship applications."
-                );
-
-        subtitle.setFont(
-                new Font(
-                        "Arial",
-                        Font.PLAIN,
-                        14
-                )
-        );
-
-        subtitle.setForeground(
-                MUTED_TEXT_COLOR
-        );
-
-
-        JPanel header =
-                new JPanel();
-
-        header.setOpaque(false);
-
-        header.setLayout(
-                new BoxLayout(
-                        header,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-        header.add(title);
-
-        header.add(
-                Box.createVerticalStrut(
-                        5
-                )
-        );
-
-        header.add(subtitle);
-
-
-        content.add(
-                header,
-                BorderLayout.NORTH
-        );
-
-
-        // =========================
-        // DATA
-        // =========================
-
-        ApplicationDAO dao =
-                new ApplicationDAO();
-
-        Map<String, Integer> statistics =
-                dao.getApplicationStatistics(
-                        userId
-                );
-
-
-        int applied =
-                statistics.getOrDefault(
-                        "Applied",
-                        0
-                );
-
-        int shortlisted =
-                statistics.getOrDefault(
-                        "Shortlisted",
-                        0
-                );
-
-        int interview =
-                statistics.getOrDefault(
-                        "Interview",
-                        0
-                );
-
-        int rejected =
-                statistics.getOrDefault(
-                        "Rejected",
-                        0
-                );
-
-
-        int total =
-                applied
-                        + shortlisted
-                        + interview
-                        + rejected;
-
-
-        // =========================
-        // SUMMARY CARDS
-        // =========================
-
-        JPanel summaryPanel =
-                new JPanel(
-                        new GridLayout(
-                                1,
-                                4,
-                                15,
-                                15
-                        )
-                );
-
-        summaryPanel.setOpaque(false);
-
-
-        summaryPanel.add(
-                createMetricCard(
-                        "Applied",
-                        applied,
-                        ACCENT_COLOR
-                )
-        );
-
-        summaryPanel.add(
-                createMetricCard(
-                        "Shortlisted",
-                        shortlisted,
-                        GREEN_COLOR
-                )
-        );
-
-        summaryPanel.add(
-                createMetricCard(
-                        "Interview",
-                        interview,
-                        PURPLE_COLOR
-                )
-        );
-
-        summaryPanel.add(
-                createMetricCard(
-                        "Rejected",
-                        rejected,
-                        RED_COLOR
-                )
-        );
-
-
-        // =========================
-        // ANALYTICS CARD
-        // =========================
-
-        JPanel analyticsCard =
-                new JPanel(
-                        new BorderLayout(
-                                20,
-                                15
-                        )
-                );
-
-        analyticsCard.setBackground(
-                CARD_COLOR
-        );
-
-        analyticsCard.setBorder(
-                BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(
-                                BORDER_COLOR
-                        ),
-                        new EmptyBorder(
-                                20,
-                                20,
-                                20,
-                                20
-                        )
-                )
-        );
-
-
-        JLabel progressTitle =
-                new JLabel(
-                        "Application Progress"
-                );
-
-        progressTitle.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        20
-                )
-        );
-
-        progressTitle.setForeground(
-                TEXT_COLOR
-        );
-
-
-        analyticsCard.add(
-                progressTitle,
-                BorderLayout.NORTH
-        );
-
-
-        JPanel progressPanel =
-                new JPanel();
-
-        progressPanel.setOpaque(false);
-
-        progressPanel.setLayout(
-                new BoxLayout(
-                        progressPanel,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-
-        progressPanel.add(
-                createProgressRow(
-                        "Applied",
-                        applied,
-                        total,
-                        ACCENT_COLOR
-                )
-        );
-
-        progressPanel.add(
-                Box.createVerticalStrut(
-                        18
-                )
-        );
-
-        progressPanel.add(
-                createProgressRow(
-                        "Shortlisted",
-                        shortlisted,
-                        total,
-                        GREEN_COLOR
-                )
-        );
-
-        progressPanel.add(
-                Box.createVerticalStrut(
-                        18
-                )
-        );
-
-        progressPanel.add(
-                createProgressRow(
-                        "Interview",
-                        interview,
-                        total,
-                        PURPLE_COLOR
-                )
-        );
-
-        progressPanel.add(
-                Box.createVerticalStrut(
-                        18
-                )
-        );
-
-        progressPanel.add(
-                createProgressRow(
-                        "Rejected",
-                        rejected,
-                        total,
-                        RED_COLOR
-                )
-        );
-
-
-        analyticsCard.add(
-                progressPanel,
-                BorderLayout.CENTER
-        );
-
-
-        // =========================
-        // TOTAL CARD
-        // =========================
-
-        JPanel totalCard =
-                new JPanel(
-                        new BorderLayout()
-                );
-
-        totalCard.setBackground(
-                new Color(
-                        248,
-                        250,
-                        252
-                )
-        );
-
-        totalCard.setBorder(
-                BorderFactory.createLineBorder(
-                        BORDER_COLOR
-                )
-        );
-
-
-        JLabel totalTitle =
-                new JLabel(
-                        "Total Applications"
-                );
-
-        totalTitle.setFont(
-                new Font(
-                        "Arial",
-                        Font.PLAIN,
-                        14
-                )
-        );
-
-        totalTitle.setForeground(
-                MUTED_TEXT_COLOR
-        );
-
-
-        JLabel totalValue =
-                new JLabel(
-                        String.valueOf(
-                                total
-                        )
-                );
-
-        totalValue.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        34
-                )
-        );
-
-        totalValue.setForeground(
-                TEXT_COLOR
-        );
-
-
-        JPanel totalText =
-                new JPanel();
-
-        totalText.setOpaque(false);
-
-        totalText.setLayout(
-                new BoxLayout(
-                        totalText,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-        totalText.setBorder(
-                new EmptyBorder(
-                        15,
-                        20,
-                        15,
-                        20
-                )
-        );
-
-        totalText.add(
-                totalTitle
-        );
-
-        totalText.add(
-                Box.createVerticalStrut(
-                        5
-                )
-        );
-
-        totalText.add(
-                totalValue
-        );
-
-
-        totalCard.add(
-                totalText,
-                BorderLayout.CENTER
-        );
-
-
-        JPanel bottomPanel =
-                new JPanel(
-                        new BorderLayout()
-                );
-
-        bottomPanel.setOpaque(false);
-
-        bottomPanel.add(
-                totalCard,
-                BorderLayout.CENTER
-        );
-
-
-        content.add(
-                summaryPanel,
-                BorderLayout.CENTER
-        );
-
-
-        // Put analytics + total together
-
-        JPanel centerWrapper =
-                new JPanel(
-                        new BorderLayout(
-                                15,
-                                15
-                        )
-                );
-
-        centerWrapper.setOpaque(false);
-
-        centerWrapper.add(
-                summaryPanel,
-                BorderLayout.NORTH
-        );
-
-        centerWrapper.add(
-                analyticsCard,
-                BorderLayout.CENTER
-        );
-
-        centerWrapper.add(
-                bottomPanel,
-                BorderLayout.SOUTH
-        );
-
-
-        content.add(
-                centerWrapper,
-                BorderLayout.CENTER
-        );
-
-
-        // =========================
-        // NAVIGATION
-        // =========================
-
-        dashboardButton.addActionListener(
-                e -> {
-
-                    dispose();
-
-                    new DashboardFrame(
-                            user
-                    );
-                }
-        );
-
-
-        profileButton.addActionListener(
-                e ->
-                        new ProfileFrame(
-                                user
-                        )
-        );
-
-
-        applicationsButton.addActionListener(
-                e -> {
-
-                    dispose();
-
-                    new ApplicationsFrame(
-                            user
-                    );
-                }
-        );
-
-
-        addButton.addActionListener(
-                e -> {
-
-                    dispose();
-
-                    new AddApplicationFrame(
-                            user
-                    );
-                }
-        );
-
-
-        analyticsButton.addActionListener(
-                e -> {
-                    // Already on analytics
-                }
-        );
-
-
-        logoutButton.addActionListener(
-                e -> {
-
-                    dispose();
-
-                    new LoginFrame();
-                }
-        );
-
-
-        add(root);
-
-        setVisible(true);
+        buildUI();
     }
 
+    private void buildUI() {
 
-    // =========================
-    // METRIC CARD
-    // =========================
+        JPanel root = new JPanel(new BorderLayout());
+        root.setBackground(BACKGROUND);
 
-    private JPanel createMetricCard(
+        root.add(createSidebar(), BorderLayout.WEST);
+        root.add(createMainContent(), BorderLayout.CENTER);
+
+        setContentPane(root);
+    }
+
+    private JPanel createSidebar() {
+
+        JPanel sidebar = new JPanel(new BorderLayout());
+        sidebar.setBackground(SIDEBAR);
+        sidebar.setPreferredSize(new Dimension(220, 750));
+
+        JPanel top = new JPanel();
+        top.setOpaque(false);
+        top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
+        top.setBorder(new EmptyBorder(30, 20, 20, 20));
+
+        JLabel logo = new JLabel("SmartIntern");
+        logo.setForeground(Color.WHITE);
+        logo.setFont(new Font("SansSerif", Font.BOLD, 21));
+        logo.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel tracker = new JLabel("Internship Tracker");
+        tracker.setForeground(new Color(156, 163, 175));
+        tracker.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        tracker.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        top.add(logo);
+        top.add(Box.createVerticalStrut(2));
+        top.add(tracker);
+        top.add(Box.createVerticalStrut(30));
+
+        top.add(createSidebarButton("Dashboard", false, e -> {
+            dispose();
+            new DashboardFrame(user).setVisible(true);
+        }));
+
+        top.add(Box.createVerticalStrut(8));
+
+        top.add(createSidebarButton("My Profile", false, e -> {
+            dispose();
+            new ProfileFrame(user).setVisible(true);
+        }));
+
+        top.add(Box.createVerticalStrut(8));
+
+        top.add(createSidebarButton("My Applications", false, e -> {
+            dispose();
+            new ApplicationsFrame(user).setVisible(true);
+        }));
+
+        top.add(Box.createVerticalStrut(8));
+
+        top.add(createSidebarButton("Add Application", false, e -> {
+            dispose();
+            new AddApplicationFrame(user).setVisible(true);
+        }));
+
+        top.add(Box.createVerticalStrut(8));
+
+        top.add(createSidebarButton("Upcoming Deadlines", false, e -> {
+            showUpcomingDeadlines();
+        }));
+
+        top.add(Box.createVerticalStrut(8));
+
+        top.add(createSidebarButton("Analytics", true, e -> {
+        }));
+
+        sidebar.add(top, BorderLayout.NORTH);
+
+        JPanel bottom = new JPanel();
+        bottom.setOpaque(false);
+        bottom.setLayout(new BoxLayout(bottom, BoxLayout.Y_AXIS));
+        bottom.setBorder(new EmptyBorder(15, 20, 25, 20));
+
+        bottom.add(createSidebarButton("Logout", false, e -> {
+            dispose();
+            new LoginFrame().setVisible(true);
+        }));
+
+        sidebar.add(bottom, BorderLayout.SOUTH);
+
+        return sidebar;
+    }
+
+    private JButton createSidebarButton(
+            String text,
+            boolean selected,
+            java.awt.event.ActionListener action) {
+
+        JButton button = new JButton(text);
+
+        button.setAlignmentX(Component.LEFT_ALIGNMENT);
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+        button.setPreferredSize(new Dimension(180, 42));
+
+        button.setForeground(Color.WHITE);
+        button.setBackground(selected
+                ? new Color(55, 65, 81)
+                : SIDEBAR);
+
+        button.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        button.setBorder(BorderFactory.createEmptyBorder(0, 14, 0, 10));
+        button.setFocusPainted(false);
+        button.setOpaque(true);
+
+        button.addActionListener(action);
+
+        return button;
+    }
+
+    private JPanel createMainContent() {
+
+        JPanel main = new JPanel(new BorderLayout(0, 20));
+        main.setBackground(BACKGROUND);
+        main.setBorder(new EmptyBorder(30, 30, 30, 30));
+
+        JPanel header = new JPanel();
+        header.setBackground(BACKGROUND);
+        header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
+
+        JLabel title = new JLabel("Application Analytics");
+        title.setFont(new Font("SansSerif", Font.BOLD, 28));
+        title.setForeground(TEXT);
+
+        JLabel subtitle = new JLabel(
+                "Understand your internship application progress"
+        );
+        subtitle.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        subtitle.setForeground(MUTED);
+
+        header.add(title);
+        header.add(Box.createVerticalStrut(5));
+        header.add(subtitle);
+
+        main.add(header, BorderLayout.NORTH);
+
+        JPanel center = new JPanel();
+        center.setBackground(BACKGROUND);
+        center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
+
+        ApplicationDAO dao = new ApplicationDAO();
+
+        Map<String, Integer> stats =
+                dao.getApplicationStatistics(user.getUserId());
+
+        int applied = stats.getOrDefault("Applied", 0);
+        int shortlisted = stats.getOrDefault("Shortlisted", 0);
+        int interview = stats.getOrDefault("Interview", 0);
+        int rejected = stats.getOrDefault("Rejected", 0);
+
+        int total = applied + shortlisted + interview + rejected;
+
+        JPanel cards = new JPanel(new GridLayout(1, 4, 15, 0));
+        cards.setBackground(BACKGROUND);
+        cards.setMaximumSize(new Dimension(
+                Integer.MAX_VALUE,
+                130
+        ));
+
+        cards.add(createStatCard(
+                "Applied",
+                applied,
+                BLUE
+        ));
+
+        cards.add(createStatCard(
+                "Shortlisted",
+                shortlisted,
+                new Color(124, 58, 237)
+        ));
+
+        cards.add(createStatCard(
+                "Interview",
+                interview,
+                new Color(5, 150, 105)
+        ));
+
+        cards.add(createStatCard(
+                "Rejected",
+                rejected,
+                new Color(220, 38, 38)
+        ));
+
+        center.add(cards);
+        center.add(Box.createVerticalStrut(20));
+
+        JPanel insights = createInsightsPanel(
+                total,
+                shortlisted,
+                interview
+        );
+
+        center.add(insights);
+
+        main.add(center, BorderLayout.CENTER);
+
+        return main;
+    }
+
+    private JPanel createStatCard(
             String title,
             int value,
-            Color accent
-    ) {
+            Color accent) {
 
-        JPanel card =
-                new JPanel(
-                        new BorderLayout()
-                );
+        JPanel card = new JPanel();
+        card.setBackground(CARD);
 
-        card.setBackground(
-                CARD_COLOR
-        );
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(18, 18, 18, 18)
+        ));
 
-        card.setBorder(
-                BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(
-                                BORDER_COLOR
-                        ),
-                        new EmptyBorder(
-                                15,
-                                15,
-                                15,
-                                15
-                        )
-                )
-        );
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
 
+        JPanel bar = new JPanel();
+        bar.setBackground(accent);
+        bar.setPreferredSize(new Dimension(45, 4));
+        bar.setMaximumSize(new Dimension(45, 4));
+        bar.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel titleLabel =
-                new JLabel(
-                        title
-                );
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        titleLabel.setForeground(MUTED);
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        titleLabel.setFont(
-                new Font(
-                        "Arial",
-                        Font.PLAIN,
-                        13
-                )
-        );
+        JLabel valueLabel = new JLabel(String.valueOf(value));
+        valueLabel.setFont(new Font("SansSerif", Font.BOLD, 28));
+        valueLabel.setForeground(TEXT);
+        valueLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        titleLabel.setForeground(
-                MUTED_TEXT_COLOR
-        );
-
-
-        JLabel valueLabel =
-                new JLabel(
-                        String.valueOf(
-                                value
-                        )
-                );
-
-        valueLabel.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        28
-                )
-        );
-
-        valueLabel.setForeground(
-                accent
-        );
-
-
-        card.add(
-                titleLabel,
-                BorderLayout.NORTH
-        );
-
-        card.add(
-                valueLabel,
-                BorderLayout.CENTER
-        );
-
+        card.add(bar);
+        card.add(Box.createVerticalStrut(10));
+        card.add(titleLabel);
+        card.add(Box.createVerticalStrut(4));
+        card.add(valueLabel);
 
         return card;
     }
 
-
-    // =========================
-    // PROGRESS ROW
-    // =========================
-
-    private JPanel createProgressRow(
-            String title,
-            int value,
+    private JPanel createInsightsPanel(
             int total,
-            Color accent
-    ) {
+            int shortlisted,
+            int interview) {
 
-        JPanel row =
-                new JPanel(
-                        new BorderLayout(
-                                10,
-                                5
-                        )
-                );
+        JPanel panel = new JPanel();
+        panel.setBackground(CARD);
 
-        row.setOpaque(false);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(25, 25, 25, 25)
+        ));
 
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        JLabel titleLabel =
-                new JLabel(
-                        title
-                );
+        JLabel title = new JLabel("Insights");
+        title.setFont(new Font("SansSerif", Font.BOLD, 20));
+        title.setForeground(TEXT);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        titleLabel.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        14
-                )
+        panel.add(title);
+        panel.add(Box.createVerticalStrut(20));
+
+        double shortlistRate =
+                total == 0 ? 0 :
+                        ((double) shortlisted / total) * 100;
+
+        double interviewRate =
+                total == 0 ? 0 :
+                        ((double) interview / total) * 100;
+
+        addInsight(
+                panel,
+                "Total Applications",
+                String.valueOf(total)
         );
 
-        titleLabel.setForeground(
-                TEXT_COLOR
+        addInsight(
+                panel,
+                "Shortlist Rate",
+                String.format("%.1f%%", shortlistRate)
         );
 
-
-        JLabel countLabel =
-                new JLabel(
-                        String.valueOf(
-                                value
-                        )
-                );
-
-        countLabel.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        14
-                )
+        addInsight(
+                panel,
+                "Interview Rate",
+                String.format("%.1f%%", interviewRate)
         );
 
-        countLabel.setForeground(
-                accent
-        );
-
-
-        JProgressBar progressBar =
-                new JProgressBar(
-                        0,
-                        Math.max(
-                                total,
-                                1
-                        )
-                );
-
-        progressBar.setValue(
-                value
-        );
-
-        progressBar.setStringPainted(false);
-
-        progressBar.setForeground(
-                accent
-        );
-
-
-        JPanel top =
-                new JPanel(
-                        new BorderLayout()
-                );
-
-        top.setOpaque(false);
-
-        top.add(
-                titleLabel,
-                BorderLayout.WEST
-        );
-
-        top.add(
-                countLabel,
-                BorderLayout.EAST
-        );
-
-
-        JPanel container =
-                new JPanel();
-
-        container.setOpaque(false);
-
-        container.setLayout(
-                new BorderLayout(
-                        0,
-                        7
-                )
-        );
-
-        container.add(
-                top,
-                BorderLayout.NORTH
-        );
-
-        container.add(
-                progressBar,
-                BorderLayout.CENTER
-        );
-
-
-        return container;
+        return panel;
     }
 
+    private void addInsight(
+            JPanel panel,
+            String label,
+            String value) {
 
-    // =========================
-    // SIDEBAR BUTTON
-    // =========================
-
-    private JButton createSidebarButton(
-            String text
-    ) {
-
-        JButton button =
-                new JButton(
-                        text
-                );
-
-        button.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        14
-                )
+        JPanel row = new JPanel(new BorderLayout());
+        row.setBackground(CARD);
+        row.setMaximumSize(
+                new Dimension(Integer.MAX_VALUE, 45)
         );
 
-        button.setForeground(
-                Color.WHITE
+        JLabel left = new JLabel(label);
+        left.setFont(new Font(
+                "SansSerif",
+                Font.PLAIN,
+                14
+        ));
+        left.setForeground(MUTED);
+
+        JLabel right = new JLabel(value);
+        right.setFont(new Font(
+                "SansSerif",
+                Font.BOLD,
+                15
+        ));
+        right.setForeground(TEXT);
+
+        row.add(left, BorderLayout.WEST);
+        row.add(right, BorderLayout.EAST);
+
+        panel.add(row);
+        panel.add(Box.createVerticalStrut(8));
+    }
+
+    private void showUpcomingDeadlines() {
+
+        ApplicationDAO dao = new ApplicationDAO();
+
+        var applications =
+                dao.getUpcomingDeadlines(user.getUserId());
+
+        if (applications.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No upcoming deadlines."
+            );
+
+            return;
+        }
+
+        StringBuilder message = new StringBuilder();
+
+        for (var app : applications) {
+
+            message.append(app.getCompanyName())
+                    .append(" - ")
+                    .append(app.getJobRole())
+                    .append("\nDeadline: ")
+                    .append(app.getDeadline())
+                    .append("\n\n");
+        }
+
+        JTextArea area = new JTextArea(
+                message.toString()
         );
 
-        button.setBackground(
-                SIDEBAR_COLOR
+        area.setEditable(false);
+
+        JScrollPane scroll = new JScrollPane(area);
+        scroll.setPreferredSize(
+                new Dimension(450, 350)
         );
 
-        button.setHorizontalAlignment(
-                SwingConstants.LEFT
+        JOptionPane.showMessageDialog(
+                this,
+                scroll,
+                "Upcoming Deadlines",
+                JOptionPane.INFORMATION_MESSAGE
         );
-
-        button.setFocusPainted(false);
-
-        button.setBorder(
-                BorderFactory.createEmptyBorder(
-                        12,
-                        15,
-                        12,
-                        12
-                )
-        );
-
-        button.setMaximumSize(
-                new Dimension(
-                        Integer.MAX_VALUE,
-                        45
-                )
-        );
-
-        return button;
     }
 }

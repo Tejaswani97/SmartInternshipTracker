@@ -6,7 +6,6 @@ import model.User;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
@@ -15,1139 +14,401 @@ public class ApplicationsFrame extends JFrame {
 
     private final User user;
 
-    private JTable applicationsTable;
-    private DefaultTableModel tableModel;
+    private final Color SIDEBAR = new Color(31, 41, 55);
+    private final Color BACKGROUND = new Color(245, 247, 250);
+    private final Color CARD = Color.WHITE;
+    private final Color TEXT = new Color(31, 41, 55);
+    private final Color MUTED = new Color(107, 114, 128);
+    private final Color BLUE = new Color(59, 130, 246);
+    private final Color BORDER = new Color(229, 231, 235);
 
     private JTextField searchField;
-    private JComboBox<String> statusBox;
-
-    // =========================
-    // THEME
-    // =========================
-
-    private static final Color SIDEBAR_COLOR =
-            new Color(31, 41, 55);
-
-    private static final Color BACKGROUND_COLOR =
-            new Color(245, 247, 250);
-
-    private static final Color CARD_COLOR =
-            Color.WHITE;
-
-    private static final Color TEXT_COLOR =
-            new Color(31, 41, 55);
-
-    private static final Color MUTED_TEXT_COLOR =
-            new Color(107, 114, 128);
-
-    private static final Color ACCENT_COLOR =
-            new Color(59, 130, 246);
-
-    private static final Color BORDER_COLOR =
-            new Color(229, 231, 235);
-
-    private static final Color DELETE_COLOR =
-            new Color(220, 38, 38);
-
+    private JComboBox<String> statusCombo;
+    private JTable table;
+    private DefaultTableModel tableModel;
 
     public ApplicationsFrame(User user) {
 
         this.user = user;
 
-        setTitle(
-                "Smart Internship Tracker - My Applications"
-        );
-
-        setSize(1100, 700);
-
-        setDefaultCloseOperation(
-                JFrame.DISPOSE_ON_CLOSE
-        );
-
+        setTitle("Smart Internship Tracker - My Applications");
+        setSize(1200, 750);
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        buildUI();
+        loadApplications();
+    }
 
-        // =========================
-        // ROOT
-        // =========================
+    private void buildUI() {
 
-        JPanel rootPanel =
-                new JPanel(
-                        new BorderLayout()
-                );
+        JPanel root = new JPanel(new BorderLayout());
+        root.setBackground(BACKGROUND);
 
-        rootPanel.setBackground(
-                BACKGROUND_COLOR
+        root.add(createSidebar(), BorderLayout.WEST);
+        root.add(createMainContent(), BorderLayout.CENTER);
+
+        setContentPane(root);
+    }
+
+    private JPanel createSidebar() {
+
+        JPanel sidebar = new JPanel(new BorderLayout());
+        sidebar.setBackground(SIDEBAR);
+        sidebar.setPreferredSize(new Dimension(220, 750));
+
+        JPanel top = new JPanel();
+        top.setOpaque(false);
+        top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
+        top.setBorder(new EmptyBorder(30, 20, 20, 20));
+
+        JLabel logo = new JLabel("SmartIntern");
+        logo.setForeground(Color.WHITE);
+        logo.setFont(new Font("SansSerif", Font.BOLD, 21));
+        logo.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel tracker = new JLabel("Internship Tracker");
+        tracker.setForeground(new Color(156, 163, 175));
+        tracker.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        tracker.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        top.add(logo);
+        top.add(Box.createVerticalStrut(2));
+        top.add(tracker);
+        top.add(Box.createVerticalStrut(30));
+
+        top.add(createSidebarButton("Dashboard", false, e -> {
+            dispose();
+            new DashboardFrame(user).setVisible(true);
+        }));
+
+        top.add(Box.createVerticalStrut(8));
+
+        top.add(createSidebarButton("My Profile", false, e -> {
+
+            new ProfileFrame(user).setVisible(true);
+        }));
+
+        top.add(Box.createVerticalStrut(8));
+
+        top.add(createSidebarButton("My Applications", true, e -> {
+        }));
+
+        top.add(Box.createVerticalStrut(8));
+
+        top.add(createSidebarButton("Add Application", false, e -> {
+            dispose();
+            new AddApplicationFrame(user).setVisible(true);
+        }));
+
+        top.add(Box.createVerticalStrut(8));
+
+        top.add(createSidebarButton("Upcoming Deadlines", false, e -> {
+            showUpcomingDeadlines();
+        }));
+
+        top.add(Box.createVerticalStrut(8));
+
+        top.add(createSidebarButton("Analytics", false, e -> {
+            dispose();
+            new AnalyticsFrame(user).setVisible(true);
+        }));
+
+        sidebar.add(top, BorderLayout.NORTH);
+
+        JPanel bottom = new JPanel();
+        bottom.setOpaque(false);
+        bottom.setLayout(new BoxLayout(bottom, BoxLayout.Y_AXIS));
+        bottom.setBorder(new EmptyBorder(15, 20, 25, 20));
+
+        bottom.add(createSidebarButton("Logout", false, e -> {
+            dispose();
+            new LoginFrame().setVisible(true);
+        }));
+
+        sidebar.add(bottom, BorderLayout.SOUTH);
+
+        return sidebar;
+    }
+
+    private JButton createSidebarButton(
+            String text,
+            boolean selected,
+            java.awt.event.ActionListener action) {
+
+        JButton button = new JButton(text);
+
+        button.setAlignmentX(Component.LEFT_ALIGNMENT);
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+        button.setPreferredSize(new Dimension(180, 42));
+
+        button.setForeground(Color.WHITE);
+        button.setBackground(selected
+                ? new Color(55, 65, 81)
+                : SIDEBAR);
+
+        button.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        button.setBorder(BorderFactory.createEmptyBorder(0, 14, 0, 10));
+        button.setFocusPainted(false);
+        button.setOpaque(true);
+
+        button.addActionListener(action);
+
+        return button;
+    }
+
+    private JPanel createMainContent() {
+
+        JPanel main = new JPanel(new BorderLayout(0, 20));
+        main.setBackground(BACKGROUND);
+        main.setBorder(new EmptyBorder(30, 30, 30, 30));
+
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(BACKGROUND);
+
+        JLabel title = new JLabel("My Applications");
+        title.setFont(new Font("SansSerif", Font.BOLD, 28));
+        title.setForeground(TEXT);
+
+        JLabel subtitle = new JLabel("Track and manage your internship applications");
+        subtitle.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        subtitle.setForeground(MUTED);
+
+        JPanel titleBox = new JPanel();
+        titleBox.setBackground(BACKGROUND);
+        titleBox.setLayout(new BoxLayout(titleBox, BoxLayout.Y_AXIS));
+
+        titleBox.add(title);
+        titleBox.add(Box.createVerticalStrut(5));
+        titleBox.add(subtitle);
+
+        header.add(titleBox, BorderLayout.WEST);
+
+        main.add(header, BorderLayout.NORTH);
+
+        JPanel center = new JPanel(new BorderLayout(0, 15));
+        center.setBackground(BACKGROUND);
+
+        center.add(createToolbar(), BorderLayout.NORTH);
+        center.add(createTableCard(), BorderLayout.CENTER);
+        center.add(createBottomButtons(), BorderLayout.SOUTH);
+
+        main.add(center, BorderLayout.CENTER);
+
+        return main;
+    }
+
+    private JPanel createToolbar() {
+
+        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        toolbar.setBackground(BACKGROUND);
+
+        searchField = new JTextField();
+        searchField.setPreferredSize(new Dimension(230, 38));
+
+        JButton searchButton = new JButton("Search");
+        JButton showAllButton = new JButton("Show All");
+
+        statusCombo = new JComboBox<>(
+                new String[]{
+                        "All",
+                        "Applied",
+                        "Shortlisted",
+                        "Interview",
+                        "Rejected"
+                }
         );
 
-
-        // =========================
-        // SIDEBAR
-        // =========================
-
-        JPanel sidebar =
-                new JPanel(
-                        new GridBagLayout()
-                );
-
-        sidebar.setPreferredSize(
-                new Dimension(
-                        220,
-                        0
-                )
-        );
-
-        sidebar.setBackground(
-                SIDEBAR_COLOR
-        );
-
-        sidebar.setBorder(
-                new EmptyBorder(
-                        25,
-                        15,
-                        25,
-                        15
-                )
-        );
-
-
-        GridBagConstraints sideGbc =
-                new GridBagConstraints();
-
-        sideGbc.gridx = 0;
-        sideGbc.weightx = 1;
-        sideGbc.fill =
-                GridBagConstraints.HORIZONTAL;
-
-        sideGbc.anchor =
-                GridBagConstraints.NORTHWEST;
-
-        sideGbc.insets =
-                new Insets(
-                        0,
-                        0,
-                        8,
-                        0
-                );
-
-
-        // Logo
-
-        JLabel logoLabel =
-                new JLabel(
-                        "SMART TRACKER"
-                );
-
-        logoLabel.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        20
-                )
-        );
-
-        logoLabel.setForeground(
-                Color.WHITE
-        );
-
-        sideGbc.gridy = 0;
-
-        sidebar.add(
-                logoLabel,
-                sideGbc
-        );
-
-
-        // Space
-
-        sideGbc.gridy = 1;
-
-        sideGbc.weighty = 0;
-
-        sidebar.add(
-                Box.createVerticalStrut(
-                        25
-                ),
-                sideGbc
-        );
-
-
-        // =========================
-        // SIDEBAR BUTTONS
-        // =========================
-
-        JButton dashboardButton =
-                createSidebarButton(
-                        "Dashboard"
-                );
-
-        JButton profileButton =
-                createSidebarButton(
-                        "My Profile"
-                );
-
-        JButton applicationsButton =
-                createSidebarButton(
-                        "My Applications"
-                );
-
-        JButton addButton =
-                createSidebarButton(
-                        "Add Application"
-                );
-
-        JButton deadlineButton =
-                createSidebarButton(
-                        "Upcoming Deadlines"
-                );
-
-        JButton logoutButton =
-                createSidebarButton(
-                        "Logout"
-                );
-
-
-        addSidebarButton(
-                sidebar,
-                dashboardButton,
-                2
-        );
-
-        addSidebarButton(
-                sidebar,
-                profileButton,
-                3
-        );
-
-        addSidebarButton(
-                sidebar,
-                applicationsButton,
-                4
-        );
-
-        addSidebarButton(
-                sidebar,
-                addButton,
-                5
-        );
-
-        addSidebarButton(
-                sidebar,
-                deadlineButton,
-                6
-        );
-
-
-        // Push logout to bottom
-
-        GridBagConstraints glueGbc =
-                new GridBagConstraints();
-
-        glueGbc.gridx = 0;
-        glueGbc.gridy = 7;
-
-        glueGbc.weighty = 1;
-        glueGbc.fill =
-                GridBagConstraints.VERTICAL;
-
-        sidebar.add(
-                Box.createVerticalGlue(),
-                glueGbc
-        );
-
-
-        GridBagConstraints logoutGbc =
-                new GridBagConstraints();
-
-        logoutGbc.gridx = 0;
-        logoutGbc.gridy = 8;
-
-        logoutGbc.weightx = 1;
-
-        logoutGbc.fill =
-                GridBagConstraints.HORIZONTAL;
-
-        logoutGbc.anchor =
-                GridBagConstraints.SOUTHWEST;
-
-        sidebar.add(
-                logoutButton,
-                logoutGbc
-        );
-
-
-        rootPanel.add(
-                sidebar,
-                BorderLayout.WEST
-        );
-
-
-        // =========================
-        // CONTENT
-        // =========================
-
-        JPanel contentPanel =
-                new JPanel(
-                        new BorderLayout(
-                                20,
-                                20
-                        )
-                );
-
-        contentPanel.setBackground(
-                BACKGROUND_COLOR
-        );
-
-        contentPanel.setBorder(
-                new EmptyBorder(
-                        30,
-                        30,
-                        30,
-                        30
-                )
-        );
-
-
-        // =========================
-        // HEADER
-        // =========================
-
-        JPanel headerPanel =
-                new JPanel(
-                        new BorderLayout()
-                );
-
-        headerPanel.setOpaque(
-                false
-        );
-
-
-        JLabel titleLabel =
-                new JLabel(
-                        "My Applications"
-                );
-
-        titleLabel.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        28
-                )
-        );
-
-        titleLabel.setForeground(
-                TEXT_COLOR
-        );
-
-
-        JLabel subtitleLabel =
-                new JLabel(
-                        "Search, filter and manage your internship applications."
-                );
-
-        subtitleLabel.setFont(
-                new Font(
-                        "Arial",
-                        Font.PLAIN,
-                        14
-                )
-        );
-
-        subtitleLabel.setForeground(
-                MUTED_TEXT_COLOR
-        );
-
-
-        JPanel headerText =
-                new JPanel();
-
-        headerText.setOpaque(
-                false
-        );
-
-        headerText.setLayout(
-                new BoxLayout(
-                        headerText,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-
-        headerText.add(
-                titleLabel
-        );
-
-        headerText.add(
-                Box.createVerticalStrut(
-                        5
-                )
-        );
-
-        headerText.add(
-                subtitleLabel
-        );
-
-
-        headerPanel.add(
-                headerText,
-                BorderLayout.WEST
-        );
-
-
-        contentPanel.add(
-                headerPanel,
-                BorderLayout.NORTH
-        );
-
-
-        // =========================
-        // APPLICATION CARD
-        // =========================
-
-        JPanel applicationsCard =
-                new JPanel(
-                        new BorderLayout(
-                                10,
-                                15
-                        )
-                );
-
-        applicationsCard.setBackground(
-                CARD_COLOR
-        );
-
-        applicationsCard.setBorder(
-                BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(
-                                BORDER_COLOR
-                        ),
-                        new EmptyBorder(
-                                20,
-                                20,
-                                20,
-                                20
-                        )
-                )
-        );
-
-
-        // =========================
-        // FILTER PANEL
-        // =========================
-
-        JPanel filterPanel =
-                new JPanel(
-                        new FlowLayout(
-                                FlowLayout.LEFT,
-                                10,
-                                5
-                        )
-                );
-
-        filterPanel.setOpaque(
-                false
-        );
-
-
-        JLabel companyLabel =
-                new JLabel(
-                        "Company"
-                );
-
-        companyLabel.setForeground(
-                TEXT_COLOR
-        );
-
-
-        searchField =
-                new JTextField(
-                        15
-                );
-
-
-        JButton searchButton =
-                createActionButton(
-                        "Search"
-                );
-
-
-        JButton showAllButton =
-                createSecondaryButton(
-                        "Show All"
-                );
-
-
-        JLabel statusLabel =
-                new JLabel(
+        statusCombo.setPreferredSize(new Dimension(140, 38));
+
+        JButton filterButton = new JButton("Filter");
+
+        searchButton.addActionListener(e -> searchApplications());
+        showAllButton.addActionListener(e -> loadApplications());
+        filterButton.addActionListener(e -> filterApplications());
+
+        toolbar.add(searchField);
+        toolbar.add(searchButton);
+        toolbar.add(showAllButton);
+        toolbar.add(statusCombo);
+        toolbar.add(filterButton);
+
+        return toolbar;
+    }
+
+    private JPanel createTableCard() {
+
+        JPanel card = new JPanel(new BorderLayout());
+        card.setBackground(CARD);
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(10, 10, 10, 10)
+        ));
+
+        tableModel = new DefaultTableModel(
+                new String[]{
+                        "ID",
+                        "Company",
+                        "Job Role",
+                        "Application Date",
+                        "Deadline",
                         "Status"
-                );
-
-        statusLabel.setForeground(
-                TEXT_COLOR
-        );
-
-
-        statusBox =
-                new JComboBox<>(
-                        new String[]{
-                                "All",
-                                "Applied",
-                                "Shortlisted",
-                                "Interview",
-                                "Rejected"
-                        }
-                );
-
-
-        statusBox.setPreferredSize(
-                new Dimension(
-                        130,
-                        32
-                )
-        );
-
-
-        JButton filterButton =
-                createActionButton(
-                        "Filter"
-                );
-
-
-        filterPanel.add(
-                companyLabel
-        );
-
-        filterPanel.add(
-                searchField
-        );
-
-        filterPanel.add(
-                searchButton
-        );
-
-        filterPanel.add(
-                showAllButton
-        );
-
-        filterPanel.add(
-                Box.createHorizontalStrut(
-                        15
-                )
-        );
-
-        filterPanel.add(
-                statusLabel
-        );
-
-        filterPanel.add(
-                statusBox
-        );
-
-        filterPanel.add(
-                filterButton
-        );
-
-
-        applicationsCard.add(
-                filterPanel,
-                BorderLayout.NORTH
-        );
-
-
-        // =========================
-        // TABLE
-        // =========================
-
-        String[] columns = {
-                "ID",
-                "Company",
-                "Role",
-                "Application Date",
-                "Deadline",
-                "Status"
+                },
+                0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
         };
 
+        table = new JTable(tableModel);
 
-        tableModel =
-                new DefaultTableModel(
-                        columns,
-                        0
-                ) {
-
-                    @Override
-                    public boolean isCellEditable(
-                            int row,
-                            int column
-                    ) {
-
-                        return false;
-                    }
-                };
-
-
-        applicationsTable =
-                new JTable(
-                        tableModel
-                );
-
-
-        applicationsTable.setRowHeight(
-                36
+        table.setRowHeight(32);
+        table.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        table.getTableHeader().setFont(
+                new Font("SansSerif", Font.BOLD, 13)
         );
 
-        applicationsTable.setFont(
-                new Font(
-                        "Arial",
-                        Font.PLAIN,
-                        13
-                )
+        table.getTableHeader().setBackground(
+                new Color(249, 250, 251)
         );
 
-        applicationsTable.setForeground(
-                TEXT_COLOR
+        table.setSelectionMode(
+                ListSelectionModel.SINGLE_SELECTION
         );
 
-        applicationsTable.setBackground(
-                Color.WHITE
-        );
+        JScrollPane scrollPane = new JScrollPane(table);
 
-        applicationsTable.setGridColor(
-                BORDER_COLOR
-        );
+        card.add(scrollPane, BorderLayout.CENTER);
 
-        applicationsTable.setSelectionBackground(
-                new Color(
-                        219,
-                        234,
-                        254
-                )
-        );
-
-        applicationsTable.setSelectionForeground(
-                TEXT_COLOR
-        );
-
-        applicationsTable.setShowVerticalLines(
-                false
-        );
-
-
-        applicationsTable
-                .getTableHeader()
-                .setFont(
-                        new Font(
-                                "Arial",
-                                Font.BOLD,
-                                13
-                        )
-                );
-
-
-        applicationsTable
-                .getTableHeader()
-                .setBackground(
-                        new Color(
-                                243,
-                                244,
-                                246
-                        )
-                );
-
-
-        applicationsTable
-                .getTableHeader()
-                .setForeground(
-                        TEXT_COLOR
-                );
-
-
-        applicationsTable
-                .getTableHeader()
-                .setPreferredSize(
-                        new Dimension(
-                                0,
-                                38
-                        )
-                );
-
-
-        DefaultTableCellRenderer centerRenderer =
-                new DefaultTableCellRenderer();
-
-        centerRenderer.setHorizontalAlignment(
-                SwingConstants.CENTER
-        );
-
-
-        applicationsTable
-                .getColumnModel()
-                .getColumn(0)
-                .setCellRenderer(
-                        centerRenderer
-                );
-
-
-        JScrollPane scrollPane =
-                new JScrollPane(
-                        applicationsTable
-                );
-
-        scrollPane.setBorder(
-                BorderFactory.createLineBorder(
-                        BORDER_COLOR
-                )
-        );
-
-
-        applicationsCard.add(
-                scrollPane,
-                BorderLayout.CENTER
-        );
-
-
-        // =========================
-        // BOTTOM BUTTONS
-        // =========================
-
-        JPanel buttonPanel =
-                new JPanel(
-                        new FlowLayout(
-                                FlowLayout.RIGHT,
-                                10,
-                                5
-                        )
-                );
-
-        buttonPanel.setOpaque(
-                false
-        );
-
-
-        JButton refreshButton =
-                createSecondaryButton(
-                        "Refresh"
-                );
-
-
-        JButton detailsButton =
-                createSecondaryButton(
-                        "View Details"
-                );
-
-
-        JButton updateButton =
-                createActionButton(
-                        "Update"
-                );
-
-
-        JButton deleteButton =
-                createDeleteButton(
-                        "Delete"
-                );
-
-
-        JButton backButton =
-                createSecondaryButton(
-                        "Back"
-                );
-
-
-        buttonPanel.add(
-                refreshButton
-        );
-
-        buttonPanel.add(
-                detailsButton
-        );
-
-        buttonPanel.add(
-                updateButton
-        );
-
-        buttonPanel.add(
-                deleteButton
-        );
-
-        buttonPanel.add(
-                backButton
-        );
-
-
-        applicationsCard.add(
-                buttonPanel,
-                BorderLayout.SOUTH
-        );
-
-
-        contentPanel.add(
-                applicationsCard,
-                BorderLayout.CENTER
-        );
-
-
-        rootPanel.add(
-                contentPanel,
-                BorderLayout.CENTER
-        );
-
-
-        // =========================
-        // ACTIONS
-        // =========================
-
-        searchButton.addActionListener(
-                e ->
-                        searchApplications()
-        );
-
-
-        showAllButton.addActionListener(
-                e ->
-                        loadApplications()
-        );
-
-
-        filterButton.addActionListener(
-                e ->
-                        filterApplications()
-        );
-
-
-        refreshButton.addActionListener(
-                e ->
-                        loadApplications()
-        );
-
-
-        detailsButton.addActionListener(
-                e ->
-                        showApplicationDetails()
-        );
-
-
-        updateButton.addActionListener(
-                e ->
-                        updateSelectedApplication()
-        );
-
-
-        deleteButton.addActionListener(
-                e ->
-                        deleteSelectedApplication()
-        );
-
-
-        // Back → Dashboard
-
-        backButton.addActionListener(
-                e -> {
-
-                    dispose();
-
-                    new DashboardFrame(
-                            user
-                    );
-                }
-        );
-
-
-        // Dashboard
-
-        dashboardButton.addActionListener(
-                e -> {
-
-                    dispose();
-
-                    new DashboardFrame(
-                            user
-                    );
-                }
-        );
-
-
-        // Profile
-
-        profileButton.addActionListener(
-                e ->
-                        new ProfileFrame(
-                                user
-                        )
-        );
-
-
-        // Applications
-
-        applicationsButton.addActionListener(
-                e ->
-                        loadApplications()
-        );
-
-
-        // Add
-
-        addButton.addActionListener(
-                e -> {
-
-                    dispose();
-
-                    new AddApplicationFrame(
-                            user
-                    );
-                }
-        );
-
-
-        // Deadlines
-
-        deadlineButton.addActionListener(
-                e -> {
-
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Upcoming deadlines are displayed on the dashboard.",
-                            "Upcoming Deadlines",
-                            JOptionPane.INFORMATION_MESSAGE
-                    );
-                }
-        );
-
-
-        // Logout
-
-        logoutButton.addActionListener(
-                e -> {
-
-                    dispose();
-
-                    new LoginFrame();
-                }
-        );
-
-
-        add(rootPanel);
-
-        loadApplications();
-
-        setVisible(true);
+        return card;
     }
 
+    private JPanel createBottomButtons() {
 
-    // =========================
-    // SIDEBAR HELPER
-    // =========================
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panel.setBackground(BACKGROUND);
 
-    private void addSidebarButton(
-            JPanel sidebar,
-            JButton button,
-            int row
-    ) {
+        JButton refreshButton = new JButton("Refresh");
+        JButton detailsButton = new JButton("View Details");
+        JButton updateButton = new JButton("Update");
+        JButton deleteButton = new JButton("Delete");
 
-        GridBagConstraints gbc =
-                new GridBagConstraints();
+        refreshButton.addActionListener(e -> loadApplications());
+        detailsButton.addActionListener(e -> viewDetails());
+        updateButton.addActionListener(e -> updateApplication());
+        deleteButton.addActionListener(e -> deleteApplication());
 
-        gbc.gridx = 0;
-        gbc.gridy = row;
+        panel.add(refreshButton);
+        panel.add(detailsButton);
+        panel.add(updateButton);
+        panel.add(deleteButton);
 
-        gbc.weightx = 1;
-
-        gbc.fill =
-                GridBagConstraints.HORIZONTAL;
-
-        gbc.anchor =
-                GridBagConstraints.WEST;
-
-        gbc.insets =
-                new Insets(
-                        0,
-                        0,
-                        8,
-                        0
-                );
-
-        sidebar.add(
-                button,
-                gbc
-        );
+        return panel;
     }
-
-
-    // =========================
-    // LOAD APPLICATIONS
-    // =========================
 
     private void loadApplications() {
 
-        tableModel.setRowCount(0);
-
-        ApplicationDAO dao =
-                new ApplicationDAO();
+        ApplicationDAO dao = new ApplicationDAO();
 
         List<Application> applications =
-                dao.getApplicationsByUser(
-                        user.getUserId()
-                );
+                dao.getApplicationsByUser(user.getUserId());
 
-        addApplicationsToTable(
-                applications
-        );
+        populateTable(applications);
     }
-
-
-    // =========================
-    // SEARCH
-    // =========================
 
     private void searchApplications() {
 
-        String company =
-                searchField
-                        .getText()
-                        .trim();
-
+        String company = searchField.getText().trim();
 
         if (company.isEmpty()) {
-
             loadApplications();
-
             return;
         }
 
-
-        tableModel.setRowCount(0);
-
-
-        ApplicationDAO dao =
-                new ApplicationDAO();
-
+        ApplicationDAO dao = new ApplicationDAO();
 
         List<Application> applications =
-                dao.searchByCompany(
-                        company,
-                        user.getUserId()
-                );
+                dao.searchByCompany(company, user.getUserId());
 
-
-        addApplicationsToTable(
-                applications
-        );
+        populateTable(applications);
     }
-
-
-    // =========================
-    // FILTER
-    // =========================
 
     private void filterApplications() {
 
-        String status =
-                statusBox
-                        .getSelectedItem()
-                        .toString();
+        String status = (String) statusCombo.getSelectedItem();
 
-
-        if (status.equals("All")) {
-
+        if ("All".equals(status)) {
             loadApplications();
-
             return;
         }
 
+        ApplicationDAO dao = new ApplicationDAO();
+
+        List<Application> applications =
+                dao.filterByStatus(status, user.getUserId());
+
+        populateTable(applications);
+    }
+
+    private void populateTable(List<Application> applications) {
 
         tableModel.setRowCount(0);
 
+        for (Application app : applications) {
 
-        ApplicationDAO dao =
-                new ApplicationDAO();
-
-
-        List<Application> applications =
-                dao.filterByStatus(
-                        status,
-                        user.getUserId()
-                );
-
-
-        addApplicationsToTable(
-                applications
-        );
-    }
-
-
-    // =========================
-    // ADD TO TABLE
-    // =========================
-
-    private void addApplicationsToTable(
-            List<Application> applications
-    ) {
-
-        for (
-                Application application :
-                applications
-        ) {
-
-            tableModel.addRow(
-                    new Object[]{
-                            application.getApplicationId(),
-                            application.getCompanyName(),
-                            application.getJobRole(),
-                            application.getApplicationDate(),
-                            application.getDeadline(),
-                            application.getStatus()
-                    }
-            );
+            tableModel.addRow(new Object[]{
+                    app.getApplicationId(),
+                    app.getCompanyName(),
+                    app.getJobRole(),
+                    app.getApplicationDate(),
+                    app.getDeadline(),
+                    app.getStatus()
+            });
         }
     }
 
+    private int getSelectedApplicationId() {
 
-    // =========================
-    // VIEW DETAILS
-    // =========================
+        int row = table.getSelectedRow();
 
-    private void showApplicationDetails() {
-
-        int selectedRow =
-                applicationsTable
-                        .getSelectedRow();
-
-
-        if (selectedRow == -1) {
+        if (row == -1) {
 
             JOptionPane.showMessageDialog(
                     this,
                     "Please select an application first.",
-                    "No Application Selected",
+                    "No Selection",
                     JOptionPane.WARNING_MESSAGE
             );
 
+            return -1;
+        }
+
+        return (int) tableModel.getValueAt(row, 0);
+    }
+
+    private void viewDetails() {
+
+        int applicationId = getSelectedApplicationId();
+
+        if (applicationId == -1) {
             return;
         }
 
+        ApplicationDAO dao = new ApplicationDAO();
 
-        int applicationId =
-                (int) tableModel.getValueAt(
-                        selectedRow,
-                        0
-                );
+        Application app = dao.getApplicationById(
+                applicationId,
+                user.getUserId()
+        );
 
-
-        ApplicationDAO dao =
-                new ApplicationDAO();
-
-
-        Application application =
-                dao.getApplicationById(
-                        applicationId,
-                        user.getUserId()
-                );
-
-
-        if (application == null) {
+        if (app == null) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Unable to load application.",
+                    "Application not found.",
                     "Error",
                     JOptionPane.ERROR_MESSAGE
             );
@@ -1155,124 +416,63 @@ public class ApplicationsFrame extends JFrame {
             return;
         }
 
+        JTextArea area = new JTextArea();
 
-        JTextArea details =
-                new JTextArea();
+        area.setEditable(false);
+        area.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
 
-
-        details.setEditable(false);
-
-        details.setLineWrap(true);
-
-        details.setWrapStyleWord(true);
-
-
-        details.setFont(
-                new Font(
-                        "Arial",
-                        Font.PLAIN,
-                        14
-                )
+        area.setText(
+                "Company: " + app.getCompanyName() + "\n\n" +
+                "Job Role: " + app.getJobRole() + "\n\n" +
+                "Application Date: " + app.getApplicationDate() + "\n\n" +
+                "Deadline: " + app.getDeadline() + "\n\n" +
+                "Status: " + app.getStatus() + "\n\n" +
+                "Job Link: " + app.getJobLink() + "\n\n" +
+                "Notes: " + app.getNotes()
         );
 
-
-        details.setText(
-                "APPLICATION DETAILS\n\n"
-                        + "Company: "
-                        + application.getCompanyName()
-                        + "\n\n"
-                        + "Job Role: "
-                        + application.getJobRole()
-                        + "\n\n"
-                        + "Application Date: "
-                        + application.getApplicationDate()
-                        + "\n\n"
-                        + "Deadline: "
-                        + application.getDeadline()
-                        + "\n\n"
-                        + "Status: "
-                        + application.getStatus()
-                        + "\n\n"
-                        + "Job Link: "
-                        + application.getJobLink()
-                        + "\n\n"
-                        + "Notes: "
-                        + application.getNotes()
-        );
-
-
-        JScrollPane detailsScroll =
-                new JScrollPane(
-                        details
-                );
-
-
-        detailsScroll.setPreferredSize(
-                new Dimension(
-                        500,
-                        400
-                )
-        );
-
+        JScrollPane scrollPane = new JScrollPane(area);
+        scrollPane.setPreferredSize(new Dimension(500, 400));
 
         JOptionPane.showMessageDialog(
                 this,
-                detailsScroll,
+                scrollPane,
                 "Application Details",
                 JOptionPane.INFORMATION_MESSAGE
         );
     }
 
+    private void updateApplication() {
 
-    // =========================
-    // UPDATE
-    // =========================
+        int row = table.getSelectedRow();
 
-    private void updateSelectedApplication() {
-
-        int selectedRow =
-                applicationsTable
-                        .getSelectedRow();
-
-
-        if (selectedRow == -1) {
+        if (row == -1) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Please select an application first."
+                    "Please select an application first.",
+                    "No Selection",
+                    JOptionPane.WARNING_MESSAGE
             );
 
             return;
         }
 
-
         int applicationId =
-                (int) tableModel.getValueAt(
-                        selectedRow,
-                        0
-                );
-
+                (int) tableModel.getValueAt(row, 0);
 
         String company =
-                tableModel.getValueAt(
-                        selectedRow,
-                        1
-                ).toString();
-
+                tableModel.getValueAt(row, 1).toString();
 
         String role =
-                tableModel.getValueAt(
-                        selectedRow,
-                        2
-                ).toString();
-
+                tableModel.getValueAt(row, 2).toString();
 
         String status =
-                tableModel.getValueAt(
-                        selectedRow,
-                        5
-                ).toString();
+                tableModel.getValueAt(row, 5).toString();
 
+        dispose();
 
         new UpdateApplicationFrame(
                 user.getUserId(),
@@ -1282,81 +482,40 @@ public class ApplicationsFrame extends JFrame {
                 status,
                 "",
                 ""
-        );
+        ).setVisible(true);
     }
 
+    private void deleteApplication() {
 
-    // =========================
-    // DELETE
-    // =========================
+        int applicationId = getSelectedApplicationId();
 
-    private void deleteSelectedApplication() {
-
-        int selectedRow =
-                applicationsTable
-                        .getSelectedRow();
-
-
-        if (selectedRow == -1) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Please select an application first."
-            );
-
+        if (applicationId == -1) {
             return;
         }
 
+        int choice = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to delete this application?",
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION
+        );
 
-        int applicationId =
-                (int) tableModel.getValueAt(
-                        selectedRow,
-                        0
-                );
-
-
-        String company =
-                tableModel.getValueAt(
-                        selectedRow,
-                        1
-                ).toString();
-
-
-        int choice =
-                JOptionPane.showConfirmDialog(
-                        this,
-                        "Delete "
-                                + company
-                                + " application?",
-                        "Confirm Delete",
-                        JOptionPane.YES_NO_OPTION
-                );
-
-
-        if (
-                choice != JOptionPane.YES_OPTION
-        ) {
-
+        if (choice != JOptionPane.YES_OPTION) {
             return;
         }
 
+        ApplicationDAO dao = new ApplicationDAO();
 
-        ApplicationDAO dao =
-                new ApplicationDAO();
-
-
-        boolean success =
-                dao.deleteApplication(
-                        applicationId,
-                        user.getUserId()
-                );
-
+        boolean success = dao.deleteApplication(
+                applicationId,
+                user.getUserId()
+        );
 
         if (success) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Application deleted successfully!"
+                    "Application deleted successfully."
             );
 
             loadApplications();
@@ -1372,244 +531,47 @@ public class ApplicationsFrame extends JFrame {
         }
     }
 
+    private void showUpcomingDeadlines() {
 
-    // =========================
-    // SIDEBAR BUTTON
-    // =========================
+        ApplicationDAO dao = new ApplicationDAO();
 
-    private JButton createSidebarButton(
-            String text
-    ) {
+        List<Application> applications =
+                dao.getUpcomingDeadlines(user.getUserId());
 
-        JButton button =
-                new JButton(
-                        text
-                );
+        if (applications.isEmpty()) {
 
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No upcoming deadlines."
+            );
 
-        button.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        14
-                )
+            return;
+        }
+
+        StringBuilder message = new StringBuilder();
+
+        for (Application app : applications) {
+
+            message.append(app.getCompanyName())
+                    .append(" - ")
+                    .append(app.getJobRole())
+                    .append("\nDeadline: ")
+                    .append(app.getDeadline())
+                    .append("\n\n");
+        }
+
+        JTextArea area = new JTextArea(message.toString());
+        area.setEditable(false);
+        area.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
+        JScrollPane scroll = new JScrollPane(area);
+        scroll.setPreferredSize(new Dimension(450, 350));
+
+        JOptionPane.showMessageDialog(
+                this,
+                scroll,
+                "Upcoming Deadlines",
+                JOptionPane.INFORMATION_MESSAGE
         );
-
-
-        button.setForeground(
-                Color.WHITE
-        );
-
-
-        button.setBackground(
-                SIDEBAR_COLOR
-        );
-
-
-        button.setHorizontalAlignment(
-                SwingConstants.LEFT
-        );
-
-
-        button.setFocusPainted(
-                false
-        );
-
-
-        button.setBorder(
-                BorderFactory.createEmptyBorder(
-                        12,
-                        15,
-                        12,
-                        12
-                )
-        );
-
-
-        button.setPreferredSize(
-                new Dimension(
-                        190,
-                        45
-                )
-        );
-
-
-        button.setMinimumSize(
-                new Dimension(
-                        190,
-                        45
-                )
-        );
-
-
-        button.setMaximumSize(
-                new Dimension(
-                        Integer.MAX_VALUE,
-                        45
-                )
-        );
-
-
-        return button;
-    }
-
-
-    // =========================
-    // ACTION BUTTON
-    // =========================
-
-    private JButton createActionButton(
-            String text
-    ) {
-
-        JButton button =
-                new JButton(
-                        text
-                );
-
-
-        button.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        13
-                )
-        );
-
-
-        button.setForeground(
-                Color.WHITE
-        );
-
-
-        button.setBackground(
-                ACCENT_COLOR
-        );
-
-
-        button.setFocusPainted(
-                false
-        );
-
-
-        button.setBorder(
-                BorderFactory.createEmptyBorder(
-                        8,
-                        16,
-                        8,
-                        16
-                )
-        );
-
-
-        return button;
-    }
-
-
-    // =========================
-    // SECONDARY BUTTON
-    // =========================
-
-    private JButton createSecondaryButton(
-            String text
-    ) {
-
-        JButton button =
-                new JButton(
-                        text
-                );
-
-
-        button.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        13
-                )
-        );
-
-
-        button.setForeground(
-                TEXT_COLOR
-        );
-
-
-        button.setBackground(
-                new Color(
-                        243,
-                        244,
-                        246
-                )
-        );
-
-
-        button.setFocusPainted(
-                false
-        );
-
-
-        button.setBorder(
-                BorderFactory.createEmptyBorder(
-                        8,
-                        16,
-                        8,
-                        16
-                )
-        );
-
-
-        return button;
-    }
-
-
-    // =========================
-    // DELETE BUTTON
-    // =========================
-
-    private JButton createDeleteButton(
-            String text
-    ) {
-
-        JButton button =
-                new JButton(
-                        text
-                );
-
-
-        button.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        13
-                )
-        );
-
-
-        button.setForeground(
-                Color.WHITE
-        );
-
-
-        button.setBackground(
-                DELETE_COLOR
-        );
-
-
-        button.setFocusPainted(
-                false
-        );
-
-
-        button.setBorder(
-                BorderFactory.createEmptyBorder(
-                        8,
-                        16,
-                        8,
-                        16
-                )
-        );
-
-
-        return button;
     }
 }

@@ -231,17 +231,15 @@ public class LoginFrame extends JFrame {
 
         if (user != null) {
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Login successful! Welcome "
-                            + user.getName()
-            );
+    JOptionPane.showMessageDialog(
+            this,
+            "Login successful! Welcome " + user.getName()
+    );
 
-            new DashboardFrame(user);
+    dispose();
 
-            dispose();
-
-        } else {
+    new DashboardFrame(user).setVisible(true);
+} else {
 
             JOptionPane.showMessageDialog(
                     this,
