@@ -3,6 +3,8 @@ package gui;
 import dao.InternshipDAO;
 import model.Internship;
 import model.User;
+import util.SkillMatchResult;
+import util.SkillMatcher;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -156,6 +158,7 @@ public class InternshipsFrame extends JFrame {
     // =========================================================
 
     private JPanel createSidebar() {
+        
 
         JPanel sidebar =
                 new JPanel(
@@ -849,6 +852,7 @@ public class InternshipsFrame extends JFrame {
                         BoxLayout.Y_AXIS
                 )
         );
+        resultsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
 
         JScrollPane scrollPane =
@@ -1225,21 +1229,22 @@ public class InternshipsFrame extends JFrame {
 
         } else {
 
-            for (
-                    Internship internship :
-                    internships
-            ) {
+           for (int i = 0; i < internships.size(); i++) {
 
-                resultsPanel.add(
-                        createInternshipCard(
-                                internship
-                        )
-                );
+                Internship internship = internships.get(i);
 
-                resultsPanel.add(
-                        Box.createVerticalStrut(12)
-                );
-            }
+             resultsPanel.add(
+                 createInternshipCard(
+                    internship
+            )
+    );
+
+           if (i < internships.size() - 1) {
+             resultsPanel.add(
+                Box.createVerticalStrut(12)
+            );
+         }
+   }
         }
 
 
@@ -1256,6 +1261,11 @@ public class InternshipsFrame extends JFrame {
     private JPanel createInternshipCard(
             Internship internship
     ) {
+
+        SkillMatchResult matchResult = SkillMatcher.calculateMatch(
+        user.getSkills(),
+        internship.getRequiredSkills()
+        );
 
         JPanel card =
                 new JPanel(
@@ -1289,10 +1299,16 @@ public class InternshipsFrame extends JFrame {
         card.setMaximumSize(
                 new Dimension(
                         Integer.MAX_VALUE,
-                        180
+                        220
                 )
         );
-
+        
+        card.setPreferredSize(
+                 new Dimension(
+                    0,
+                    220
+              )
+       );
 
         // -----------------------------------------------------
         // LEFT
@@ -1357,6 +1373,22 @@ public class InternshipsFrame extends JFrame {
                 new JLabel(
                         internship.getCategory()
                 );
+
+        JLabel matchLabel = new JLabel(
+        "🔥 " + matchResult.getMatchPercentage() + "% Match"
+         );
+
+        matchLabel.setFont(
+        new Font(
+                "SansSerif",
+                Font.BOLD,
+                13
+        )
+     );
+
+matchLabel.setForeground(
+        GREEN
+);
 
 
         category.setFont(
@@ -1455,11 +1487,16 @@ public class InternshipsFrame extends JFrame {
         left.add(category);
 
         left.add(
-                Box.createVerticalStrut(8)
+           Box.createVerticalStrut(8)
         );
 
-        left.add(details);
+        left.add(matchLabel);
 
+        left.add(
+           Box.createVerticalStrut(8)
+      );
+
+        left.add(details);
         left.add(
                 Box.createVerticalStrut(5)
         );
