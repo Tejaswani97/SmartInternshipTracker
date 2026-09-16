@@ -35,6 +35,7 @@ public class AddApplicationFrame extends JFrame {
 
         setTitle("Smart Internship Tracker - Add Application");
         setSize(1200, 750);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 

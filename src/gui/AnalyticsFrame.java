@@ -26,6 +26,7 @@ public class AnalyticsFrame extends JFrame {
 
         setTitle("Smart Internship Tracker - Analytics");
         setSize(1200, 750);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 

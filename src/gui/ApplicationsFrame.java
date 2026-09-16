@@ -33,6 +33,7 @@ public class ApplicationsFrame extends JFrame {
 
         setTitle("Smart Internship Tracker - My Applications");
         setSize(1200, 750);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 

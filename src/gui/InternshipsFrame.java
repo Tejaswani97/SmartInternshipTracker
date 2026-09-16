@@ -89,7 +89,7 @@ public class InternshipsFrame extends JFrame {
                 1200,
                 750
         );
-
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         setLocationRelativeTo(null);
 

@@ -54,6 +54,7 @@ public class DashboardFrame extends JFrame {
                 1200,
                 750
         );
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         setLocationRelativeTo(null);
 
@@ -239,7 +240,7 @@ public class DashboardFrame extends JFrame {
                         "My Profile",
                         false,
                         e -> {
-
+                              dispose();
                             new ProfileFrame(user)
                                     .setVisible(true);
 
@@ -262,7 +263,7 @@ public class DashboardFrame extends JFrame {
                         "Internship Opportunities",
                         false,
                         e -> {
-
+                               dispose();
                             new InternshipsFrame(user)
                                     .setVisible(true);
 
@@ -285,7 +286,7 @@ public class DashboardFrame extends JFrame {
                         "My Applications",
                         false,
                         e -> {
-
+                             dispose();
                             new ApplicationsFrame(user)
                                     .setVisible(true);
 
@@ -308,7 +309,7 @@ public class DashboardFrame extends JFrame {
                         "Add Application",
                         false,
                         e -> {
-
+                                  dispose();
                             new AddApplicationFrame(user)
                                     .setVisible(true);
 
@@ -353,7 +354,7 @@ public class DashboardFrame extends JFrame {
                         "Analytics",
                         false,
                         e -> {
-
+                              dispose();
                             new AnalyticsFrame(user)
                                     .setVisible(true);
 
@@ -1355,7 +1356,7 @@ public class DashboardFrame extends JFrame {
 
         browseButton.addActionListener(
                 e -> {
-
+                     dispose();
                     new InternshipsFrame(user)
                             .setVisible(true);
 
@@ -1365,7 +1366,7 @@ public class DashboardFrame extends JFrame {
 
         addButton.addActionListener(
                 e -> {
-
+                      dispose();
                     new AddApplicationFrame(user)
                             .setVisible(true);
 
@@ -1375,7 +1376,7 @@ public class DashboardFrame extends JFrame {
 
         analyticsButton.addActionListener(
                 e -> {
-
+                          dispose();
                     new AnalyticsFrame(user)
                             .setVisible(true);
 
