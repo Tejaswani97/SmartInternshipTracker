@@ -1377,7 +1377,40 @@ public class InternshipsFrame extends JFrame {
         JLabel matchLabel = new JLabel(
         "🔥 " + matchResult.getMatchPercentage() + "% Match"
          );
+          String missingSkillsText;
 
+if (matchResult.getMissingSkills().isEmpty()) {
+
+    missingSkillsText = "✓ All required skills matched";
+
+} else {
+
+    missingSkillsText =
+            "⚠ Missing: "
+                    + String.join(
+                            ", ",
+                            matchResult.getMissingSkills()
+                    );
+}
+
+JLabel missingSkillsLabel =
+        new JLabel(
+                missingSkillsText
+        );
+
+missingSkillsLabel.setFont(
+        new Font(
+                "SansSerif",
+                Font.PLAIN,
+                12
+        )
+);
+
+missingSkillsLabel.setForeground(
+        matchResult.getMissingSkills().isEmpty()
+                ? GREEN
+                : ORANGE
+);
         matchLabel.setFont(
         new Font(
                 "SansSerif",
@@ -1492,11 +1525,17 @@ matchLabel.setForeground(
 
         left.add(matchLabel);
 
-        left.add(
-           Box.createVerticalStrut(8)
-      );
+         left.add(
+        Box.createVerticalStrut(5)
+        );
 
-        left.add(details);
+         left.add(missingSkillsLabel);
+
+        left.add(
+        Box.createVerticalStrut(8)
+           );
+
+         left.add(details);
         left.add(
                 Box.createVerticalStrut(5)
         );
