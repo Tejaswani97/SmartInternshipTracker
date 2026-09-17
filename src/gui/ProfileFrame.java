@@ -1512,14 +1512,36 @@ if (updated) {
 
 
             user.setResumePath(
-                    file.getAbsolutePath()
-            );
+        file.getAbsolutePath()
+);
 
+UserDAO userDAO = new UserDAO();
 
-            resumeLabel.setText(
-                    file.getName()
-            );
+boolean updated =
+        userDAO.updateProfile(user);
 
+if (updated) {
+
+    resumeLabel.setText(
+            file.getName()
+    );
+
+    JOptionPane.showMessageDialog(
+            this,
+            "Resume saved successfully!",
+            "Resume Updated",
+            JOptionPane.INFORMATION_MESSAGE
+    );
+
+} else {
+
+    JOptionPane.showMessageDialog(
+            this,
+            "Resume selected, but could not be saved to the database.",
+            "Save Failed",
+            JOptionPane.ERROR_MESSAGE
+    );
+}
 
             JOptionPane.showMessageDialog(
                     this,
