@@ -1,6 +1,8 @@
 package gui;
 
+import dao.ApplicationDAO;
 import dao.InternshipDAO;
+import model.Application;
 import model.Internship;
 import model.User;
 import util.SkillMatchResult;
@@ -1793,81 +1795,149 @@ matchLabel.setForeground(
     // =========================================================
 
     private void apply(
-            Internship internship
+        Internship internship
+) {
+
+    String resume =
+            user.getResumePath();
+
+    // ---------------------------------------------------------
+    // CHECK RESUME
+    // ---------------------------------------------------------
+
+    if (
+            resume == null
+                    || resume.isBlank()
     ) {
-
-        String resume =
-                user.getResumePath();
-
-
-        if (
-                resume == null
-                        || resume.isBlank()
-        ) {
-
-            int answer =
-                    JOptionPane.showConfirmDialog(
-                            this,
-                            "You haven't uploaded a resume yet.\n"
-                                    + "Open your profile and upload one first?",
-                            "Resume Required",
-                            JOptionPane.YES_NO_OPTION
-                    );
-
-
-            if (
-                    answer ==
-                            JOptionPane.YES_OPTION
-            ) {
-
-                goToProfile();
-            }
-
-
-            return;
-        }
-
 
         int answer =
                 JOptionPane.showConfirmDialog(
                         this,
-                        "Resume ready: "
-                                + new java.io.File(
-                                resume
-                        ).getName()
-                                + "\n\n"
-                                + "Open the employer application page?",
-                        "Apply",
+                        "You haven't uploaded a resume yet.\n"
+                                + "Open your profile and upload one first?",
+                        "Resume Required",
                         JOptionPane.YES_NO_OPTION
                 );
-
 
         if (
                 answer ==
                         JOptionPane.YES_OPTION
         ) {
 
-            try {
-
-                Desktop.getDesktop()
-                        .browse(
-                                new URI(
-                                        internship.getJobLink()
-                                )
-                        );
-
-            } catch (Exception ex) {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Unable to open the application link.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-            }
+            goToProfile();
         }
+
+        return;
     }
 
+    // ---------------------------------------------------------
+    // CONFIRM OPENING APPLICATION PAGE
+    // ---------------------------------------------------------
+
+    int answer =
+            JOptionPane.showConfirmDialog(
+                    this,
+                    "Your resume is ready.\n\n"
+                            + "Open the employer's application page?",
+                    "Apply",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+    if (
+            answer != JOptionPane.YES_OPTION
+    ) {
+
+        return;
+    }
+
+    // ---------------------------------------------------------
+    // OPEN REAL EMPLOYER PAGE
+    // ---------------------------------------------------------
+
+    try {
+
+        Desktop.getDesktop()
+                .browse(
+                        new URI(
+                                internship.getJobLink()
+                        )
+                );
+
+    } catch (Exception ex) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Unable to open the application link.",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+
+        return;
+    }
+
+    // ---------------------------------------------------------
+    // ASK WHETHER USER ACTUALLY APPLIED
+    // ---------------------------------------------------------
+
+    int appliedAnswer =
+            JOptionPane.showConfirmDialog(
+                    this,
+                    "Did you submit your application on the employer's website?",
+                    "Track Application",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+    if (
+            appliedAnswer != JOptionPane.YES_OPTION
+    ) {
+
+        return;
+    }
+
+    // ---------------------------------------------------------
+    // ADD APPLICATION TO DATABASE
+    // ---------------------------------------------------------
+
+    Application application =
+            new Application(
+                    user.getUserId(),
+                    internship.getCompanyName(),
+                    internship.getJobRole(),
+                    LocalDate.now(),
+                    internship.getDeadline(),
+                    "Applied",
+                    internship.getJobLink(),
+                    "Applied through Smart Internship Tracker"
+            );
+
+    ApplicationDAO applicationDAO =
+            new ApplicationDAO();
+
+    boolean success =
+            applicationDAO.addApplication(
+                    application
+            );
+
+    if (success) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Application added to My Applications!",
+                "Application Tracked",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+
+    } else {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "You may have applied successfully, "
+                        + "but we could not save it to My Applications.",
+                "Tracking Failed",
+                JOptionPane.WARNING_MESSAGE
+        );
+    }
+}
 
     // =========================================================
     // RESET

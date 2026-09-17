@@ -18,103 +18,112 @@ public class InternshipDAO {
 
     public List<Internship> getAllInternships() {
 
-        List<Internship> internships = new ArrayList<>();
+        List<Internship> internships =
+                new ArrayList<>();
 
         String sql = """
                 SELECT *
                 FROM internships
-                ORDER BY deadline ASC
+                ORDER BY deadline
                 """;
 
         try (
-                Connection connection = DatabaseConnection.getConnection();
+                Connection connection =
+                        DatabaseConnection.getConnection();
+
                 PreparedStatement statement =
                         connection.prepareStatement(sql);
+
                 ResultSet resultSet =
                         statement.executeQuery()
         ) {
 
             while (resultSet.next()) {
 
-                Internship internship = new Internship(
-                        resultSet.getInt("internship_id"),
-                        resultSet.getString("company_name"),
-                        resultSet.getString("job_role"),
-                        resultSet.getString("category"),
-                        resultSet.getString("location"),
-                        resultSet.getString("work_mode"),
-                        resultSet.getString("stipend"),
-                        resultSet.getString("duration"),
-                        resultSet.getString("required_skills"),
-                        resultSet.getDate("deadline").toLocalDate(),
-                        resultSet.getString("job_link")
+                internships.add(
+                        createInternshipFromResultSet(
+                                resultSet
+                        )
                 );
-
-                internships.add(internship);
             }
 
         } catch (SQLException e) {
 
             System.out.println(
-                    "Error loading internships: "
-                            + e.getMessage()
+                    "Failed to load internships!"
             );
+
+            e.printStackTrace();
         }
 
         return internships;
     }
 
+
     // =========================================================
-    // SEARCH BY COMPANY OR JOB ROLE
+    // SEARCH INTERNSHIPS
     // =========================================================
 
-    public List<Internship> searchInternships(String keyword) {
+    public List<Internship> searchInternships(
+            String keyword
+    ) {
 
-        List<Internship> internships = new ArrayList<>();
+        List<Internship> internships =
+                new ArrayList<>();
 
         String sql = """
                 SELECT *
                 FROM internships
                 WHERE company_name LIKE ?
                    OR job_role LIKE ?
-                ORDER BY deadline ASC
+                ORDER BY deadline
                 """;
 
         try (
-                Connection connection = DatabaseConnection.getConnection();
+                Connection connection =
+                        DatabaseConnection.getConnection();
+
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
         ) {
 
-            String searchPattern =
+            String search =
                     "%" + keyword + "%";
 
-            statement.setString(1, searchPattern);
-            statement.setString(2, searchPattern);
+            statement.setString(
+                    1,
+                    search
+            );
 
-            try (ResultSet resultSet =
-                         statement.executeQuery()) {
+            statement.setString(
+                    2,
+                    search
+            );
 
-                while (resultSet.next()) {
+            ResultSet resultSet =
+                    statement.executeQuery();
 
-                    internships.add(
-                            createInternshipFromResultSet(
-                                    resultSet
-                            )
-                    );
-                }
+            while (resultSet.next()) {
+
+                internships.add(
+                        createInternshipFromResultSet(
+                                resultSet
+                        )
+                );
             }
 
         } catch (SQLException e) {
 
             System.out.println(
-                    "Search failed: "
-                            + e.getMessage()
+                    "Internship search failed!"
             );
+
+            e.printStackTrace();
         }
 
         return internships;
     }
+
 
     // =========================================================
     // FILTER BY CATEGORY
@@ -131,7 +140,7 @@ public class InternshipDAO {
                 SELECT *
                 FROM internships
                 WHERE category = ?
-                ORDER BY deadline ASC
+                ORDER BY deadline
                 """;
 
         try (
@@ -142,31 +151,35 @@ public class InternshipDAO {
                         connection.prepareStatement(sql)
         ) {
 
-            statement.setString(1, category);
+            statement.setString(
+                    1,
+                    category
+            );
 
-            try (ResultSet resultSet =
-                         statement.executeQuery()) {
+            ResultSet resultSet =
+                    statement.executeQuery();
 
-                while (resultSet.next()) {
+            while (resultSet.next()) {
 
-                    internships.add(
-                            createInternshipFromResultSet(
-                                    resultSet
-                            )
-                    );
-                }
+                internships.add(
+                        createInternshipFromResultSet(
+                                resultSet
+                        )
+                );
             }
 
         } catch (SQLException e) {
 
             System.out.println(
-                    "Category filter failed: "
-                            + e.getMessage()
+                    "Category filter failed!"
             );
+
+            e.printStackTrace();
         }
 
         return internships;
     }
+
 
     // =========================================================
     // FILTER BY LOCATION
@@ -183,7 +196,7 @@ public class InternshipDAO {
                 SELECT *
                 FROM internships
                 WHERE location = ?
-                ORDER BY deadline ASC
+                ORDER BY deadline
                 """;
 
         try (
@@ -194,31 +207,35 @@ public class InternshipDAO {
                         connection.prepareStatement(sql)
         ) {
 
-            statement.setString(1, location);
+            statement.setString(
+                    1,
+                    location
+            );
 
-            try (ResultSet resultSet =
-                         statement.executeQuery()) {
+            ResultSet resultSet =
+                    statement.executeQuery();
 
-                while (resultSet.next()) {
+            while (resultSet.next()) {
 
-                    internships.add(
-                            createInternshipFromResultSet(
-                                    resultSet
-                            )
-                    );
-                }
+                internships.add(
+                        createInternshipFromResultSet(
+                                resultSet
+                        )
+                );
             }
 
         } catch (SQLException e) {
 
             System.out.println(
-                    "Location filter failed: "
-                            + e.getMessage()
+                    "Location filter failed!"
             );
+
+            e.printStackTrace();
         }
 
         return internships;
     }
+
 
     // =========================================================
     // FILTER BY WORK MODE
@@ -235,7 +252,7 @@ public class InternshipDAO {
                 SELECT *
                 FROM internships
                 WHERE work_mode = ?
-                ORDER BY deadline ASC
+                ORDER BY deadline
                 """;
 
         try (
@@ -246,34 +263,38 @@ public class InternshipDAO {
                         connection.prepareStatement(sql)
         ) {
 
-            statement.setString(1, workMode);
+            statement.setString(
+                    1,
+                    workMode
+            );
 
-            try (ResultSet resultSet =
-                         statement.executeQuery()) {
+            ResultSet resultSet =
+                    statement.executeQuery();
 
-                while (resultSet.next()) {
+            while (resultSet.next()) {
 
-                    internships.add(
-                            createInternshipFromResultSet(
-                                    resultSet
-                            )
-                    );
-                }
+                internships.add(
+                        createInternshipFromResultSet(
+                                resultSet
+                        )
+                );
             }
 
         } catch (SQLException e) {
 
             System.out.println(
-                    "Work mode filter failed: "
-                            + e.getMessage()
+                    "Work mode filter failed!"
             );
+
+            e.printStackTrace();
         }
 
         return internships;
     }
 
+
     // =========================================================
-    // HELPER METHOD
+    // RESULT SET → INTERNSHIP OBJECT
     // =========================================================
 
     private Internship createInternshipFromResultSet(
@@ -281,17 +302,70 @@ public class InternshipDAO {
     ) throws SQLException {
 
         return new Internship(
-                resultSet.getInt("internship_id"),
-                resultSet.getString("company_name"),
-                resultSet.getString("job_role"),
-                resultSet.getString("category"),
-                resultSet.getString("location"),
-                resultSet.getString("work_mode"),
-                resultSet.getString("stipend"),
-                resultSet.getString("duration"),
-                resultSet.getString("required_skills"),
-                resultSet.getDate("deadline").toLocalDate(),
-                resultSet.getString("job_link")
+
+                resultSet.getInt(
+                        "internship_id"
+                ),
+
+                resultSet.getString(
+                        "company_name"
+                ),
+
+                resultSet.getString(
+                        "job_role"
+                ),
+
+                resultSet.getString(
+                        "category"
+                ),
+
+                resultSet.getString(
+                        "location"
+                ),
+
+                resultSet.getString(
+                        "work_mode"
+                ),
+
+                resultSet.getString(
+                        "stipend"
+                ),
+
+                resultSet.getString(
+                        "duration"
+                ),
+
+                resultSet.getString(
+                        "required_skills"
+                ),
+
+                resultSet.getDate(
+                        "deadline"
+                ).toLocalDate(),
+
+                resultSet.getString(
+                        "job_link"
+                ),
+
+                resultSet.getString(
+                        "recruiter_name"
+                ),
+
+                resultSet.getString(
+                        "recruiter_role"
+                ),
+
+                resultSet.getString(
+                        "recruiter_email"
+                ),
+
+                resultSet.getString(
+                        "recruiter_linkedin"
+                ),
+
+                resultSet.getString(
+                        "contact_source"
+                )
         );
     }
 }
