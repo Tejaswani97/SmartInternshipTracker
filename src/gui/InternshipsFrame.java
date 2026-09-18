@@ -14,6 +14,8 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -1272,7 +1274,7 @@ public class InternshipsFrame extends JFrame {
         JPanel card =
                 new JPanel(
                         new BorderLayout(
-                                20,
+                                30,
                                 10
                         )
                 );
@@ -1298,19 +1300,12 @@ public class InternshipsFrame extends JFrame {
         );
 
 
-        card.setMaximumSize(
-                new Dimension(
-                        Integer.MAX_VALUE,
-                        220
-                )
-        );
-        
-        card.setPreferredSize(
-                 new Dimension(
-                    0,
-                    220
-              )
-       );
+         card.setMaximumSize(
+        new Dimension(
+                Integer.MAX_VALUE,
+                300
+        )
+);
 
         // -----------------------------------------------------
         // LEFT
@@ -1395,12 +1390,14 @@ if (matchResult.getMissingSkills().isEmpty()) {
                     );
 }
 
-JLabel missingSkillsLabel =
+      JLabel missingSkillsLabel =
         new JLabel(
-                missingSkillsText
+                "<html>"
+                        + missingSkillsText
+                        + "</html>"
         );
 
-missingSkillsLabel.setFont(
+      missingSkillsLabel.setFont(
         new Font(
                 "SansSerif",
                 Font.PLAIN,
@@ -1486,11 +1483,12 @@ matchLabel.setForeground(
         );
 
 
-        JLabel skills =
-                new JLabel(
-                        "Skills: "
-                                + internship.getRequiredSkills()
-                );
+          JLabel skills =
+        new JLabel(
+                "<html><b>Skills:</b> "
+                        + internship.getRequiredSkills()
+                        + "</html>"
+        );
 
 
         skills.setFont(
@@ -1570,18 +1568,28 @@ matchLabel.setForeground(
         );
 
 
-        long days =
-                ChronoUnit.DAYS.between(
-                        LocalDate.now(),
-                        internship.getDeadline()
-                );
+        boolean hasDeadline =
+        internship.getDeadline() != null;
+
+long days = 0;
+
+if (hasDeadline) {
+
+    days =
+            ChronoUnit.DAYS.between(
+                    LocalDate.now(),
+                    internship.getDeadline()
+            );
+}
 
 
-        JLabel deadline =
-                new JLabel(
-                        "Deadline: "
+JLabel deadline =
+        new JLabel(
+                hasDeadline
+                        ? "Deadline: "
                                 + internship.getDeadline()
-                );
+                        : "Deadline: Not specified"
+        );
 
 
         deadline.setFont(
@@ -1611,51 +1619,60 @@ matchLabel.setForeground(
         );
 
 
-        if (days < 0) {
+        if (!hasDeadline) {
 
-            daysLabel.setText(
-                    "Deadline passed"
-            );
+    daysLabel.setText(
+            "No deadline listed"
+    );
 
-            daysLabel.setForeground(
-                    RED
-            );
+    daysLabel.setForeground(
+            MUTED
+    );
 
-        } else if (days == 0) {
+} else if (days < 0) {
 
-            daysLabel.setText(
-                    "⚠ Due today"
-            );
+    daysLabel.setText(
+            "Deadline passed"
+    );
 
-            daysLabel.setForeground(
-                    RED
-            );
+    daysLabel.setForeground(
+            RED
+    );
 
-        } else if (days <= 3) {
+} else if (days == 0) {
 
-            daysLabel.setText(
-                    "⚠ "
-                            + days
-                            + " days left"
-            );
+    daysLabel.setText(
+            "⚠ Due today"
+    );
 
-            daysLabel.setForeground(
-                    ORANGE
-            );
+    daysLabel.setForeground(
+            RED
+    );
 
-        } else {
+} else if (days <= 3) {
 
-            daysLabel.setText(
-                    "⏰ "
-                            + days
-                            + " days left"
-            );
+    daysLabel.setText(
+            "⚠ "
+                    + days
+                    + " days left"
+    );
 
-            daysLabel.setForeground(
-                    BLUE
-            );
-        }
+    daysLabel.setForeground(
+            ORANGE
+    );
 
+} else {
+
+    daysLabel.setText(
+            "⏰ "
+                    + days
+                    + " days left"
+    );
+
+    daysLabel.setForeground(
+            BLUE
+    );
+}
 
         JButton detailsButton =
                 createButton(
@@ -1744,51 +1761,954 @@ matchLabel.setForeground(
             Internship internship
     ) {
 
-        String message =
-                "COMPANY\n"
-                        + internship.getCompanyName()
-                        + "\n\n"
+        JDialog dialog =
+                new JDialog(
+                        this,
+                        "Internship Details",
+                        true
+                );
 
-                        + "ROLE\n"
-                        + internship.getJobRole()
-                        + "\n\n"
+        dialog.setSize(
+                820,
+                700
+        );
 
-                        + "CATEGORY\n"
-                        + internship.getCategory()
-                        + "\n\n"
+        dialog.setMinimumSize(
+                new Dimension(
+                        700,
+                        600
+                )
+        );
 
-                        + "LOCATION\n"
-                        + internship.getLocation()
-                        + "\n\n"
+        dialog.setLocationRelativeTo(this);
 
-                        + "WORK MODE\n"
-                        + internship.getWorkMode()
-                        + "\n\n"
-
-                        + "STIPEND\n"
-                        + internship.getStipend()
-                        + "\n\n"
-
-                        + "DURATION\n"
-                        + internship.getDuration()
-                        + "\n\n"
-
-                        + "REQUIRED SKILLS\n"
-                        + internship.getRequiredSkills()
-                        + "\n\n"
-
-                        + "DEADLINE\n"
-                        + internship.getDeadline();
+        dialog.setLayout(
+                new BorderLayout()
+        );
 
 
-        JOptionPane.showMessageDialog(
-                this,
-                message,
-                "Internship Details",
-                JOptionPane.INFORMATION_MESSAGE
+        // =========================================================
+        // HEADER
+        // =========================================================
+
+        JPanel header =
+                new JPanel(
+                        new BorderLayout()
+                );
+
+        header.setBackground(
+                CARD
+        );
+
+        header.setBorder(
+                new EmptyBorder(
+                        20,
+                        24,
+                        18,
+                        24
+                )
+        );
+
+
+        JPanel headerText =
+                new JPanel();
+
+        headerText.setOpaque(false);
+
+        headerText.setLayout(
+                new BoxLayout(
+                        headerText,
+                        BoxLayout.Y_AXIS
+                )
+        );
+
+
+        JLabel companyLabel =
+                new JLabel(
+                        safeValue(
+                                internship.getCompanyName()
+                        )
+                );
+
+        companyLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        25
+                )
+        );
+
+        companyLabel.setForeground(
+                TEXT
+        );
+
+
+        JLabel roleLabel =
+                new JLabel(
+                        safeValue(
+                                internship.getJobRole()
+                        )
+                );
+
+        roleLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        16
+                )
+        );
+
+        roleLabel.setForeground(
+                MUTED
+        );
+
+
+        headerText.add(
+                companyLabel
+        );
+
+        headerText.add(
+                Box.createVerticalStrut(4)
+        );
+
+        headerText.add(
+                roleLabel
+        );
+
+
+        header.add(
+                headerText,
+                BorderLayout.CENTER
+        );
+
+
+        // =========================================================
+        // SCROLLABLE CONTENT
+        // =========================================================
+
+        JPanel body =
+                new JPanel(
+                        new GridBagLayout()
+                );
+
+        body.setBackground(
+                BACKGROUND
+        );
+
+        body.setBorder(
+                new EmptyBorder(
+                        20,
+                        24,
+                        20,
+                        24
+                )
+        );
+
+
+        GridBagConstraints bodyGbc =
+                new GridBagConstraints();
+
+        bodyGbc.gridx = 0;
+        bodyGbc.gridy = 0;
+        bodyGbc.weightx = 1;
+        bodyGbc.fill =
+                GridBagConstraints.HORIZONTAL;
+        bodyGbc.anchor =
+                GridBagConstraints.NORTHWEST;
+        bodyGbc.insets =
+                new Insets(
+                        0,
+                        0,
+                        14,
+                        0
+                );
+
+
+        // =========================================================
+        // INTERNSHIP INFORMATION
+        // =========================================================
+
+        JPanel internshipSection =
+                createDetailsSection(
+                        "Internship Information"
+                );
+
+        JPanel internshipGrid =
+                new JPanel(
+                        new GridBagLayout()
+                );
+
+        internshipGrid.setOpaque(false);
+
+        addDetailRow(
+                internshipGrid,
+                0,
+                "Category",
+                internship.getCategory()
+        );
+
+        addDetailRow(
+                internshipGrid,
+                1,
+                "Location",
+                internship.getLocation()
+        );
+
+        addDetailRow(
+                internshipGrid,
+                2,
+                "Work Mode",
+                internship.getWorkMode()
+        );
+
+        addDetailRow(
+                internshipGrid,
+                3,
+                "Stipend",
+                internship.getStipend()
+        );
+
+        addDetailRow(
+                internshipGrid,
+                4,
+                "Duration",
+                internship.getDuration()
+        );
+
+        addDetailRow(
+                internshipGrid,
+                5,
+                "Deadline",
+                internship.getDeadline() != null
+                        ? internship.getDeadline().toString()
+                        : "Not specified"
+        );
+
+        internshipSection.add(
+                internshipGrid,
+                BorderLayout.CENTER
+        );
+
+        body.add(
+                internshipSection,
+                bodyGbc
+        );
+
+
+        // =========================================================
+        // SKILLS
+        // =========================================================
+
+        bodyGbc.gridy++;
+
+        JPanel skillsSection =
+                createDetailsSection(
+                        "Required Skills"
+                );
+
+        JLabel skillsLabel =
+                new JLabel(
+                        "<html><div style='width:680px;'>"
+                                + safeValue(
+                                        internship.getRequiredSkills()
+                                )
+                                + "</div></html>"
+                );
+
+        skillsLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        14
+                )
+        );
+
+        skillsLabel.setForeground(
+                TEXT
+        );
+
+        skillsSection.add(
+                skillsLabel,
+                BorderLayout.CENTER
+        );
+
+        body.add(
+                skillsSection,
+                bodyGbc
+        );
+
+
+        // =========================================================
+        // RECRUITER & OUTREACH
+        // =========================================================
+
+        bodyGbc.gridy++;
+
+        JPanel recruiterSection =
+                createDetailsSection(
+                        "Recruiter & Outreach"
+                );
+
+        JPanel recruiterGrid =
+                new JPanel(
+                        new GridBagLayout()
+                );
+
+        recruiterGrid.setOpaque(false);
+
+        addDetailRow(
+                recruiterGrid,
+                0,
+                "Recruiter",
+                internship.getRecruiterName()
+        );
+
+        addDetailRow(
+                recruiterGrid,
+                1,
+                "Role",
+                internship.getRecruiterRole()
+        );
+
+
+        GridBagConstraints emailGbc =
+                new GridBagConstraints();
+
+        emailGbc.gridx = 0;
+        emailGbc.gridy = 2;
+        emailGbc.weightx = 0.5;
+        emailGbc.fill =
+                GridBagConstraints.HORIZONTAL;
+        emailGbc.anchor =
+                GridBagConstraints.NORTHWEST;
+        emailGbc.insets =
+                new Insets(
+                        7,
+                        0,
+                        7,
+                        20
+                );
+
+        JLabel emailTitle =
+                new JLabel(
+                        "Email"
+                );
+
+        emailTitle.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        12
+                )
+        );
+
+        emailTitle.setForeground(
+                MUTED
+        );
+
+        recruiterGrid.add(
+                emailTitle,
+                emailGbc
+        );
+
+
+        emailGbc.gridx = 1;
+        emailGbc.weightx = 1;
+        emailGbc.insets =
+                new Insets(
+                        7,
+                        0,
+                        7,
+                        0
+                );
+
+        recruiterGrid.add(
+                createEmailValuePanel(
+                        internship
+                ),
+                emailGbc
+        );
+
+
+        addDetailRow(
+                recruiterGrid,
+                3,
+                "Contact Source",
+                internship.getContactSource()
+        );
+
+        recruiterSection.add(
+                recruiterGrid,
+                BorderLayout.CENTER
+        );
+
+
+        String linkedin =
+                internship.getRecruiterLinkedin();
+
+        if (
+                linkedin != null
+                        && !linkedin.isBlank()
+        ) {
+
+            final String linkedinUrl =
+                    linkedin;
+
+            JButton linkedinButton =
+                    createButton(
+                            "Open LinkedIn",
+                            BLUE
+                    );
+
+            linkedinButton.addActionListener(
+                    e -> {
+
+                        try {
+
+                            Desktop.getDesktop()
+                                    .browse(
+                                            new URI(
+                                                    linkedinUrl
+                                            )
+                                    );
+
+                        } catch (Exception ex) {
+
+                            JOptionPane.showMessageDialog(
+                                    dialog,
+                                    "Unable to open the LinkedIn profile.",
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE
+                            );
+                        }
+                    }
+            );
+
+            JPanel linkedinPanel =
+                    new JPanel(
+                            new FlowLayout(
+                                    FlowLayout.LEFT,
+                                    0,
+                                    8
+                            )
+                    );
+
+            linkedinPanel.setOpaque(false);
+
+            linkedinPanel.add(
+                    linkedinButton
+            );
+
+            recruiterSection.add(
+                    linkedinPanel,
+                    BorderLayout.SOUTH
+            );
+        }
+
+        body.add(
+                recruiterSection,
+                bodyGbc
+        );
+
+
+        // =========================================================
+        // BOTTOM SPACER
+        // =========================================================
+
+        bodyGbc.gridy++;
+        bodyGbc.weighty = 1;
+        bodyGbc.fill = GridBagConstraints.BOTH;
+        bodyGbc.insets = new Insets(0, 0, 0, 0);
+
+        body.add(
+                Box.createGlue(),
+                bodyGbc
+        );
+
+
+        JScrollPane scrollPane =
+                new JScrollPane(
+                        body
+                );
+
+        scrollPane.setBorder(null);
+
+        scrollPane.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
+
+        scrollPane.setVerticalScrollBarPolicy(
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
+        );
+
+        scrollPane.getVerticalScrollBar()
+                .setUnitIncrement(16);
+
+
+        // =========================================================
+        // BOTTOM ACTIONS
+        // =========================================================
+
+        JPanel bottom =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.RIGHT,
+                                10,
+                                12
+                        )
+                );
+
+        bottom.setBackground(
+                BACKGROUND
+        );
+
+        bottom.setBorder(
+                new EmptyBorder(
+                        0,
+                        20,
+                        5,
+                        20
+                )
+        );
+
+        JButton closeButton =
+                createButton(
+                        "Close",
+                        new Color(
+                                107,
+                                114,
+                                128
+                        )
+                );
+
+        closeButton.addActionListener(
+                e -> dialog.dispose()
+        );
+
+        bottom.add(
+                closeButton
+        );
+
+
+        dialog.add(
+                header,
+                BorderLayout.NORTH
+        );
+
+        dialog.add(
+                scrollPane,
+                BorderLayout.CENTER
+        );
+
+        dialog.add(
+                bottom,
+                BorderLayout.SOUTH
+        );
+
+        dialog.setVisible(true);
+    }
+
+
+    // =========================================================
+    // DETAILS SECTION
+    // =========================================================
+
+    private JPanel createDetailsSection(
+            String title
+    ) {
+
+        JPanel section =
+                new JPanel(
+                        new BorderLayout(
+                                0,
+                                12
+                        )
+                );
+
+        section.setBackground(
+                CARD
+        );
+
+        section.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(
+                                BORDER
+                        ),
+                        new EmptyBorder(
+                                18,
+                                20,
+                                18,
+                                20
+                        )
+                )
+        );
+
+        JLabel titleLabel =
+                new JLabel(
+                        title
+                );
+
+        titleLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        17
+                )
+        );
+
+        titleLabel.setForeground(
+                TEXT
+        );
+
+        section.add(
+                titleLabel,
+                BorderLayout.NORTH
+        );
+
+        return section;
+    }
+
+
+    // =========================================================
+    // DETAIL ROW
+    // =========================================================
+
+    private void addDetailRow(
+            JPanel grid,
+            int row,
+            String title,
+            String value
+    ) {
+
+        GridBagConstraints gbc =
+                new GridBagConstraints();
+
+        gbc.gridy = row;
+        gbc.fill =
+                GridBagConstraints.HORIZONTAL;
+        gbc.anchor =
+                GridBagConstraints.NORTHWEST;
+        gbc.insets =
+                new Insets(
+                        7,
+                        0,
+                        7,
+                        20
+                );
+
+
+        gbc.gridx = 0;
+        gbc.weightx = 0.35;
+
+        JLabel titleLabel =
+                new JLabel(
+                        title
+                );
+
+        titleLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        12
+                )
+        );
+
+        titleLabel.setForeground(
+                MUTED
+        );
+
+        grid.add(
+                titleLabel,
+                gbc
+        );
+
+
+        gbc.gridx = 1;
+        gbc.weightx = 0.65;
+        gbc.insets =
+                new Insets(
+                        7,
+                        0,
+                        7,
+                        0
+                );
+
+        JLabel valueLabel =
+                new JLabel(
+                        "<html><div style='width:360px;'>"
+                                + safeValue(value)
+                                + "</div></html>"
+                );
+
+        valueLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        14
+                )
+        );
+
+        valueLabel.setForeground(
+                TEXT
+        );
+
+        grid.add(
+                valueLabel,
+                gbc
         );
     }
 
+
+    // =========================================================
+    // CLICKABLE RECRUITER EMAIL VALUE
+    // =========================================================
+
+    private JPanel createEmailValuePanel(
+            Internship internship
+    ) {
+
+        JPanel panel =
+                new JPanel(
+                        new BorderLayout()
+                );
+
+        panel.setOpaque(false);
+
+        String email =
+                internship.getRecruiterEmail();
+
+        if (
+                email == null
+                        || email.isBlank()
+        ) {
+
+            JLabel label =
+                    new JLabel(
+                            "Not provided"
+                    );
+
+            label.setFont(
+                    new Font(
+                            "SansSerif",
+                            Font.PLAIN,
+                            14
+                    )
+            );
+
+            label.setForeground(
+                    MUTED
+            );
+
+            panel.add(
+                    label,
+                    BorderLayout.WEST
+            );
+
+            return panel;
+        }
+
+
+        JLabel emailLabel =
+                new JLabel(
+                        "<html><u>"
+                                + email
+                                + "</u></html>"
+                );
+
+        emailLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        14
+                )
+        );
+
+        emailLabel.setForeground(
+                BLUE
+        );
+
+        emailLabel.setCursor(
+                new Cursor(
+                        Cursor.HAND_CURSOR
+                )
+        );
+
+        emailLabel.setToolTipText(
+                "Click to compose a cold email"
+        );
+
+        emailLabel.addMouseListener(
+                new java.awt.event.MouseAdapter() {
+
+                    @Override
+                    public void mouseClicked(
+                            java.awt.event.MouseEvent e
+                    ) {
+
+                        openColdEmail(
+                                internship,
+                                email
+                        );
+                    }
+
+                    @Override
+                    public void mouseEntered(
+                            java.awt.event.MouseEvent e
+                    ) {
+
+                        emailLabel.setForeground(
+                                GREEN
+                        );
+                    }
+
+                    @Override
+                    public void mouseExited(
+                            java.awt.event.MouseEvent e
+                    ) {
+
+                        emailLabel.setForeground(
+                                BLUE
+                        );
+                    }
+                }
+        );
+
+        panel.add(
+                emailLabel,
+                BorderLayout.WEST
+        );
+
+        return panel;
+    }
+
+
+    // =========================================================
+    // OPEN COLD EMAIL
+    // =========================================================
+
+    private void openColdEmail(
+            Internship internship,
+            String recruiterEmail
+    ) {
+
+        String studentName =
+                user.getName() == null
+                        || user.getName().isBlank()
+                        ? "Student"
+                        : user.getName();
+
+        String company =
+                safeValue(
+                        internship.getCompanyName()
+                );
+
+        String role =
+                safeValue(
+                        internship.getJobRole()
+                );
+
+        String recruiterName =
+                safeValue(
+                        internship.getRecruiterName()
+                );
+
+        String studentSkills =
+                safeValue(
+                        user.getSkills()
+                );
+
+        String subject =
+                "Application for "
+                        + role
+                        + " at "
+                        + company;
+
+        String body =
+                "Hi "
+                        + recruiterName
+                        + ",\n\n"
+                        + "My name is "
+                        + studentName
+                        + ", and I am interested in the "
+                        + role
+                        + " opportunity at "
+                        + company
+                        + ".\n\n"
+                        + "My relevant skills include "
+                        + studentSkills
+                        + ".\n\n"
+                        + "I would be grateful for the opportunity "
+                        + "to be considered for this internship. "
+                        + "I have attached my resume for your review.\n\n"
+                        + "Thank you for your time and consideration.\n\n"
+                        + "Regards,\n"
+                        + studentName;
+
+        try {
+
+            String encodedSubject =
+                    URLEncoder.encode(
+                            subject,
+                            StandardCharsets.UTF_8
+                    ).replace(
+                            "+",
+                            "%20"
+                    );
+
+            String encodedBody =
+                    URLEncoder.encode(
+                            body,
+                            StandardCharsets.UTF_8
+                    ).replace(
+                            "+",
+                            "%20"
+                    );
+
+            URI mailto =
+                    new URI(
+                            "mailto:"
+                                    + recruiterEmail
+                                    + "?subject="
+                                    + encodedSubject
+                                    + "&body="
+                                    + encodedBody
+                    );
+
+            Desktop.getDesktop()
+                    .browse(
+                            mailto
+                    );
+
+        } catch (Exception ex) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to open your email application.",
+                    "Email Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+
+    // =========================================================
+    // SAFE VALUE
+    // =========================================================
+
+    private String safeValue(
+            String value
+    ) {
+
+        if (
+                value == null
+                        || value.isBlank()
+        ) {
+
+            return "Not provided";
+        }
+
+        return value;
+    }
 
     // =========================================================
     // APPLY

@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -301,6 +302,21 @@ public class InternshipDAO {
             ResultSet resultSet
     ) throws SQLException {
 
+        // -----------------------------------------------------
+        // HANDLE NULL DEADLINE SAFELY
+        // -----------------------------------------------------
+
+        java.sql.Date sqlDeadline =
+                resultSet.getDate(
+                        "deadline"
+                );
+
+        LocalDate deadline =
+                sqlDeadline != null
+                        ? sqlDeadline.toLocalDate()
+                        : null;
+
+
         return new Internship(
 
                 resultSet.getInt(
@@ -339,9 +355,7 @@ public class InternshipDAO {
                         "required_skills"
                 ),
 
-                resultSet.getDate(
-                        "deadline"
-                ).toLocalDate(),
+                deadline,
 
                 resultSet.getString(
                         "job_link"
