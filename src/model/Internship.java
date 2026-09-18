@@ -1,6 +1,7 @@
 package model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Internship {
 
@@ -22,6 +23,13 @@ public class Internship {
     private String recruiterEmail;
     private String recruiterLinkedin;
     private String contactSource;
+
+    // Source tracking
+    private String sourceName;
+    private String externalJobId;
+    private String sourceUrl;
+    private LocalDate postedDate;
+    private LocalDateTime fetchedAt;
 
 
     // =========================================================
@@ -57,6 +65,12 @@ public class Internship {
         this.recruiterEmail = "";
         this.recruiterLinkedin = "";
         this.contactSource = "";
+
+        this.sourceName = "Manual";
+        this.externalJobId = "";
+        this.sourceUrl = "";
+        this.postedDate = null;
+        this.fetchedAt = null;
     }
 
 
@@ -98,6 +112,12 @@ public class Internship {
         this.recruiterEmail = recruiterEmail;
         this.recruiterLinkedin = recruiterLinkedin;
         this.contactSource = contactSource;
+
+        this.sourceName = "Manual";
+        this.externalJobId = "";
+        this.sourceUrl = "";
+        this.postedDate = null;
+        this.fetchedAt = null;
     }
 
 
@@ -136,6 +156,12 @@ public class Internship {
         this.recruiterEmail = "";
         this.recruiterLinkedin = "";
         this.contactSource = "";
+
+        this.sourceName = "Manual";
+        this.externalJobId = "";
+        this.sourceUrl = "";
+        this.postedDate = null;
+        this.fetchedAt = null;
     }
 
 
@@ -179,6 +205,66 @@ public class Internship {
         this.recruiterEmail = recruiterEmail;
         this.recruiterLinkedin = recruiterLinkedin;
         this.contactSource = contactSource;
+
+        this.sourceName = "Manual";
+        this.externalJobId = "";
+        this.sourceUrl = "";
+        this.postedDate = null;
+        this.fetchedAt = null;
+    }
+
+
+    // =========================================================
+    // Constructor for database records WITH recruiter + source
+    // =========================================================
+
+    public Internship(
+            int internshipId,
+            String companyName,
+            String jobRole,
+            String category,
+            String location,
+            String workMode,
+            String stipend,
+            String duration,
+            String requiredSkills,
+            LocalDate deadline,
+            String jobLink,
+            String recruiterName,
+            String recruiterRole,
+            String recruiterEmail,
+            String recruiterLinkedin,
+            String contactSource,
+            String sourceName,
+            String externalJobId,
+            String sourceUrl,
+            LocalDate postedDate,
+            LocalDateTime fetchedAt
+    ) {
+
+        this.internshipId = internshipId;
+        this.companyName = companyName;
+        this.jobRole = jobRole;
+        this.category = category;
+        this.location = location;
+        this.workMode = workMode;
+        this.stipend = stipend;
+        this.duration = duration;
+        this.requiredSkills = requiredSkills;
+        this.deadline = deadline;
+        this.jobLink = jobLink;
+
+        this.recruiterName = recruiterName;
+        this.recruiterRole = recruiterRole;
+        this.recruiterEmail = recruiterEmail;
+        this.recruiterLinkedin = recruiterLinkedin;
+        this.contactSource = contactSource;
+
+        this.sourceName = sourceName;
+        this.externalJobId = externalJobId;
+        this.sourceUrl = sourceUrl;
+        this.postedDate = postedDate;
+        this.fetchedAt = fetchedAt;
     }
 
 
@@ -248,5 +334,25 @@ public class Internship {
 
     public String getContactSource() {
         return contactSource;
+    }
+
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    public String getExternalJobId() {
+        return externalJobId;
+    }
+
+    public String getSourceUrl() {
+        return sourceUrl;
+    }
+
+    public LocalDate getPostedDate() {
+        return postedDate;
+    }
+
+    public LocalDateTime getFetchedAt() {
+        return fetchedAt;
     }
 }

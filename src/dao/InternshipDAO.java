@@ -7,7 +7,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -317,6 +321,40 @@ public class InternshipDAO {
                         : null;
 
 
+        // -----------------------------------------------------
+        // HANDLE NULL POSTED DATE SAFELY
+        // -----------------------------------------------------
+
+        java.sql.Date sqlPostedDate =
+                resultSet.getDate(
+                        "posted_date"
+                );
+
+        LocalDate postedDate =
+                sqlPostedDate != null
+                        ? sqlPostedDate.toLocalDate()
+                        : null;
+
+
+        // -----------------------------------------------------
+        // HANDLE NULL FETCHED DATE SAFELY
+        // -----------------------------------------------------
+
+        Timestamp sqlFetchedAt =
+                resultSet.getTimestamp(
+                        "fetched_at"
+                );
+
+        LocalDateTime fetchedAt =
+                sqlFetchedAt != null
+                        ? sqlFetchedAt.toLocalDateTime()
+                        : null;
+
+
+        // -----------------------------------------------------
+        // CREATE INTERNSHIP OBJECT
+        // -----------------------------------------------------
+
         return new Internship(
 
                 resultSet.getInt(
@@ -379,7 +417,23 @@ public class InternshipDAO {
 
                 resultSet.getString(
                         "contact_source"
-                )
+                ),
+
+                resultSet.getString(
+                        "source_name"
+                ),
+
+                resultSet.getString(
+                        "external_job_id"
+                ),
+
+                resultSet.getString(
+                        "source_url"
+                ),
+
+                postedDate,
+
+                fetchedAt
         );
     }
 }
