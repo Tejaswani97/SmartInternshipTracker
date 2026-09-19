@@ -1,26 +1,77 @@
 package api;
 
+import dao.InternshipDAO;
+import model.Internship;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import model.Internship;
-
 public class GreenhouseSource {
 
     public static void main(String[] args) {
 
-        String boardToken = "nirmata";
+        GreenhouseSource source =
+                new GreenhouseSource();
 
-        String url =
+        List<Internship> internships =
+                source.fetchInternships();
+
+        InternshipDAO dao =
+                new InternshipDAO();
+
+        for (Internship internship : internships) {
+
+            String result =
+                    dao.saveOrUpdate(
+                            internship
+                    );
+
+            System.out.println(
+                    result
+                    + ": "
+                    + internship.getJobRole()
+            );
+        }
+    }
+
+
+    // =========================================================
+    // FETCH INTERNSHIPS
+    // =========================================================
+
+    public List<Internship> fetchInternships() {
+
+        List<Internship> internships =
+                new ArrayList<>();
+
+        String boardToken =
+                "nirmata";
+
+        String companyName =
+                "Nirmata";
+
+        String boardUrl =
+                "https://job-boards.greenhouse.io/"
+                + boardToken;
+
+        String apiUrl =
                 "https://boards-api.greenhouse.io/v1/boards/"
                 + boardToken
                 + "/jobs?content=true";
@@ -28,7 +79,7 @@ public class GreenhouseSource {
         try {
 
             // -------------------------------------------------
-            // 1. SEND REQUEST
+            // SEND REQUEST
             // -------------------------------------------------
 
             HttpClient client =
@@ -36,7 +87,9 @@ public class GreenhouseSource {
 
             HttpRequest request =
                     HttpRequest.newBuilder()
-                            .uri(URI.create(url))
+                            .uri(
+                                    URI.create(apiUrl)
+                            )
                             .GET()
                             .build();
 
@@ -46,14 +99,12 @@ public class GreenhouseSource {
                             HttpResponse.BodyHandlers.ofString()
                     );
 
+
             System.out.println(
-                    "Status code: " + response.statusCode()
+                    "Status code: "
+                    + response.statusCode()
             );
 
-
-            // -------------------------------------------------
-            // 2. CHECK RESPONSE
-            // -------------------------------------------------
 
             if (response.statusCode() != 200) {
 
@@ -61,12 +112,12 @@ public class GreenhouseSource {
                         "Greenhouse request failed!"
                 );
 
-                return;
+                return internships;
             }
 
 
             // -------------------------------------------------
-            // 3. PARSE JSON
+            // PARSE JSON
             // -------------------------------------------------
 
             JsonObject data =
@@ -75,49 +126,123 @@ public class GreenhouseSource {
                     ).getAsJsonObject();
 
             JsonArray jobs =
-                    data.getAsJsonArray("jobs");
+                    data.getAsJsonArray(
+                            "jobs"
+                    );
+
 
             System.out.println(
-                    "Total jobs received: " + jobs.size()
+                    "Total jobs received: "
+                    + jobs.size()
             );
 
 
             // -------------------------------------------------
-            // 4. PROCESS EACH JOB
+            // PROCESS JOBS
             // -------------------------------------------------
 
-            for (JsonElement element : jobs) {
+            for (
+                    JsonElement element :
+                    jobs
+            ) {
 
                 JsonObject job =
                         element.getAsJsonObject();
 
                 String title =
-                        getString(job, "title");
+                        getString(
+                                job,
+                                "title"
+                        );
 
 
                 // -------------------------------------------------
-                // ONLY KEEP INTERNSHIPS
+                // ONLY INTERNSHIPS
                 // -------------------------------------------------
 
-                if (!title.toLowerCase().contains("intern")) {
+                if (
+                        !title
+                                .toLowerCase()
+                                .contains("intern")
+                ) {
+
                     continue;
                 }
 
 
                 // -------------------------------------------------
-                // BASIC JOB DATA
+                // JOB ID
                 // -------------------------------------------------
 
                 String externalJobId =
                         String.valueOf(
-                                job.get("id").getAsLong()
+                                job.get("id")
+                                        .getAsLong()
                         );
+
+
+                // -------------------------------------------------
+                // JOB LINK
+                // -------------------------------------------------
 
                 String jobLink =
                         getString(
                                 job,
                                 "absolute_url"
                         );
+
+
+                // -------------------------------------------------
+                // FULL DESCRIPTION
+                // -------------------------------------------------
+
+                String content =
+                        getString(
+                                job,
+                                "content"
+                        );
+
+
+                // -------------------------------------------------
+                // EXTRACT REAL REQUIRED SKILLS
+                // -------------------------------------------------
+
+                String requiredSkills =
+                        extractRequiredSkills(
+                                content
+                        );
+
+
+                // -------------------------------------------------
+                // EXTRACT PUBLIC EMAIL
+                // -------------------------------------------------
+
+                String recruiterEmail =
+                        extractEmail(
+                                content
+                        );
+
+
+                // -------------------------------------------------
+                // EXTRACT PUBLIC LINKEDIN URL
+                // -------------------------------------------------
+
+                String recruiterLinkedin =
+                        extractLinkedIn(
+                                content
+                        );
+
+
+                String contactSource = "";
+
+                if (
+                        !recruiterEmail.isBlank()
+                        || !recruiterLinkedin.isBlank()
+                ) {
+
+                    contactSource =
+                            "Greenhouse job description";
+                }
 
 
                 // -------------------------------------------------
@@ -129,7 +254,9 @@ public class GreenhouseSource {
 
                 if (
                         job.has("location")
-                        && !job.get("location").isJsonNull()
+                        && !job.get(
+                                "location"
+                        ).isJsonNull()
                 ) {
 
                     JsonObject locationObject =
@@ -150,7 +277,9 @@ public class GreenhouseSource {
                 // -------------------------------------------------
 
                 String workMode =
-                        detectWorkMode(location);
+                        detectWorkMode(
+                                location
+                        );
 
 
                 // -------------------------------------------------
@@ -162,7 +291,9 @@ public class GreenhouseSource {
 
                 if (
                         job.has("departments")
-                        && job.get("departments").isJsonArray()
+                        && job.get(
+                                "departments"
+                        ).isJsonArray()
                 ) {
 
                     JsonArray departments =
@@ -170,7 +301,10 @@ public class GreenhouseSource {
                                     "departments"
                             );
 
-                    if (departments.size() > 0) {
+                    if (
+                            departments.size()
+                                    > 0
+                    ) {
 
                         JsonObject department =
                                 departments
@@ -184,9 +318,12 @@ public class GreenhouseSource {
                                 );
 
                         if (
-                                departmentName != null
-                                && !departmentName.isBlank()
+                                departmentName
+                                        != null
+                                && !departmentName
+                                        .isBlank()
                         ) {
+
                             category =
                                     departmentName;
                         }
@@ -199,38 +336,25 @@ public class GreenhouseSource {
                 // -------------------------------------------------
 
                 LocalDate postedDate =
-                        null;
-
-                if (
-                        job.has("first_published")
-                        && !job.get(
+                        parseDate(
+                                job,
                                 "first_published"
-                        ).isJsonNull()
-                ) {
-
-                    String published =
-                            job.get(
-                                    "first_published"
-                            ).getAsString();
-
-                    if (
-                            published != null
-                            && published.length() >= 10
-                    ) {
-
-                        postedDate =
-                                LocalDate.parse(
-                                        published.substring(
-                                                0,
-                                                10
-                                        )
-                                );
-                    }
-                }
+                        );
 
 
                 // -------------------------------------------------
-                // CREATE INTERNSHIP OBJECT
+                // DEADLINE
+                // -------------------------------------------------
+
+                LocalDate deadline =
+                        parseDate(
+                                job,
+                                "application_deadline"
+                        );
+
+
+                // -------------------------------------------------
+                // CREATE INTERNSHIP
                 // -------------------------------------------------
 
                 Internship internship =
@@ -238,7 +362,7 @@ public class GreenhouseSource {
 
                                 0,
 
-                                "Nirmata",
+                                companyName,
 
                                 title,
 
@@ -252,9 +376,9 @@ public class GreenhouseSource {
 
                                 "Not specified",
 
-                                "",
+                                requiredSkills,
 
-                                null,
+                                deadline,
 
                                 jobLink,
 
@@ -262,17 +386,17 @@ public class GreenhouseSource {
 
                                 "",
 
-                                "",
+                                recruiterEmail,
 
-                                "",
+                                recruiterLinkedin,
 
-                                "",
+                                contactSource,
 
                                 "Greenhouse",
 
                                 externalJobId,
 
-                                url,
+                                boardUrl,
 
                                 postedDate,
 
@@ -280,8 +404,13 @@ public class GreenhouseSource {
                         );
 
 
+                internships.add(
+                        internship
+                );
+
+
                 // -------------------------------------------------
-                // DISPLAY RESULT
+                // DISPLAY WHAT WE IMPORTED
                 // -------------------------------------------------
 
                 System.out.println(
@@ -289,54 +418,290 @@ public class GreenhouseSource {
                 );
 
                 System.out.println(
-                        "Company: "
-                        + internship.getCompanyName()
-                );
-
-                System.out.println(
                         "Role: "
-                        + internship.getJobRole()
-                );
-
-                System.out.println(
-                        "Category: "
-                        + internship.getCategory()
+                        + title
                 );
 
                 System.out.println(
                         "Location: "
-                        + internship.getLocation()
+                        + location
                 );
 
                 System.out.println(
-                        "Work Mode: "
-                        + internship.getWorkMode()
+                        "Skills: "
+                        + requiredSkills
                 );
 
                 System.out.println(
-                        "External ID: "
-                        + internship.getExternalJobId()
+                        "Recruiter email: "
+                        + (
+                            recruiterEmail.isBlank()
+                            ? "Not published"
+                            : recruiterEmail
+                        )
                 );
 
                 System.out.println(
-                        "Posted Date: "
-                        + internship.getPostedDate()
-                );
-
-                System.out.println(
-                        "Job Link: "
-                        + internship.getJobLink()
-                );
-
-                System.out.println(
-                        "Source: "
-                        + internship.getSourceName()
+                        "Recruiter LinkedIn: "
+                        + (
+                            recruiterLinkedin.isBlank()
+                            ? "Not published"
+                            : recruiterLinkedin
+                        )
                 );
             }
 
         } catch (Exception e) {
 
             e.printStackTrace();
+        }
+
+
+        return internships;
+    }
+
+
+    // =========================================================
+    // EXTRACT REQUIRED SKILLS
+    // =========================================================
+
+    private String extractRequiredSkills(
+            String content
+    ) {
+
+        if (
+                content == null
+                || content.isBlank()
+        ) {
+
+            return "";
+        }
+
+        String text =
+                content
+                        .replaceAll(
+                                "<[^>]*>",
+                                " "
+                        )
+                        .replace(
+                                "&amp;",
+                                "&"
+                        )
+                        .replace(
+                                "&nbsp;",
+                                " "
+                        )
+                        .toLowerCase();
+
+
+        String[][] skillNames = {
+
+                {
+                        "machine learning",
+                        "Machine Learning"
+                },
+
+                {
+                        "data science",
+                        "Data Science"
+                },
+
+                {
+                        "ai agents",
+                        "AI Agents"
+                },
+
+                {
+                        "mcp servers",
+                        "MCP Servers"
+                },
+
+                {
+                        "large language models",
+                        "Large Language Models"
+                },
+
+                {
+                        "generative ai",
+                        "Generative AI"
+                },
+
+                {
+                        "retrieval-augmented generation",
+                        "Retrieval-Augmented Generation"
+                },
+
+                {
+                        "model tuning",
+                        "Model Tuning"
+                },
+
+                {
+                        "slms",
+                        "SLMs"
+                },
+
+                {
+                        "fine-tuning",
+                        "Fine-Tuning"
+                },
+
+                {
+                        "kubernetes",
+                        "Kubernetes"
+                },
+
+                {
+                        "cloud native",
+                        "Cloud Native"
+                }
+        };
+
+
+        Set<String> foundSkills =
+                new LinkedHashSet<>();
+
+
+        for (
+                String[] skill :
+                skillNames
+        ) {
+
+            if (
+                    text.contains(
+                            skill[0]
+                    )
+            ) {
+
+                foundSkills.add(
+                        skill[1]
+                );
+            }
+        }
+
+
+        return String.join(
+                ", ",
+                foundSkills
+        );
+    }
+
+
+    // =========================================================
+    // EXTRACT EMAIL
+    // =========================================================
+
+    private String extractEmail(
+            String content
+    ) {
+
+        if (
+                content == null
+                || content.isBlank()
+        ) {
+
+            return "";
+        }
+
+        Pattern pattern =
+                Pattern.compile(
+                        "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
+                );
+
+        Matcher matcher =
+                pattern.matcher(
+                        content
+                );
+
+        if (matcher.find()) {
+
+            return matcher.group();
+        }
+
+        return "";
+    }
+
+
+    // =========================================================
+    // EXTRACT LINKEDIN URL
+    // =========================================================
+
+    private String extractLinkedIn(
+            String content
+    ) {
+
+        if (
+                content == null
+                || content.isBlank()
+        ) {
+
+            return "";
+        }
+
+        Pattern pattern =
+                Pattern.compile(
+                        "https?://(?:www\\.)?linkedin\\.com/[^\\s\"'<>]+",
+                        Pattern.CASE_INSENSITIVE
+                );
+
+        Matcher matcher =
+                pattern.matcher(
+                        content
+                );
+
+        if (matcher.find()) {
+
+            return matcher.group();
+        }
+
+        return "";
+    }
+
+
+    // =========================================================
+    // PARSE DATE
+    // =========================================================
+
+    private LocalDate parseDate(
+            JsonObject job,
+            String field
+    ) {
+
+        if (
+                !job.has(field)
+                || job.get(
+                        field
+                ).isJsonNull()
+        ) {
+
+            return null;
+        }
+
+        String value =
+                job.get(
+                        field
+                ).getAsString();
+
+        if (
+                value == null
+                || value.length() < 10
+        ) {
+
+            return null;
+        }
+
+        try {
+
+            return LocalDate.parse(
+                    value.substring(
+                            0,
+                            10
+                    )
+            );
+
+        } catch (Exception e) {
+
+            return null;
         }
     }
 
@@ -345,7 +710,7 @@ public class GreenhouseSource {
     // SAFE STRING READER
     // =========================================================
 
-    private static String getString(
+    private String getString(
             JsonObject object,
             String field
     ) {
@@ -353,12 +718,17 @@ public class GreenhouseSource {
         if (
                 object == null
                 || !object.has(field)
-                || object.get(field).isJsonNull()
+                || object.get(
+                        field
+                ).isJsonNull()
         ) {
+
             return "";
         }
 
-        return object.get(field).getAsString();
+        return object.get(
+                field
+        ).getAsString();
     }
 
 
@@ -366,31 +736,54 @@ public class GreenhouseSource {
     // DETECT WORK MODE
     // =========================================================
 
-    private static String detectWorkMode(
+    private String detectWorkMode(
             String location
     ) {
 
-        if (location == null) {
+        if (
+                location == null
+                || location.isBlank()
+        ) {
+
             return "Not specified";
         }
 
         String lower =
                 location.toLowerCase();
 
-        if (lower.contains("remote")) {
+
+        if (
+                lower.contains(
+                        "remote"
+                )
+        ) {
+
             return "Remote";
         }
 
-        if (lower.contains("hybrid")) {
+
+        if (
+                lower.contains(
+                        "hybrid"
+                )
+        ) {
+
             return "Hybrid";
         }
 
+
         if (
-                lower.contains("on-site")
-                || lower.contains("onsite")
+                lower.contains(
+                        "on-site"
+                )
+                || lower.contains(
+                        "onsite"
+                )
         ) {
+
             return "On-site";
         }
+
 
         return "Not specified";
     }
