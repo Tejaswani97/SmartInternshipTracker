@@ -3,6 +3,11 @@ package api;
 import dao.InternshipDAO;
 import model.Internship;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -15,15 +20,15 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 public class GreenhouseSource {
+
+    // =========================================================
+    // MAIN
+    // =========================================================
 
     public static void main(String[] args) {
 
@@ -31,10 +36,15 @@ public class GreenhouseSource {
                 new GreenhouseSource();
 
         List<Internship> internships =
-                source.fetchInternships();
+                source.fetchAllInternships();
 
         InternshipDAO dao =
                 new InternshipDAO();
+
+        System.out.println();
+        System.out.println("==============================");
+        System.out.println("SAVING GREENHOUSE INTERNSHIPS");
+        System.out.println("==============================");
 
         for (Internship internship : internships) {
 
@@ -45,53 +55,131 @@ public class GreenhouseSource {
 
             System.out.println(
                     result
-                    + ": "
-                    + internship.getJobRole()
+                            + ": "
+                            + internship.getCompanyName()
+                            + " - "
+                            + internship.getJobRole()
             );
         }
+
+        System.out.println();
+        System.out.println(
+                "Total internships collected: "
+                        + internships.size()
+        );
     }
 
 
     // =========================================================
-    // FETCH INTERNSHIPS
+    // FETCH FROM ALL GREENHOUSE COMPANIES
     // =========================================================
 
-    public List<Internship> fetchInternships() {
+    public List<Internship> fetchAllInternships() {
 
-        List<Internship> internships =
+        List<Internship> allInternships =
                 new ArrayList<>();
 
-        String boardToken =
-                "nirmata";
 
-        String companyName =
-                "Nirmata";
+        // -----------------------------------------------------
+        // NIRMATA
+        // -----------------------------------------------------
 
-        String boardUrl =
+        fetchCompanyInternships(
+                "nirmata",
+                "Nirmata",
+                allInternships
+        );
+
+
+        // -----------------------------------------------------
+        // INSTAWORK
+        // -----------------------------------------------------
+
+        fetchCompanyInternships(
+                "instawork",
+                "Instawork",
+                allInternships
+        );
+
+
+        // -----------------------------------------------------
+        // GRAPHCORE
+        // -----------------------------------------------------
+
+        fetchCompanyInternships(
+                "graphcore",
+                "Graphcore",
+                allInternships
+        );
+
+
+        return allInternships;
+    }
+
+
+    // =========================================================
+    // FETCH ONE COMPANY
+    // =========================================================
+
+    private void fetchCompanyInternships(
+            String boardToken,
+            String companyName,
+            List<Internship> allInternships
+    ) {
+
+        String sourceUrl =
                 "https://job-boards.greenhouse.io/"
-                + boardToken;
+                        + boardToken;
 
         String apiUrl =
                 "https://boards-api.greenhouse.io/v1/boards/"
-                + boardToken
-                + "/jobs?content=true";
+                        + boardToken
+                        + "/jobs?content=true";
+
+
+        System.out.println();
+        System.out.println(
+                "================================"
+        );
+
+        System.out.println(
+                "Fetching: "
+                        + companyName
+        );
+
+        System.out.println(
+                "================================"
+        );
+
 
         try {
 
             // -------------------------------------------------
-            // SEND REQUEST
+            // HTTP CLIENT
             // -------------------------------------------------
 
             HttpClient client =
                     HttpClient.newHttpClient();
 
+
+            // -------------------------------------------------
+            // REQUEST
+            // -------------------------------------------------
+
             HttpRequest request =
                     HttpRequest.newBuilder()
                             .uri(
-                                    URI.create(apiUrl)
+                                    URI.create(
+                                            apiUrl
+                                    )
                             )
                             .GET()
                             .build();
+
+
+            // -------------------------------------------------
+            // SEND REQUEST
+            // -------------------------------------------------
 
             HttpResponse<String> response =
                     client.send(
@@ -102,17 +190,25 @@ public class GreenhouseSource {
 
             System.out.println(
                     "Status code: "
-                    + response.statusCode()
+                            + response.statusCode()
             );
 
 
-            if (response.statusCode() != 200) {
+            // -------------------------------------------------
+            // CHECK RESPONSE
+            // -------------------------------------------------
+
+            if (
+                    response.statusCode()
+                            != 200
+            ) {
 
                 System.out.println(
-                        "Greenhouse request failed!"
+                        "Could not fetch "
+                                + companyName
                 );
 
-                return internships;
+                return;
             }
 
 
@@ -125,6 +221,7 @@ public class GreenhouseSource {
                             response.body()
                     ).getAsJsonObject();
 
+
             JsonArray jobs =
                     data.getAsJsonArray(
                             "jobs"
@@ -133,8 +230,11 @@ public class GreenhouseSource {
 
             System.out.println(
                     "Total jobs received: "
-                    + jobs.size()
+                            + jobs.size()
             );
+
+
+            int internshipCount = 0;
 
 
             // -------------------------------------------------
@@ -149,6 +249,11 @@ public class GreenhouseSource {
                 JsonObject job =
                         element.getAsJsonObject();
 
+
+                // -------------------------------------------------
+                // JOB TITLE
+                // -------------------------------------------------
+
                 String title =
                         getString(
                                 job,
@@ -157,28 +262,43 @@ public class GreenhouseSource {
 
 
                 // -------------------------------------------------
-                // ONLY INTERNSHIPS
+                // ONLY REAL INTERNSHIPS
                 // -------------------------------------------------
 
                 if (
-                        !title
-                                .toLowerCase()
-                                .contains("intern")
+                        !isInternshipTitle(
+                                title
+                        )
                 ) {
 
                     continue;
                 }
 
 
+                internshipCount++;
+
+
                 // -------------------------------------------------
-                // JOB ID
+                // EXTERNAL JOB ID
                 // -------------------------------------------------
 
                 String externalJobId =
-                        String.valueOf(
-                                job.get("id")
-                                        .getAsLong()
-                        );
+                        "";
+
+                if (
+                        job.has("id")
+                        && !job.get(
+                                "id"
+                        ).isJsonNull()
+                ) {
+
+                    externalJobId =
+                            String.valueOf(
+                                    job.get(
+                                            "id"
+                                    ).getAsLong()
+                            );
+                }
 
 
                 // -------------------------------------------------
@@ -193,7 +313,7 @@ public class GreenhouseSource {
 
 
                 // -------------------------------------------------
-                // FULL DESCRIPTION
+                // DESCRIPTION
                 // -------------------------------------------------
 
                 String content =
@@ -204,7 +324,7 @@ public class GreenhouseSource {
 
 
                 // -------------------------------------------------
-                // EXTRACT REAL REQUIRED SKILLS
+                // REQUIRED SKILLS
                 // -------------------------------------------------
 
                 String requiredSkills =
@@ -214,7 +334,7 @@ public class GreenhouseSource {
 
 
                 // -------------------------------------------------
-                // EXTRACT PUBLIC EMAIL
+                // PUBLIC EMAIL
                 // -------------------------------------------------
 
                 String recruiterEmail =
@@ -224,7 +344,7 @@ public class GreenhouseSource {
 
 
                 // -------------------------------------------------
-                // EXTRACT PUBLIC LINKEDIN URL
+                // PUBLIC LINKEDIN
                 // -------------------------------------------------
 
                 String recruiterLinkedin =
@@ -233,11 +353,13 @@ public class GreenhouseSource {
                         );
 
 
-                String contactSource = "";
+                String contactSource =
+                        "";
 
                 if (
                         !recruiterEmail.isBlank()
-                        || !recruiterLinkedin.isBlank()
+                        ||
+                        !recruiterLinkedin.isBlank()
                 ) {
 
                     contactSource =
@@ -252,11 +374,12 @@ public class GreenhouseSource {
                 String location =
                         "Not specified";
 
+
                 if (
                         job.has("location")
-                        && !job.get(
+                        && job.get(
                                 "location"
-                        ).isJsonNull()
+                        ).isJsonObject()
                 ) {
 
                     JsonObject locationObject =
@@ -264,11 +387,20 @@ public class GreenhouseSource {
                                     "location"
                             );
 
-                    location =
+                    String locationName =
                             getString(
                                     locationObject,
                                     "name"
                             );
+
+
+                    if (
+                            !locationName.isBlank()
+                    ) {
+
+                        location =
+                                locationName;
+                    }
                 }
 
 
@@ -289,6 +421,7 @@ public class GreenhouseSource {
                 String category =
                         "Internship";
 
+
                 if (
                         job.has("departments")
                         && job.get(
@@ -301,6 +434,7 @@ public class GreenhouseSource {
                                     "departments"
                             );
 
+
                     if (
                             departments.size()
                                     > 0
@@ -311,16 +445,16 @@ public class GreenhouseSource {
                                         .get(0)
                                         .getAsJsonObject();
 
+
                         String departmentName =
                                 getString(
                                         department,
                                         "name"
                                 );
 
+
                         if (
-                                departmentName
-                                        != null
-                                && !departmentName
+                                !departmentName
                                         .isBlank()
                         ) {
 
@@ -354,7 +488,7 @@ public class GreenhouseSource {
 
 
                 // -------------------------------------------------
-                // CREATE INTERNSHIP
+                // CREATE INTERNSHIP OBJECT
                 // -------------------------------------------------
 
                 Internship internship =
@@ -396,7 +530,7 @@ public class GreenhouseSource {
 
                                 externalJobId,
 
-                                boardUrl,
+                                sourceUrl,
 
                                 postedDate,
 
@@ -404,13 +538,13 @@ public class GreenhouseSource {
                         );
 
 
-                internships.add(
+                allInternships.add(
                         internship
                 );
 
 
                 // -------------------------------------------------
-                // DISPLAY WHAT WE IMPORTED
+                // DISPLAY
                 // -------------------------------------------------
 
                 System.out.println(
@@ -418,46 +552,106 @@ public class GreenhouseSource {
                 );
 
                 System.out.println(
+                        "Company: "
+                                + companyName
+                );
+
+                System.out.println(
                         "Role: "
-                        + title
+                                + title
                 );
 
                 System.out.println(
                         "Location: "
-                        + location
+                                + location
+                );
+
+                System.out.println(
+                        "Work Mode: "
+                                + workMode
                 );
 
                 System.out.println(
                         "Skills: "
-                        + requiredSkills
+                                + (
+                                        requiredSkills.isBlank()
+                                                ? "Not detected"
+                                                : requiredSkills
+                                )
                 );
 
                 System.out.println(
-                        "Recruiter email: "
-                        + (
-                            recruiterEmail.isBlank()
-                            ? "Not published"
-                            : recruiterEmail
-                        )
+                        "Email: "
+                                + (
+                                        recruiterEmail.isBlank()
+                                                ? "Not published"
+                                                : recruiterEmail
+                                )
                 );
 
                 System.out.println(
-                        "Recruiter LinkedIn: "
-                        + (
-                            recruiterLinkedin.isBlank()
-                            ? "Not published"
-                            : recruiterLinkedin
-                        )
+                        "LinkedIn: "
+                                + (
+                                        recruiterLinkedin.isBlank()
+                                                ? "Not published"
+                                                : recruiterLinkedin
+                                )
+                );
+
+                System.out.println(
+                        "Job ID: "
+                                + externalJobId
                 );
             }
 
+
+            System.out.println(
+                    "Internships found from "
+                            + companyName
+                            + ": "
+                            + internshipCount
+            );
+
+
         } catch (Exception e) {
+
+            System.out.println(
+                    "Error while fetching "
+                            + companyName
+            );
 
             e.printStackTrace();
         }
+    }
 
 
-        return internships;
+    // =========================================================
+    // CHECK WHETHER TITLE IS REALLY AN INTERNSHIP
+    // =========================================================
+
+    private boolean isInternshipTitle(
+            String title
+    ) {
+
+        if (
+                title == null
+                || title.isBlank()
+        ) {
+
+            return false;
+        }
+
+
+        Pattern pattern =
+                Pattern.compile(
+                        "\\b(intern|interns|internship)\\b",
+                        Pattern.CASE_INSENSITIVE
+                );
+
+
+        return pattern
+                .matcher(title)
+                .find();
     }
 
 
@@ -476,6 +670,7 @@ public class GreenhouseSource {
 
             return "";
         }
+
 
         String text =
                 content
@@ -497,6 +692,21 @@ public class GreenhouseSource {
         String[][] skillNames = {
 
                 {
+                        "java",
+                        "Java"
+                },
+
+                {
+                        "python",
+                        "Python"
+                },
+
+                {
+                        "sql",
+                        "SQL"
+                },
+
+                {
                         "machine learning",
                         "Machine Learning"
                 },
@@ -507,18 +717,8 @@ public class GreenhouseSource {
                 },
 
                 {
-                        "ai agents",
-                        "AI Agents"
-                },
-
-                {
-                        "mcp servers",
-                        "MCP Servers"
-                },
-
-                {
-                        "large language models",
-                        "Large Language Models"
+                        "artificial intelligence",
+                        "Artificial Intelligence"
                 },
 
                 {
@@ -527,23 +727,33 @@ public class GreenhouseSource {
                 },
 
                 {
-                        "retrieval-augmented generation",
-                        "Retrieval-Augmented Generation"
+                        "ai agents",
+                        "AI Agents"
                 },
 
                 {
-                        "model tuning",
-                        "Model Tuning"
+                        "llm",
+                        "LLM"
                 },
 
                 {
-                        "slms",
-                        "SLMs"
+                        "large language models",
+                        "Large Language Models"
                 },
 
                 {
-                        "fine-tuning",
-                        "Fine-Tuning"
+                        "deep learning",
+                        "Deep Learning"
+                },
+
+                {
+                        "tensorflow",
+                        "TensorFlow"
+                },
+
+                {
+                        "pytorch",
+                        "PyTorch"
                 },
 
                 {
@@ -552,8 +762,73 @@ public class GreenhouseSource {
                 },
 
                 {
-                        "cloud native",
-                        "Cloud Native"
+                        "aws",
+                        "AWS"
+                },
+
+                {
+                        "gcp",
+                        "GCP"
+                },
+
+                {
+                        "docker",
+                        "Docker"
+                },
+
+                {
+                        "react",
+                        "React"
+                },
+
+                {
+                        "javascript",
+                        "JavaScript"
+                },
+
+                {
+                        "typescript",
+                        "TypeScript"
+                },
+
+                {
+                        "c++",
+                        "C++"
+                },
+
+                {
+                        "c#",
+                        "C#"
+                },
+
+                {
+                        "git",
+                        "Git"
+                },
+
+                {
+                        "linux",
+                        "Linux"
+                },
+
+                {
+                        "kotlin",
+                        "Kotlin"
+                },
+
+                {
+                        "swift",
+                        "Swift"
+                },
+
+                {
+                        "ruby",
+                        "Ruby"
+                },
+
+                {
+                        "go",
+                        "Go"
                 }
         };
 
@@ -568,7 +843,8 @@ public class GreenhouseSource {
         ) {
 
             if (
-                    text.contains(
+                    containsSkill(
+                            text,
                             skill[0]
                     )
             ) {
@@ -588,6 +864,30 @@ public class GreenhouseSource {
 
 
     // =========================================================
+    // SAFE SKILL MATCH
+    // =========================================================
+
+    private boolean containsSkill(
+            String text,
+            String skill
+    ) {
+
+        String regex =
+                "(?i)(?<![A-Za-z0-9])"
+                        + Pattern.quote(skill)
+                        + "(?![A-Za-z0-9])";
+
+
+        return Pattern
+                .compile(
+                        regex
+                )
+                .matcher(text)
+                .find();
+    }
+
+
+    // =========================================================
     // EXTRACT EMAIL
     // =========================================================
 
@@ -603,27 +903,31 @@ public class GreenhouseSource {
             return "";
         }
 
+
         Pattern pattern =
                 Pattern.compile(
                         "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
                 );
+
 
         Matcher matcher =
                 pattern.matcher(
                         content
                 );
 
+
         if (matcher.find()) {
 
             return matcher.group();
         }
+
 
         return "";
     }
 
 
     // =========================================================
-    // EXTRACT LINKEDIN URL
+    // EXTRACT LINKEDIN
     // =========================================================
 
     private String extractLinkedIn(
@@ -638,21 +942,25 @@ public class GreenhouseSource {
             return "";
         }
 
+
         Pattern pattern =
                 Pattern.compile(
                         "https?://(?:www\\.)?linkedin\\.com/[^\\s\"'<>]+",
                         Pattern.CASE_INSENSITIVE
                 );
 
+
         Matcher matcher =
                 pattern.matcher(
                         content
                 );
 
+
         if (matcher.find()) {
 
             return matcher.group();
         }
+
 
         return "";
     }
@@ -677,10 +985,12 @@ public class GreenhouseSource {
             return null;
         }
 
+
         String value =
                 job.get(
                         field
                 ).getAsString();
+
 
         if (
                 value == null
@@ -689,6 +999,7 @@ public class GreenhouseSource {
 
             return null;
         }
+
 
         try {
 
@@ -726,6 +1037,7 @@ public class GreenhouseSource {
             return "";
         }
 
+
         return object.get(
                 field
         ).getAsString();
@@ -747,6 +1059,7 @@ public class GreenhouseSource {
 
             return "Not specified";
         }
+
 
         String lower =
                 location.toLowerCase();
@@ -776,7 +1089,8 @@ public class GreenhouseSource {
                 lower.contains(
                         "on-site"
                 )
-                || lower.contains(
+                ||
+                lower.contains(
                         "onsite"
                 )
         ) {
