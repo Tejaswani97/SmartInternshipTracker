@@ -73,6 +73,8 @@ public class InternshipsFrame extends JFrame {
     private JLabel resultCountLabel;
     private JButton refreshButton;
 
+    private Timer autoRefreshTimer;
+
     private JPanel resultsPanel;
 
     private final InternshipDAO internshipDAO;
@@ -129,8 +131,9 @@ public class InternshipsFrame extends JFrame {
 
         loadAllInternships();
 
-        // Refresh real opportunities in the background when the page opens.
+        // Refresh real opportunities immediately when the page opens.
         refreshAllSources();
+        startAutoRefresh();
     }
 
 
@@ -2089,556 +2092,13 @@ JLabel deadline =
             Internship internship
     ) {
 
-        JDialog dialog =
-                new JDialog(
+        InternshipDetailsDialog dialog =
+                new InternshipDetailsDialog(
                         this,
-                        "Internship Details",
-                        true
+                        internship,
+                        user,
+                        () -> apply(internship)
                 );
-
-        dialog.setSize(
-                820,
-                700
-        );
-
-        dialog.setMinimumSize(
-                new Dimension(
-                        700,
-                        600
-                )
-        );
-
-        dialog.setLocationRelativeTo(this);
-
-        dialog.setLayout(
-                new BorderLayout()
-        );
-
-
-        // =========================================================
-        // HEADER
-        // =========================================================
-
-        JPanel header =
-                new JPanel(
-                        new BorderLayout()
-                );
-
-        header.setBackground(
-                CARD
-        );
-
-        header.setBorder(
-                new EmptyBorder(
-                        20,
-                        24,
-                        18,
-                        24
-                )
-        );
-
-
-        JPanel headerText =
-                new JPanel();
-
-        headerText.setOpaque(false);
-
-        headerText.setLayout(
-                new BoxLayout(
-                        headerText,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-
-        JLabel companyLabel =
-                new JLabel(
-                        safeValue(
-                                internship.getCompanyName()
-                        )
-                );
-
-        companyLabel.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        25
-                )
-        );
-
-        companyLabel.setForeground(
-                TEXT
-        );
-
-
-        JLabel roleLabel =
-                new JLabel(
-                        safeValue(
-                                internship.getJobRole()
-                        )
-                );
-
-        roleLabel.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.PLAIN,
-                        16
-                )
-        );
-
-        roleLabel.setForeground(
-                MUTED
-        );
-
-
-        headerText.add(
-                companyLabel
-        );
-
-        headerText.add(
-                Box.createVerticalStrut(4)
-        );
-
-        headerText.add(
-                roleLabel
-        );
-
-
-        header.add(
-                headerText,
-                BorderLayout.CENTER
-        );
-
-
-        // =========================================================
-        // SCROLLABLE CONTENT
-        // =========================================================
-
-        JPanel body =
-                new JPanel(
-                        new GridBagLayout()
-                );
-
-        body.setBackground(
-                BACKGROUND
-        );
-
-        body.setBorder(
-                new EmptyBorder(
-                        20,
-                        24,
-                        20,
-                        24
-                )
-        );
-
-
-        GridBagConstraints bodyGbc =
-                new GridBagConstraints();
-
-        bodyGbc.gridx = 0;
-        bodyGbc.gridy = 0;
-        bodyGbc.weightx = 1;
-        bodyGbc.fill =
-                GridBagConstraints.HORIZONTAL;
-        bodyGbc.anchor =
-                GridBagConstraints.NORTHWEST;
-        bodyGbc.insets =
-                new Insets(
-                        0,
-                        0,
-                        14,
-                        0
-                );
-
-
-        // =========================================================
-        // INTERNSHIP INFORMATION
-        // =========================================================
-
-        JPanel internshipSection =
-                createDetailsSection(
-                        "Internship Information"
-                );
-
-        JPanel internshipGrid =
-                new JPanel(
-                        new GridBagLayout()
-                );
-
-        internshipGrid.setOpaque(false);
-
-        addDetailRow(
-                internshipGrid,
-                0,
-                "Category",
-                internship.getCategory()
-        );
-
-        addDetailRow(
-                internshipGrid,
-                1,
-                "Location",
-                internship.getLocation()
-        );
-
-        addDetailRow(
-                internshipGrid,
-                2,
-                "Work Mode",
-                internship.getWorkMode()
-        );
-
-        addDetailRow(
-                internshipGrid,
-                3,
-                "Stipend",
-                internship.getStipend()
-        );
-
-        addDetailRow(
-                internshipGrid,
-                4,
-                "Duration",
-                internship.getDuration()
-        );
-
-        addDetailRow(
-                internshipGrid,
-                5,
-                "Deadline",
-                internship.getDeadline() != null
-                        ? internship.getDeadline().toString()
-                        : "Not specified"
-        );
-
-        addDetailRow(
-                internshipGrid,
-                6,
-                "Source",
-                internship.getSourceName()
-        );
-
-        internshipSection.add(
-                internshipGrid,
-                BorderLayout.CENTER
-        );
-
-        body.add(
-                internshipSection,
-                bodyGbc
-        );
-
-
-        // =========================================================
-        // SKILLS
-        // =========================================================
-
-        bodyGbc.gridy++;
-
-        JPanel skillsSection =
-                createDetailsSection(
-                        "Required Skills"
-                );
-
-        JLabel skillsLabel =
-                new JLabel(
-                        "<html><div style='width:680px;'>"
-                                + safeValue(
-                                        internship.getRequiredSkills()
-                                )
-                                + "</div></html>"
-                );
-
-        skillsLabel.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.PLAIN,
-                        14
-                )
-        );
-
-        skillsLabel.setForeground(
-                TEXT
-        );
-
-        skillsSection.add(
-                skillsLabel,
-                BorderLayout.CENTER
-        );
-
-        body.add(
-                skillsSection,
-                bodyGbc
-        );
-
-
-        // =========================================================
-        // RECRUITER & OUTREACH
-        // =========================================================
-
-        bodyGbc.gridy++;
-
-        JPanel recruiterSection =
-                createDetailsSection(
-                        "Recruiter & Outreach"
-                );
-
-        JPanel recruiterGrid =
-                new JPanel(
-                        new GridBagLayout()
-                );
-
-        recruiterGrid.setOpaque(false);
-
-        addDetailRow(
-                recruiterGrid,
-                0,
-                "Recruiter",
-                internship.getRecruiterName()
-        );
-
-        addDetailRow(
-                recruiterGrid,
-                1,
-                "Role",
-                internship.getRecruiterRole()
-        );
-
-
-        GridBagConstraints emailGbc =
-                new GridBagConstraints();
-
-        emailGbc.gridx = 0;
-        emailGbc.gridy = 2;
-        emailGbc.weightx = 0.5;
-        emailGbc.fill =
-                GridBagConstraints.HORIZONTAL;
-        emailGbc.anchor =
-                GridBagConstraints.NORTHWEST;
-        emailGbc.insets =
-                new Insets(
-                        7,
-                        0,
-                        7,
-                        20
-                );
-
-        JLabel emailTitle =
-                new JLabel(
-                        "Email"
-                );
-
-        emailTitle.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        12
-                )
-        );
-
-        emailTitle.setForeground(
-                MUTED
-        );
-
-        recruiterGrid.add(
-                emailTitle,
-                emailGbc
-        );
-
-
-        emailGbc.gridx = 1;
-        emailGbc.weightx = 1;
-        emailGbc.insets =
-                new Insets(
-                        7,
-                        0,
-                        7,
-                        0
-                );
-
-        recruiterGrid.add(
-                createEmailValuePanel(
-                        internship
-                ),
-                emailGbc
-        );
-
-
-        addDetailRow(
-                recruiterGrid,
-                3,
-                "Contact Source",
-                internship.getContactSource()
-        );
-
-        recruiterSection.add(
-                recruiterGrid,
-                BorderLayout.CENTER
-        );
-
-
-        String linkedin =
-                internship.getRecruiterLinkedin();
-
-        if (
-                linkedin != null
-                        && !linkedin.isBlank()
-        ) {
-
-            final String linkedinUrl =
-                    linkedin;
-
-            JButton linkedinButton =
-                    createButton(
-                            "Open LinkedIn",
-                            BLUE
-                    );
-
-            linkedinButton.addActionListener(
-                    e -> {
-
-                        try {
-
-                            Desktop.getDesktop()
-                                    .browse(
-                                            new URI(
-                                                    linkedinUrl
-                                            )
-                                    );
-
-                        } catch (Exception ex) {
-
-                            JOptionPane.showMessageDialog(
-                                    dialog,
-                                    "Unable to open the LinkedIn profile.",
-                                    "Error",
-                                    JOptionPane.ERROR_MESSAGE
-                            );
-                        }
-                    }
-            );
-
-            JPanel linkedinPanel =
-                    new JPanel(
-                            new FlowLayout(
-                                    FlowLayout.LEFT,
-                                    0,
-                                    8
-                            )
-                    );
-
-            linkedinPanel.setOpaque(false);
-
-            linkedinPanel.add(
-                    linkedinButton
-            );
-
-            recruiterSection.add(
-                    linkedinPanel,
-                    BorderLayout.SOUTH
-            );
-        }
-
-        body.add(
-                recruiterSection,
-                bodyGbc
-        );
-
-
-        // =========================================================
-        // BOTTOM SPACER
-        // =========================================================
-
-        bodyGbc.gridy++;
-        bodyGbc.weighty = 1;
-        bodyGbc.fill = GridBagConstraints.BOTH;
-        bodyGbc.insets = new Insets(0, 0, 0, 0);
-
-        body.add(
-                Box.createGlue(),
-                bodyGbc
-        );
-
-
-        JScrollPane scrollPane =
-                new JScrollPane(
-                        body
-                );
-
-        scrollPane.setBorder(null);
-
-        scrollPane.setHorizontalScrollBarPolicy(
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
-        );
-
-        scrollPane.setVerticalScrollBarPolicy(
-                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
-        );
-
-        scrollPane.getVerticalScrollBar()
-                .setUnitIncrement(16);
-
-
-        // =========================================================
-        // BOTTOM ACTIONS
-        // =========================================================
-
-        JPanel bottom =
-                new JPanel(
-                        new FlowLayout(
-                                FlowLayout.RIGHT,
-                                10,
-                                12
-                        )
-                );
-
-        bottom.setBackground(
-                BACKGROUND
-        );
-
-        bottom.setBorder(
-                new EmptyBorder(
-                        0,
-                        20,
-                        5,
-                        20
-                )
-        );
-
-        JButton closeButton =
-                createButton(
-                        "Close",
-                        new Color(
-                                107,
-                                114,
-                                128
-                        )
-                );
-
-        closeButton.addActionListener(
-                e -> dialog.dispose()
-        );
-
-        bottom.add(
-                closeButton
-        );
-
-
-        dialog.add(
-                header,
-                BorderLayout.NORTH
-        );
-
-        dialog.add(
-                scrollPane,
-                BorderLayout.CENTER
-        );
-
-        dialog.add(
-                bottom,
-                BorderLayout.SOUTH
-        );
 
         dialog.setVisible(true);
     }
@@ -3300,106 +2760,151 @@ JLabel deadline =
 
     private void refreshAllSources() {
 
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(this::refreshAllSources);
+            return;
+        }
+
         refreshButton.setEnabled(false);
 
         resultCountLabel.setText(
-                "Refreshing real internship opportunities..."
+                "Checking live internship opportunities..."
         );
 
-        SwingWorker<Integer, Void> worker =
+        SwingWorker<String, Void> worker =
                 new SwingWorker<>() {
 
                     @Override
-                    protected Integer doInBackground() {
-
-                        int savedOrUpdated = 0;
+                    protected String doInBackground() {
 
                         InternshipDAO dao =
                                 new InternshipDAO();
 
-                        try {
+                        int greenhouseCount = 0;
+                        int leverCount = 0;
 
-                            // -----------------------------------------
-                            // GREENHOUSE
-                            // -----------------------------------------
+                        StringBuilder status =
+                                new StringBuilder();
+
+                        // -------------------------------------------------
+                        // GREENHOUSE
+                        // -------------------------------------------------
+
+                        try {
 
                             GreenhouseSource greenhouseSource =
                                     new GreenhouseSource();
 
-                            List<Internship> greenhouseInternships =
-                                    greenhouseSource
-                                            .fetchAllInternships();
+                            List<Internship> liveGreenhouse =
+                                    greenhouseSource.fetchAllInternships();
 
-                            for (Internship internship :
-                                    greenhouseInternships) {
+                            greenhouseCount =
+                                    dao.syncSource(
+                                            "Greenhouse",
+                                            liveGreenhouse
+                                    );
 
-                                String result =
-                                        dao.saveOrUpdate(
-                                                internship
-                                        );
-
-                                if (!result.equals("FAILED")) {
-                                    savedOrUpdated++;
-                                }
-                            }
-
-
-                            // -----------------------------------------
-                            // LEVER
-                            // -----------------------------------------
-
-                            LeverSource leverSource =
-                                    new LeverSource();
-
-                            List<Internship> leverInternships =
-                                    leverSource
-                                            .fetchInternships();
-
-                            for (Internship internship :
-                                    leverInternships) {
-
-                                String result =
-                                        dao.saveOrUpdate(
-                                                internship
-                                        );
-
-                                if (!result.equals("FAILED")) {
-                                    savedOrUpdated++;
-                                }
-                            }
+                            status.append(
+                                    "Greenhouse: "
+                                            + greenhouseCount
+                                            + " live listings"
+                            );
 
                         } catch (Exception e) {
+
+                            status.append(
+                                    "Greenhouse refresh failed"
+                            );
 
                             e.printStackTrace();
                         }
 
-                        return savedOrUpdated;
-                    }
+                        status.append(" | ");
 
+                        // -------------------------------------------------
+                        // LEVER
+                        // -------------------------------------------------
+
+                        try {
+
+                            LeverSource leverSource =
+                                    new LeverSource();
+
+                            List<Internship> liveLever =
+                                    leverSource.fetchInternships();
+
+                            leverCount =
+                                    dao.syncSource(
+                                            "Lever",
+                                            liveLever
+                                    );
+
+                            status.append(
+                                    "Lever: "
+                                            + leverCount
+                                            + " live listings"
+                            );
+
+                        } catch (Exception e) {
+
+                            status.append(
+                                    "Lever refresh failed"
+                            );
+
+                            e.printStackTrace();
+                        }
+
+                        return status.toString();
+                    }
 
                     @Override
                     protected void done() {
 
+                        refreshButton.setEnabled(true);
+
+                        loadAllInternships();
+
                         try {
-
-                            get();
-
-                            refreshButton.setEnabled(true);
-
-                            loadAllInternships();
-
+                            resultCountLabel.setToolTipText(
+                                    get()
+                            );
                         } catch (Exception e) {
-
-                            refreshButton.setEnabled(true);
-
-                            loadAllInternships();
-
                             e.printStackTrace();
                         }
                     }
                 };
 
         worker.execute();
+    }
+
+
+    // =========================================================
+    // AUTO REFRESH
+    // =========================================================
+
+    private void startAutoRefresh() {
+
+        if (autoRefreshTimer != null) {
+            autoRefreshTimer.stop();
+        }
+
+        autoRefreshTimer =
+                new Timer(
+                        15 * 60 * 1000,
+                        e -> refreshAllSources()
+                );
+
+        autoRefreshTimer.setRepeats(true);
+        autoRefreshTimer.start();
+    }
+
+
+    private void stopAutoRefresh() {
+
+        if (autoRefreshTimer != null) {
+            autoRefreshTimer.stop();
+            autoRefreshTimer = null;
+        }
     }
 
 
@@ -3565,6 +3070,8 @@ JLabel deadline =
 
     private void goToDashboard() {
 
+        stopAutoRefresh();
+
         setVisible(false);
 
         new DashboardFrame(user)
@@ -3575,6 +3082,8 @@ JLabel deadline =
 
 
     private void goToProfile() {
+
+        stopAutoRefresh();
 
         setVisible(false);
 
@@ -3587,6 +3096,8 @@ JLabel deadline =
 
     private void goToApplications() {
 
+        stopAutoRefresh();
+
         setVisible(false);
 
         new ApplicationsFrame(user)
@@ -3597,6 +3108,8 @@ JLabel deadline =
 
 
     private void goToAddApplication() {
+
+        stopAutoRefresh();
 
         setVisible(false);
 
@@ -3609,6 +3122,8 @@ JLabel deadline =
 
     private void goToAnalytics() {
 
+        stopAutoRefresh();
+
         setVisible(false);
 
         new AnalyticsFrame(user)
@@ -3619,6 +3134,8 @@ JLabel deadline =
 
 
     private void logout() {
+
+        stopAutoRefresh();
 
         setVisible(false);
 
