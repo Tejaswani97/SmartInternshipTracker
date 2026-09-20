@@ -1,5 +1,7 @@
 package gui;
 
+import api.GreenhouseSource;
+import api.LeverSource;
 import dao.ApplicationDAO;
 import dao.InternshipDAO;
 import model.Application;
@@ -20,6 +22,8 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class InternshipsFrame extends JFrame {
 
@@ -64,8 +68,10 @@ public class InternshipsFrame extends JFrame {
     private JComboBox<String> categoryBox;
     private JComboBox<String> locationBox;
     private JComboBox<String> workModeBox;
+    private JComboBox<String> sourceBox;
 
     private JLabel resultCountLabel;
+    private JButton refreshButton;
 
     private JPanel resultsPanel;
 
@@ -122,6 +128,9 @@ public class InternshipsFrame extends JFrame {
 
 
         loadAllInternships();
+
+        // Refresh real opportunities in the background when the page opens.
+        refreshAllSources();
     }
 
 
@@ -599,15 +608,7 @@ public class InternshipsFrame extends JFrame {
         categoryBox =
                 new JComboBox<>(
                         new String[]{
-                                "All Categories",
-                                "Software Development",
-                                "Data Science",
-                                "AI/ML",
-                                "Web Development",
-                                "Cloud",
-                                "Cybersecurity",
-                                "Mobile Development",
-                                "Networking"
+                                "All Categories"
                         }
                 );
 
@@ -652,13 +653,7 @@ public class InternshipsFrame extends JFrame {
         locationBox =
                 new JComboBox<>(
                         new String[]{
-                                "All Locations",
-                                "Bengaluru",
-                                "Hyderabad",
-                                "Pune",
-                                "Chennai",
-                                "Noida",
-                                "Gurugram"
+                                "All Locations"
                         }
                 );
 
@@ -701,10 +696,7 @@ public class InternshipsFrame extends JFrame {
         workModeBox =
                 new JComboBox<>(
                         new String[]{
-                                "All Work Modes",
-                                "Remote",
-                                "Hybrid",
-                                "On-site"
+                                "All Work Modes"
                         }
                 );
 
@@ -715,6 +707,49 @@ public class InternshipsFrame extends JFrame {
 
         filterContainer.add(
                 workModeBox,
+                gbc
+        );
+
+
+        // -----------------------------------------------------
+        // Source
+        // -----------------------------------------------------
+
+        JLabel sourceLabel =
+                new JLabel(
+                        "Source"
+                );
+
+        sourceLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        12
+                )
+        );
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.weightx = 0;
+
+        filterContainer.add(
+                sourceLabel,
+                gbc
+        );
+
+
+        sourceBox =
+                new JComboBox<>(
+                        new String[]{
+                                "All Sources"
+                        }
+                );
+
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+
+        filterContainer.add(
+                sourceBox,
                 gbc
         );
 
@@ -739,9 +774,16 @@ public class InternshipsFrame extends JFrame {
                 );
 
 
+        refreshButton =
+                createButton(
+                        "Refresh Opportunities",
+                        GREEN
+                );
+
+
         gbc.gridx = 4;
         gbc.gridy = 0;
-        gbc.gridheight = 2;
+        gbc.gridheight = 3;
         gbc.weightx = 0;
 
 
@@ -771,6 +813,14 @@ public class InternshipsFrame extends JFrame {
 
         filterButtons.add(
                 resetButton
+        );
+
+        filterButtons.add(
+                Box.createVerticalStrut(8)
+        );
+
+        filterButtons.add(
+                refreshButton
         );
 
 
@@ -943,6 +993,11 @@ public class InternshipsFrame extends JFrame {
         );
 
 
+        refreshButton.addActionListener(
+                e -> refreshAllSources()
+        );
+
+
         searchField.addActionListener(
                 e -> applyFilters()
         );
@@ -960,6 +1015,11 @@ public class InternshipsFrame extends JFrame {
 
         List<Internship> internships =
                 internshipDAO.getAllInternships();
+
+
+        updateFilterOptions(
+                internships
+        );
 
 
         displayInternships(
@@ -1002,6 +1062,13 @@ public class InternshipsFrame extends JFrame {
                 );
 
 
+        String source =
+                String.valueOf(
+                        sourceBox
+                                .getSelectedItem()
+                );
+
+
         List<Internship> all =
                 internshipDAO.getAllInternships();
 
@@ -1040,6 +1107,8 @@ public class InternshipsFrame extends JFrame {
                                         + internship.getStipend()
                                         + " "
                                         + internship.getRequiredSkills()
+                                        + " "
+                                        + internship.getSourceName()
                         )
                                 .toLowerCase();
 
@@ -1115,6 +1184,26 @@ public class InternshipsFrame extends JFrame {
             }
 
 
+            // -------------------------------------------------
+            // SOURCE
+            // -------------------------------------------------
+
+            if (
+                    !source.equals(
+                            "All Sources"
+                    )
+                    &&
+                    !internship
+                            .getSourceName()
+                            .equalsIgnoreCase(
+                                    source
+                            )
+            ) {
+
+                matches = false;
+            }
+
+
             if (matches) {
 
                 filtered.add(
@@ -1127,6 +1216,196 @@ public class InternshipsFrame extends JFrame {
         displayInternships(
                 filtered
         );
+    }
+
+
+    // =========================================================
+    // UPDATE FILTER OPTIONS FROM REAL DATABASE DATA
+    // =========================================================
+
+    private void updateFilterOptions(
+            List<Internship> internships
+    ) {
+
+        String selectedCategory =
+                String.valueOf(
+                        categoryBox
+                                .getSelectedItem()
+                );
+
+        String selectedLocation =
+                String.valueOf(
+                        locationBox
+                                .getSelectedItem()
+                );
+
+        String selectedWorkMode =
+                String.valueOf(
+                        workModeBox
+                                .getSelectedItem()
+                );
+
+        String selectedSource =
+                String.valueOf(
+                        sourceBox
+                                .getSelectedItem()
+                );
+
+
+        Set<String> categories =
+                new TreeSet<>(
+                        String.CASE_INSENSITIVE_ORDER
+                );
+
+        Set<String> locations =
+                new TreeSet<>(
+                        String.CASE_INSENSITIVE_ORDER
+                );
+
+        Set<String> workModes =
+                new TreeSet<>(
+                        String.CASE_INSENSITIVE_ORDER
+                );
+
+        Set<String> sources =
+                new TreeSet<>(
+                        String.CASE_INSENSITIVE_ORDER
+                );
+
+
+        for (Internship internship : internships) {
+
+            addFilterValue(
+                    categories,
+                    internship.getCategory()
+            );
+
+            addFilterValue(
+                    locations,
+                    internship.getLocation()
+            );
+
+            addFilterValue(
+                    workModes,
+                    internship.getWorkMode()
+            );
+
+            addFilterValue(
+                    sources,
+                    internship.getSourceName()
+            );
+        }
+
+
+        categoryBox.removeAllItems();
+        categoryBox.addItem(
+                "All Categories"
+        );
+
+        for (String value : categories) {
+            categoryBox.addItem(value);
+        }
+
+
+        locationBox.removeAllItems();
+        locationBox.addItem(
+                "All Locations"
+        );
+
+        for (String value : locations) {
+            locationBox.addItem(value);
+        }
+
+
+        workModeBox.removeAllItems();
+        workModeBox.addItem(
+                "All Work Modes"
+        );
+
+        for (String value : workModes) {
+            workModeBox.addItem(value);
+        }
+
+
+        sourceBox.removeAllItems();
+        sourceBox.addItem(
+                "All Sources"
+        );
+
+        for (String value : sources) {
+            sourceBox.addItem(value);
+        }
+
+
+        restoreSelection(
+                categoryBox,
+                selectedCategory
+        );
+
+        restoreSelection(
+                locationBox,
+                selectedLocation
+        );
+
+        restoreSelection(
+                workModeBox,
+                selectedWorkMode
+        );
+
+        restoreSelection(
+                sourceBox,
+                selectedSource
+        );
+    }
+
+
+    private void addFilterValue(
+            Set<String> values,
+            String value
+    ) {
+
+        if (
+                value != null
+                && !value.isBlank()
+                && !value.equalsIgnoreCase(
+                        "Not specified"
+                )
+        ) {
+
+            values.add(
+                    value.trim()
+            );
+        }
+    }
+
+
+    private void restoreSelection(
+            JComboBox<String> box,
+            String selected
+    ) {
+
+        if (
+                selected == null
+                || selected.isBlank()
+        ) {
+
+            return;
+        }
+
+        for (int i = 0; i < box.getItemCount(); i++) {
+
+            if (
+                    box.getItemAt(i)
+                            .equalsIgnoreCase(
+                                    selected
+                            )
+            ) {
+
+                box.setSelectedIndex(i);
+
+                return;
+            }
+        }
     }
 
 
@@ -1519,8 +1798,34 @@ matchLabel.setForeground(
 
         left.add(category);
 
+        JLabel sourceLabel =
+                new JLabel(
+                        "Source: "
+                                + internship.getSourceName()
+                );
+
+        sourceLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        12
+                )
+        );
+
+        sourceLabel.setForeground(
+                BLUE
+        );
+
         left.add(
-           Box.createVerticalStrut(8)
+                Box.createVerticalStrut(3)
+        );
+
+        left.add(
+                sourceLabel
+        );
+
+        left.add(
+                Box.createVerticalStrut(8)
         );
 
         left.add(matchLabel);
@@ -1681,11 +1986,31 @@ JLabel deadline =
                 );
 
 
-        JButton applyButton =
-                createButton(
-                        "Apply",
-                        GREEN
+        JButton applyButton;
+
+        boolean alreadyApplied =
+                hasAlreadyApplied(
+                        internship
                 );
+
+        if (alreadyApplied) {
+
+            applyButton =
+                    createButton(
+                            "Already Applied",
+                            new Color(107, 114, 128)
+                    );
+
+            applyButton.setEnabled(false);
+
+        } else {
+
+            applyButton =
+                    createButton(
+                            "Apply",
+                            GREEN
+                    );
+        }
 
 
         right.add(
@@ -1742,11 +2067,14 @@ JLabel deadline =
         );
 
 
-        applyButton.addActionListener(
-                e -> apply(
-                        internship
-                )
-        );
+        if (!alreadyApplied) {
+
+            applyButton.addActionListener(
+                    e -> apply(
+                            internship
+                    )
+            );
+        }
 
 
         return card;
@@ -1982,6 +2310,13 @@ JLabel deadline =
                 internship.getDeadline() != null
                         ? internship.getDeadline().toString()
                         : "Not specified"
+        );
+
+        addDetailRow(
+                internshipGrid,
+                6,
+                "Source",
+                internship.getSourceName()
         );
 
         internshipSection.add(
@@ -2710,154 +3045,363 @@ JLabel deadline =
         return value;
     }
 
+    private boolean hasAlreadyApplied(
+            Internship internship
+    ) {
+
+        if (
+                internship.getJobLink() == null
+                        || internship.getJobLink().isBlank()
+        ) {
+
+            return false;
+        }
+
+        try {
+
+            ApplicationDAO applicationDAO =
+                    new ApplicationDAO();
+
+            List<Application> applications =
+                    applicationDAO.getApplicationsByUser(
+                            user.getUserId()
+                    );
+
+            for (Application application : applications) {
+
+                if (
+                        application.getJobLink() != null
+                                && application.getJobLink().equalsIgnoreCase(
+                                        internship.getJobLink()
+                                )
+                ) {
+
+                    return true;
+                }
+            }
+
+        } catch (Exception ex) {
+
+            System.out.println(
+                    "Could not check application status: "
+                            + ex.getMessage()
+            );
+        }
+
+        return false;
+    }
+
+
     // =========================================================
     // APPLY
     // =========================================================
 
     private void apply(
-        Internship internship
-) {
-
-    String resume =
-            user.getResumePath();
-
-    // ---------------------------------------------------------
-    // CHECK RESUME
-    // ---------------------------------------------------------
-
-    if (
-            resume == null
-                    || resume.isBlank()
+            Internship internship
     ) {
+
+        if (hasAlreadyApplied(internship)) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "You have already tracked this application.",
+                    "Already Applied",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            return;
+        }
+
+        String resume =
+                user.getResumePath();
+
+        // ---------------------------------------------------------
+        // CHECK RESUME
+        // ---------------------------------------------------------
+
+        if (
+                resume == null
+                        || resume.isBlank()
+        ) {
+
+            int answer =
+                    JOptionPane.showConfirmDialog(
+                            this,
+                            "You haven't uploaded a resume yet.\n"
+                                    + "Open your profile and upload one first?",
+                            "Resume Required",
+                            JOptionPane.YES_NO_OPTION
+                    );
+
+            if (
+                    answer ==
+                            JOptionPane.YES_OPTION
+            ) {
+
+                goToProfile();
+            }
+
+            return;
+        }
+
+        // ---------------------------------------------------------
+        // CHECK JOB LINK
+        // ---------------------------------------------------------
+
+        String jobLink =
+                internship.getJobLink();
+
+        if (
+                jobLink == null
+                        || jobLink.isBlank()
+        ) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "This internship does not have a valid application link.",
+                    "Application Link Missing",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+        // ---------------------------------------------------------
+        // CONFIRM OPENING APPLICATION PAGE
+        // ---------------------------------------------------------
 
         int answer =
                 JOptionPane.showConfirmDialog(
                         this,
-                        "You haven't uploaded a resume yet.\n"
-                                + "Open your profile and upload one first?",
-                        "Resume Required",
+                        "Your resume is ready.\n\n"
+                                + "Open the employer's application page?",
+                        "Apply",
                         JOptionPane.YES_NO_OPTION
                 );
 
         if (
-                answer ==
-                        JOptionPane.YES_OPTION
+                answer != JOptionPane.YES_OPTION
         ) {
 
-            goToProfile();
+            return;
         }
 
-        return;
-    }
+        // ---------------------------------------------------------
+        // OPEN REAL EMPLOYER PAGE
+        // ---------------------------------------------------------
 
-    // ---------------------------------------------------------
-    // CONFIRM OPENING APPLICATION PAGE
-    // ---------------------------------------------------------
+        try {
 
-    int answer =
-            JOptionPane.showConfirmDialog(
+            Desktop.getDesktop()
+                    .browse(
+                            new URI(
+                                    jobLink
+                            )
+                    );
+
+        } catch (Exception ex) {
+
+            JOptionPane.showMessageDialog(
                     this,
-                    "Your resume is ready.\n\n"
-                            + "Open the employer's application page?",
-                    "Apply",
-                    JOptionPane.YES_NO_OPTION
+                    "Unable to open the application link.\n\n"
+                            + "Please check the internship link and try again.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
             );
 
-    if (
-            answer != JOptionPane.YES_OPTION
-    ) {
+            return;
+        }
 
-        return;
-    }
+        // ---------------------------------------------------------
+        // ASK WHETHER USER ACTUALLY APPLIED
+        // ---------------------------------------------------------
 
-    // ---------------------------------------------------------
-    // OPEN REAL EMPLOYER PAGE
-    // ---------------------------------------------------------
-
-    try {
-
-        Desktop.getDesktop()
-                .browse(
-                        new URI(
-                                internship.getJobLink()
-                        )
+        int appliedAnswer =
+                JOptionPane.showConfirmDialog(
+                        this,
+                        "IMPORTANT:\n\n"
+                                + "Did the employer's application page load successfully\n"
+                                + "AND did you submit your application?\n\n"
+                                + "Choose NO if:\n"
+                                + "• the page showed a network/error message\n"
+                                + "• the page did not load\n"
+                                + "• you did not submit the application",
+                        "Confirm Application Submission",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE
                 );
 
-    } catch (Exception ex) {
+        if (
+                appliedAnswer != JOptionPane.YES_OPTION
+        ) {
 
-        JOptionPane.showMessageDialog(
-                this,
-                "Unable to open the application link.",
-                "Error",
-                JOptionPane.ERROR_MESSAGE
-        );
-
-        return;
-    }
-
-    // ---------------------------------------------------------
-    // ASK WHETHER USER ACTUALLY APPLIED
-    // ---------------------------------------------------------
-
-    int appliedAnswer =
-            JOptionPane.showConfirmDialog(
+            JOptionPane.showMessageDialog(
                     this,
-                    "Did you submit your application on the employer's website?",
-                    "Track Application",
-                    JOptionPane.YES_NO_OPTION
+                    "Application was NOT added to My Applications.",
+                    "Not Tracked",
+                    JOptionPane.INFORMATION_MESSAGE
             );
 
-    if (
-            appliedAnswer != JOptionPane.YES_OPTION
-    ) {
+            return;
+        }
 
-        return;
+        // ---------------------------------------------------------
+        // CREATE APPLICATION
+        // ---------------------------------------------------------
+
+        Application application =
+                new Application(
+                        user.getUserId(),
+                        internship.getCompanyName(),
+                        internship.getJobRole(),
+                        LocalDate.now(),
+                        internship.getDeadline(),
+                        "Applied",
+                        jobLink,
+                        "Applied through Smart Internship Tracker"
+                );
+
+        ApplicationDAO applicationDAO =
+                new ApplicationDAO();
+
+        boolean success =
+                applicationDAO.addApplication(
+                        application
+                );
+
+        // ---------------------------------------------------------
+        // RESULT
+        // ---------------------------------------------------------
+
+        if (success) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Application added to My Applications!",
+                    "Application Tracked",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+        } else {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "This application may already be tracked,\n"
+                            + "or we could not save it.",
+                    "Not Added",
+                    JOptionPane.WARNING_MESSAGE
+            );
+        }
     }
 
-    // ---------------------------------------------------------
-    // ADD APPLICATION TO DATABASE
-    // ---------------------------------------------------------
+    // =========================================================
+    // REFRESH REAL INTERNSHIP SOURCES
+    // =========================================================
 
-    Application application =
-            new Application(
-                    user.getUserId(),
-                    internship.getCompanyName(),
-                    internship.getJobRole(),
-                    LocalDate.now(),
-                    internship.getDeadline(),
-                    "Applied",
-                    internship.getJobLink(),
-                    "Applied through Smart Internship Tracker"
-            );
+    private void refreshAllSources() {
 
-    ApplicationDAO applicationDAO =
-            new ApplicationDAO();
+        refreshButton.setEnabled(false);
 
-    boolean success =
-            applicationDAO.addApplication(
-                    application
-            );
-
-    if (success) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Application added to My Applications!",
-                "Application Tracked",
-                JOptionPane.INFORMATION_MESSAGE
+        resultCountLabel.setText(
+                "Refreshing real internship opportunities..."
         );
 
-    } else {
+        SwingWorker<Integer, Void> worker =
+                new SwingWorker<>() {
 
-        JOptionPane.showMessageDialog(
-                this,
-                "You may have applied successfully, "
-                        + "but we could not save it to My Applications.",
-                "Tracking Failed",
-                JOptionPane.WARNING_MESSAGE
-        );
+                    @Override
+                    protected Integer doInBackground() {
+
+                        int savedOrUpdated = 0;
+
+                        InternshipDAO dao =
+                                new InternshipDAO();
+
+                        try {
+
+                            // -----------------------------------------
+                            // GREENHOUSE
+                            // -----------------------------------------
+
+                            GreenhouseSource greenhouseSource =
+                                    new GreenhouseSource();
+
+                            List<Internship> greenhouseInternships =
+                                    greenhouseSource
+                                            .fetchAllInternships();
+
+                            for (Internship internship :
+                                    greenhouseInternships) {
+
+                                String result =
+                                        dao.saveOrUpdate(
+                                                internship
+                                        );
+
+                                if (!result.equals("FAILED")) {
+                                    savedOrUpdated++;
+                                }
+                            }
+
+
+                            // -----------------------------------------
+                            // LEVER
+                            // -----------------------------------------
+
+                            LeverSource leverSource =
+                                    new LeverSource();
+
+                            List<Internship> leverInternships =
+                                    leverSource
+                                            .fetchInternships();
+
+                            for (Internship internship :
+                                    leverInternships) {
+
+                                String result =
+                                        dao.saveOrUpdate(
+                                                internship
+                                        );
+
+                                if (!result.equals("FAILED")) {
+                                    savedOrUpdated++;
+                                }
+                            }
+
+                        } catch (Exception e) {
+
+                            e.printStackTrace();
+                        }
+
+                        return savedOrUpdated;
+                    }
+
+
+                    @Override
+                    protected void done() {
+
+                        try {
+
+                            get();
+
+                            refreshButton.setEnabled(true);
+
+                            loadAllInternships();
+
+                        } catch (Exception e) {
+
+                            refreshButton.setEnabled(true);
+
+                            loadAllInternships();
+
+                            e.printStackTrace();
+                        }
+                    }
+                };
+
+        worker.execute();
     }
-}
+
 
     // =========================================================
     // RESET
@@ -3021,54 +3565,66 @@ JLabel deadline =
 
     private void goToDashboard() {
 
-        dispose();
+        setVisible(false);
 
         new DashboardFrame(user)
                 .setVisible(true);
+
+        dispose();
     }
 
 
     private void goToProfile() {
 
-        dispose();
+        setVisible(false);
 
         new ProfileFrame(user)
                 .setVisible(true);
+
+        dispose();
     }
 
 
     private void goToApplications() {
 
-        dispose();
+        setVisible(false);
 
         new ApplicationsFrame(user)
                 .setVisible(true);
+
+        dispose();
     }
 
 
     private void goToAddApplication() {
 
-        dispose();
+        setVisible(false);
 
         new AddApplicationFrame(user)
                 .setVisible(true);
+
+        dispose();
     }
 
 
     private void goToAnalytics() {
 
-        dispose();
+        setVisible(false);
 
         new AnalyticsFrame(user)
                 .setVisible(true);
+
+        dispose();
     }
 
 
     private void logout() {
 
-        dispose();
+        setVisible(false);
 
         new LoginFrame()
                 .setVisible(true);
+
+        dispose();
     }
 }
