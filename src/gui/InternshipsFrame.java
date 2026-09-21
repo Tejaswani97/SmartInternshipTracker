@@ -4,6 +4,7 @@ import api.GreenhouseSource;
 import api.LeverSource;
 import dao.ApplicationDAO;
 import dao.InternshipDAO;
+import dao.SavedInternshipDAO;
 import model.Application;
 import model.Internship;
 import model.User;
@@ -22,6 +23,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -72,6 +74,7 @@ public class InternshipsFrame extends JFrame {
     private JComboBox<String> sourceBox;
     private JComboBox<String> sortBox;
     private JCheckBox skillsOnlyCheckBox;
+    private JCheckBox savedOnlyCheckBox;
 
     private JLabel resultCountLabel;
     private JButton refreshButton;
@@ -81,6 +84,9 @@ public class InternshipsFrame extends JFrame {
     private JPanel resultsPanel;
 
     private final InternshipDAO internshipDAO;
+    private final SavedInternshipDAO savedInternshipDAO;
+
+    private Set<Integer> savedInternshipIds = new HashSet<>();
 
 
     // =========================================================
@@ -93,6 +99,9 @@ public class InternshipsFrame extends JFrame {
 
         internshipDAO =
                 new InternshipDAO();
+
+        savedInternshipDAO =
+                new SavedInternshipDAO();
 
 
         setTitle(
@@ -313,6 +322,20 @@ public class InternshipsFrame extends JFrame {
                         true,
                         e -> {
                         }
+                )
+        );
+
+
+        top.add(
+                Box.createVerticalStrut(8)
+        );
+
+
+        top.add(
+                sidebarButton(
+                        "Saved Internships",
+                        false,
+                        e -> showSavedOnly()
                 )
         );
 
@@ -805,7 +828,7 @@ public class InternshipsFrame extends JFrame {
 
 
         // -----------------------------------------------------
-        // Skill Match Toggle
+        // Skill / Saved Toggles
         // -----------------------------------------------------
 
         skillsOnlyCheckBox =
@@ -826,11 +849,38 @@ public class InternshipsFrame extends JFrame {
 
         gbc.gridx = 0;
         gbc.gridy = 3;
-        gbc.gridwidth = 4;
+        gbc.gridwidth = 2;
         gbc.weightx = 1;
 
         filterContainer.add(
                 skillsOnlyCheckBox,
+                gbc
+        );
+
+
+        savedOnlyCheckBox =
+                new JCheckBox(
+                        "Only show saved internships"
+                );
+
+        savedOnlyCheckBox.setOpaque(false);
+        savedOnlyCheckBox.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        12
+                )
+        );
+        savedOnlyCheckBox.setForeground(TEXT);
+        savedOnlyCheckBox.setFocusPainted(false);
+
+        gbc.gridx = 2;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.weightx = 1;
+
+        filterContainer.add(
+                savedOnlyCheckBox,
                 gbc
         );
 
@@ -1095,6 +1145,11 @@ public class InternshipsFrame extends JFrame {
         );
 
 
+        savedOnlyCheckBox.addActionListener(
+                e -> applyFilters()
+        );
+
+
         return content;
     }
 
@@ -1104,6 +1159,8 @@ public class InternshipsFrame extends JFrame {
     // =========================================================
 
     private void loadAllInternships() {
+
+        refreshSavedInternshipIds();
 
         List<Internship> internships =
                 internshipDAO.getAllInternships();
@@ -1164,6 +1221,11 @@ public class InternshipsFrame extends JFrame {
 
         boolean skillsOnly =
                 skillsOnlyCheckBox.isSelected();
+
+        boolean savedOnly =
+                savedOnlyCheckBox.isSelected();
+
+        refreshSavedInternshipIds();
 
         List<Internship> all =
                 internshipDAO.getAllInternships();
@@ -1279,6 +1341,18 @@ public class InternshipsFrame extends JFrame {
                 if (matchResult.getMatchPercentage() <= 0) {
                     matches = false;
                 }
+            }
+
+            // -------------------------------------------------
+            // SAVED ONLY
+            // -------------------------------------------------
+
+            if (savedOnly
+                    && !savedInternshipIds.contains(
+                            internship.getInternshipId()
+                    )) {
+
+                matches = false;
             }
 
             if (matches) {
@@ -1570,6 +1644,149 @@ public class InternshipsFrame extends JFrame {
                 return;
             }
         }
+    }
+
+
+    // =========================================================
+    // SAVED INTERNSHIPS
+    // =========================================================
+
+    private void refreshSavedInternshipIds() {
+
+        try {
+            savedInternshipIds =
+                    new HashSet<>(
+                            savedInternshipDAO
+                                    .getSavedInternshipIds(
+                                            user.getUserId()
+                                    )
+                    );
+        } catch (Exception ex) {
+            savedInternshipIds = new HashSet<>();
+            System.out.println(
+                    "Could not load saved internships: "
+                            + ex.getMessage()
+            );
+        }
+    }
+
+
+    private void showSavedOnly() {
+
+        savedOnlyCheckBox.setSelected(true);
+        applyFilters();
+    }
+
+
+    private boolean isInternshipSaved(
+            Internship internship
+    ) {
+
+        return savedInternshipIds.contains(
+                internship.getInternshipId()
+        );
+    }
+
+
+    private void toggleSavedInternship(
+            Internship internship,
+            JButton saveButton
+    ) {
+
+        int internshipId =
+                internship.getInternshipId();
+
+        boolean currentlySaved =
+                isInternshipSaved(internship);
+
+        boolean success;
+
+        if (currentlySaved) {
+
+            success =
+                    savedInternshipDAO.removeSavedInternship(
+                            user.getUserId(),
+                            internshipId
+                    );
+
+            if (success) {
+                savedInternshipIds.remove(internshipId);
+            }
+
+        } else {
+
+            success =
+                    savedInternshipDAO.saveInternship(
+                            user.getUserId(),
+                            internshipId
+                    );
+
+            if (success) {
+                savedInternshipIds.add(internshipId);
+            }
+        }
+
+        if (!success) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Could not update your saved internship list.",
+                    "Save Error",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+        styleSaveButton(
+                saveButton,
+                !currentlySaved
+        );
+
+        if (savedOnlyCheckBox.isSelected()) {
+            applyFilters();
+        }
+    }
+
+
+    private void styleSaveButton(
+            JButton button,
+            boolean saved
+    ) {
+
+        button.setText(
+                saved
+                        ? "♥ Saved"
+                        : "♡ Save"
+        );
+
+        button.setBackground(
+                saved
+                        ? new Color(220, 252, 231)
+                        : CARD
+        );
+
+        button.setForeground(
+                saved
+                        ? GREEN
+                        : BLUE
+        );
+
+        button.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(
+                                saved
+                                        ? new Color(134, 239, 172)
+                                        : new Color(191, 219, 254)
+                        ),
+                        new EmptyBorder(
+                                7,
+                                12,
+                                7,
+                                12
+                        )
+                )
+        );
     }
 
 
@@ -2143,6 +2360,23 @@ JLabel deadline =
     );
 }
 
+        JButton saveButton =
+                new JButton();
+
+        saveButton.setFocusPainted(false);
+        saveButton.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        12
+                )
+        );
+
+        styleSaveButton(
+                saveButton,
+                isInternshipSaved(internship)
+        );
+
         JButton detailsButton =
                 createButton(
                         "View Details",
@@ -2198,6 +2432,16 @@ JLabel deadline =
 
 
         right.add(
+                saveButton
+        );
+
+
+        right.add(
+                Box.createVerticalStrut(7)
+        );
+
+
+        right.add(
                 detailsButton
         );
 
@@ -2221,6 +2465,14 @@ JLabel deadline =
         card.add(
                 right,
                 BorderLayout.EAST
+        );
+
+
+        saveButton.addActionListener(
+                e -> toggleSavedInternship(
+                        internship,
+                        saveButton
+                )
         );
 
 
@@ -3631,6 +3883,8 @@ JLabel deadline =
         sortBox.setSelectedIndex(0);
 
         skillsOnlyCheckBox.setSelected(false);
+
+        savedOnlyCheckBox.setSelected(false);
 
         loadAllInternships();
     }
