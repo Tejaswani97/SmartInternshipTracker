@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -69,6 +70,8 @@ public class InternshipsFrame extends JFrame {
     private JComboBox<String> locationBox;
     private JComboBox<String> workModeBox;
     private JComboBox<String> sourceBox;
+    private JComboBox<String> sortBox;
+    private JCheckBox skillsOnlyCheckBox;
 
     private JLabel resultCountLabel;
     private JButton refreshButton;
@@ -757,6 +760,81 @@ public class InternshipsFrame extends JFrame {
         );
 
 
+        // -----------------------------------------------------
+        // Sort
+        // -----------------------------------------------------
+
+        JLabel sortLabel =
+                new JLabel(
+                        "Sort By"
+                );
+
+        sortLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        12
+                )
+        );
+
+        gbc.gridx = 2;
+        gbc.gridy = 2;
+        gbc.weightx = 0;
+
+        filterContainer.add(
+                sortLabel,
+                gbc
+        );
+
+        sortBox =
+                new JComboBox<>(
+                        new String[]{
+                                "Latest First",
+                                "Deadline Soonest",
+                                "Skill Match Highest"
+                        }
+                );
+
+        gbc.gridx = 3;
+        gbc.weightx = 1;
+
+        filterContainer.add(
+                sortBox,
+                gbc
+        );
+
+
+        // -----------------------------------------------------
+        // Skill Match Toggle
+        // -----------------------------------------------------
+
+        skillsOnlyCheckBox =
+                new JCheckBox(
+                        "Only show internships matching my skills"
+                );
+
+        skillsOnlyCheckBox.setOpaque(false);
+        skillsOnlyCheckBox.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        12
+                )
+        );
+        skillsOnlyCheckBox.setForeground(TEXT);
+        skillsOnlyCheckBox.setFocusPainted(false);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 4;
+        gbc.weightx = 1;
+
+        filterContainer.add(
+                skillsOnlyCheckBox,
+                gbc
+        );
+
+
         // Buttons
 
         JButton searchButton =
@@ -784,9 +862,10 @@ public class InternshipsFrame extends JFrame {
                 );
 
 
+        gbc.gridwidth = 1;
         gbc.gridx = 4;
         gbc.gridy = 0;
-        gbc.gridheight = 3;
+        gbc.gridheight = 4;
         gbc.weightx = 0;
 
 
@@ -1006,6 +1085,16 @@ public class InternshipsFrame extends JFrame {
         );
 
 
+        sortBox.addActionListener(
+                e -> applyFilters()
+        );
+
+
+        skillsOnlyCheckBox.addActionListener(
+                e -> applyFilters()
+        );
+
+
         return content;
     }
 
@@ -1043,13 +1132,11 @@ public class InternshipsFrame extends JFrame {
                         .trim()
                         .toLowerCase();
 
-
         String category =
                 String.valueOf(
                         categoryBox
                                 .getSelectedItem()
                 );
-
 
         String location =
                 String.valueOf(
@@ -1057,13 +1144,11 @@ public class InternshipsFrame extends JFrame {
                                 .getSelectedItem()
                 );
 
-
         String workMode =
                 String.valueOf(
                         workModeBox
                                 .getSelectedItem()
                 );
-
 
         String source =
                 String.valueOf(
@@ -1071,23 +1156,24 @@ public class InternshipsFrame extends JFrame {
                                 .getSelectedItem()
                 );
 
+        String sort =
+                String.valueOf(
+                        sortBox
+                                .getSelectedItem()
+                );
+
+        boolean skillsOnly =
+                skillsOnlyCheckBox.isSelected();
 
         List<Internship> all =
                 internshipDAO.getAllInternships();
 
-
         List<Internship> filtered =
                 new ArrayList<>();
 
+        for (Internship internship : all) {
 
-        for (
-                Internship internship :
-                all
-        ) {
-
-            boolean matches =
-                    true;
-
+            boolean matches = true;
 
             // -------------------------------------------------
             // SEARCH
@@ -1112,113 +1198,188 @@ public class InternshipsFrame extends JFrame {
                                         + internship.getRequiredSkills()
                                         + " "
                                         + internship.getSourceName()
+                                        + " "
+                                        + internship.getRecruiterName()
+                                        + " "
+                                        + internship.getRecruiterRole()
+                                        + " "
+                                        + internship.getRecruiterEmail()
+                                        + " "
+                                        + internship.getRecruiterLinkedin()
+                                        + " "
+                                        + internship.getContactSource()
                         )
                                 .toLowerCase();
 
-
-                if (
-                        !searchable.contains(
-                                keyword
-                        )
-                ) {
-
+                if (!searchable.contains(keyword)) {
                     matches = false;
                 }
             }
-
 
             // -------------------------------------------------
             // CATEGORY
             // -------------------------------------------------
 
             if (
-                    !category.equals(
-                            "All Categories"
-                    )
-                    &&
-                    !internship
-                            .getCategory()
-                            .equalsIgnoreCase(
-                                    category
-                            )
+                    !category.equals("All Categories")
+                    && !safeFilterValue(internship.getCategory())
+                            .equalsIgnoreCase(category)
             ) {
-
                 matches = false;
             }
-
 
             // -------------------------------------------------
             // LOCATION
             // -------------------------------------------------
 
             if (
-                    !location.equals(
-                            "All Locations"
-                    )
-                    &&
-                    !internship
-                            .getLocation()
-                            .equalsIgnoreCase(
-                                    location
-                            )
+                    !location.equals("All Locations")
+                    && !safeFilterValue(internship.getLocation())
+                            .equalsIgnoreCase(location)
             ) {
-
                 matches = false;
             }
-
 
             // -------------------------------------------------
             // WORK MODE
             // -------------------------------------------------
 
             if (
-                    !workMode.equals(
-                            "All Work Modes"
-                    )
-                    &&
-                    !internship
-                            .getWorkMode()
-                            .equalsIgnoreCase(
-                                    workMode
-                            )
+                    !workMode.equals("All Work Modes")
+                    && !safeFilterValue(internship.getWorkMode())
+                            .equalsIgnoreCase(workMode)
             ) {
-
                 matches = false;
             }
-
 
             // -------------------------------------------------
             // SOURCE
             // -------------------------------------------------
 
             if (
-                    !source.equals(
-                            "All Sources"
-                    )
-                    &&
-                    !internship
-                            .getSourceName()
-                            .equalsIgnoreCase(
-                                    source
-                            )
+                    !source.equals("All Sources")
+                    && !safeFilterValue(internship.getSourceName())
+                            .equalsIgnoreCase(source)
             ) {
-
                 matches = false;
             }
 
+            // -------------------------------------------------
+            // SKILL MATCH
+            // -------------------------------------------------
+
+            if (skillsOnly) {
+
+                SkillMatchResult matchResult =
+                        SkillMatcher.calculateMatch(
+                                user.getSkills(),
+                                internship.getRequiredSkills()
+                        );
+
+                if (matchResult.getMatchPercentage() <= 0) {
+                    matches = false;
+                }
+            }
 
             if (matches) {
-
-                filtered.add(
-                        internship
-                );
+                filtered.add(internship);
             }
         }
 
+        // -----------------------------------------------------
+        // SORT RESULTS
+        // -----------------------------------------------------
 
-        displayInternships(
-                filtered
+        Comparator<Internship> comparator;
+
+        if ("Deadline Soonest".equals(sort)) {
+
+            comparator =
+                    Comparator.comparing(
+                            Internship::getDeadline,
+                            Comparator.nullsLast(Comparator.naturalOrder())
+                    );
+
+        } else if ("Skill Match Highest".equals(sort)) {
+
+            comparator = (first, second) -> {
+
+                int firstMatch =
+                        SkillMatcher.calculateMatch(
+                                user.getSkills(),
+                                first.getRequiredSkills()
+                        ).getMatchPercentage();
+
+                int secondMatch =
+                        SkillMatcher.calculateMatch(
+                                user.getSkills(),
+                                second.getRequiredSkills()
+                        ).getMatchPercentage();
+
+                int matchComparison =
+                        Integer.compare(
+                                secondMatch,
+                                firstMatch
+                        );
+
+                if (matchComparison != 0) {
+                    return matchComparison;
+                }
+
+                return comparePostedDateDesc(first, second);
+            };
+
+        } else {
+
+            comparator =
+                    this::comparePostedDateDesc;
+        }
+
+        filtered.sort(comparator);
+
+        displayInternships(filtered);
+    }
+
+
+    private int comparePostedDateDesc(
+            Internship first,
+            Internship second
+    ) {
+
+        LocalDate firstDate = first.getPostedDate();
+        LocalDate secondDate = second.getPostedDate();
+
+        if (firstDate == null && secondDate == null) {
+            return Integer.compare(
+                    second.getInternshipId(),
+                    first.getInternshipId()
+            );
+        }
+
+        if (firstDate == null) {
+            return 1;
+        }
+
+        if (secondDate == null) {
+            return -1;
+        }
+
+        int result = secondDate.compareTo(firstDate);
+
+        if (result != 0) {
+            return result;
+        }
+
+        return Integer.compare(
+                second.getInternshipId(),
+                first.getInternshipId()
         );
+    }
+
+
+    private String safeFilterValue(String value) {
+
+        return value == null ? "" : value;
     }
 
 
@@ -2092,13 +2253,556 @@ JLabel deadline =
             Internship internship
     ) {
 
-        InternshipDetailsDialog dialog =
-                new InternshipDetailsDialog(
+        JDialog dialog =
+                new JDialog(
                         this,
-                        internship,
-                        user,
-                        () -> apply(internship)
+                        "Internship Details",
+                        true
                 );
+
+        dialog.setSize(
+                820,
+                700
+        );
+
+        dialog.setMinimumSize(
+                new Dimension(
+                        700,
+                        600
+                )
+        );
+
+        dialog.setLocationRelativeTo(this);
+
+        dialog.setLayout(
+                new BorderLayout()
+        );
+
+
+        // =========================================================
+        // HEADER
+        // =========================================================
+
+        JPanel header =
+                new JPanel(
+                        new BorderLayout()
+                );
+
+        header.setBackground(
+                CARD
+        );
+
+        header.setBorder(
+                new EmptyBorder(
+                        20,
+                        24,
+                        18,
+                        24
+                )
+        );
+
+
+        JPanel headerText =
+                new JPanel();
+
+        headerText.setOpaque(false);
+
+        headerText.setLayout(
+                new BoxLayout(
+                        headerText,
+                        BoxLayout.Y_AXIS
+                )
+        );
+
+
+        JLabel companyLabel =
+                new JLabel(
+                        safeValue(
+                                internship.getCompanyName()
+                        )
+                );
+
+        companyLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        25
+                )
+        );
+
+        companyLabel.setForeground(
+                TEXT
+        );
+
+
+        JLabel roleLabel =
+                new JLabel(
+                        safeValue(
+                                internship.getJobRole()
+                        )
+                );
+
+        roleLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        16
+                )
+        );
+
+        roleLabel.setForeground(
+                MUTED
+        );
+
+
+        headerText.add(
+                companyLabel
+        );
+
+        headerText.add(
+                Box.createVerticalStrut(4)
+        );
+
+        headerText.add(
+                roleLabel
+        );
+
+
+        header.add(
+                headerText,
+                BorderLayout.CENTER
+        );
+
+
+        // =========================================================
+        // SCROLLABLE CONTENT
+        // =========================================================
+
+        JPanel body =
+                new JPanel(
+                        new GridBagLayout()
+                );
+
+        body.setBackground(
+                BACKGROUND
+        );
+
+        body.setBorder(
+                new EmptyBorder(
+                        20,
+                        24,
+                        20,
+                        24
+                )
+        );
+
+
+        GridBagConstraints bodyGbc =
+                new GridBagConstraints();
+
+        bodyGbc.gridx = 0;
+        bodyGbc.gridy = 0;
+        bodyGbc.weightx = 1;
+        bodyGbc.fill =
+                GridBagConstraints.HORIZONTAL;
+        bodyGbc.anchor =
+                GridBagConstraints.NORTHWEST;
+        bodyGbc.insets =
+                new Insets(
+                        0,
+                        0,
+                        14,
+                        0
+                );
+
+
+        // =========================================================
+        // INTERNSHIP INFORMATION
+        // =========================================================
+
+        JPanel internshipSection =
+                createDetailsSection(
+                        "Internship Information"
+                );
+
+        JPanel internshipGrid =
+                new JPanel(
+                        new GridBagLayout()
+                );
+
+        internshipGrid.setOpaque(false);
+
+        addDetailRow(
+                internshipGrid,
+                0,
+                "Category",
+                internship.getCategory()
+        );
+
+        addDetailRow(
+                internshipGrid,
+                1,
+                "Location",
+                internship.getLocation()
+        );
+
+        addDetailRow(
+                internshipGrid,
+                2,
+                "Work Mode",
+                internship.getWorkMode()
+        );
+
+        addDetailRow(
+                internshipGrid,
+                3,
+                "Stipend",
+                internship.getStipend()
+        );
+
+        addDetailRow(
+                internshipGrid,
+                4,
+                "Duration",
+                internship.getDuration()
+        );
+
+        addDetailRow(
+                internshipGrid,
+                5,
+                "Deadline",
+                internship.getDeadline() != null
+                        ? internship.getDeadline().toString()
+                        : "Not specified"
+        );
+
+        addDetailRow(
+                internshipGrid,
+                6,
+                "Source",
+                internship.getSourceName()
+        );
+
+        internshipSection.add(
+                internshipGrid,
+                BorderLayout.CENTER
+        );
+
+        body.add(
+                internshipSection,
+                bodyGbc
+        );
+
+
+        // =========================================================
+        // SKILLS
+        // =========================================================
+
+        bodyGbc.gridy++;
+
+        JPanel skillsSection =
+                createDetailsSection(
+                        "Required Skills"
+                );
+
+        JLabel skillsLabel =
+                new JLabel(
+                        "<html><div style='width:680px;'>"
+                                + safeValue(
+                                        internship.getRequiredSkills()
+                                )
+                                + "</div></html>"
+                );
+
+        skillsLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        14
+                )
+        );
+
+        skillsLabel.setForeground(
+                TEXT
+        );
+
+        skillsSection.add(
+                skillsLabel,
+                BorderLayout.CENTER
+        );
+
+        body.add(
+                skillsSection,
+                bodyGbc
+        );
+
+
+        // =========================================================
+        // RECRUITER & OUTREACH
+        // =========================================================
+
+        bodyGbc.gridy++;
+
+        JPanel recruiterSection =
+                createDetailsSection(
+                        "Recruiter & Outreach"
+                );
+
+        JPanel recruiterGrid =
+                new JPanel(
+                        new GridBagLayout()
+                );
+
+        recruiterGrid.setOpaque(false);
+
+        addDetailRow(
+                recruiterGrid,
+                0,
+                "Recruiter",
+                internship.getRecruiterName()
+        );
+
+        addDetailRow(
+                recruiterGrid,
+                1,
+                "Role",
+                internship.getRecruiterRole()
+        );
+
+
+        GridBagConstraints emailGbc =
+                new GridBagConstraints();
+
+        emailGbc.gridx = 0;
+        emailGbc.gridy = 2;
+        emailGbc.weightx = 0.5;
+        emailGbc.fill =
+                GridBagConstraints.HORIZONTAL;
+        emailGbc.anchor =
+                GridBagConstraints.NORTHWEST;
+        emailGbc.insets =
+                new Insets(
+                        7,
+                        0,
+                        7,
+                        20
+                );
+
+        JLabel emailTitle =
+                new JLabel(
+                        "Email"
+                );
+
+        emailTitle.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        12
+                )
+        );
+
+        emailTitle.setForeground(
+                MUTED
+        );
+
+        recruiterGrid.add(
+                emailTitle,
+                emailGbc
+        );
+
+
+        emailGbc.gridx = 1;
+        emailGbc.weightx = 1;
+        emailGbc.insets =
+                new Insets(
+                        7,
+                        0,
+                        7,
+                        0
+                );
+
+        recruiterGrid.add(
+                createEmailValuePanel(
+                        internship
+                ),
+                emailGbc
+        );
+
+
+        addDetailRow(
+                recruiterGrid,
+                3,
+                "Contact Source",
+                internship.getContactSource()
+        );
+
+        recruiterSection.add(
+                recruiterGrid,
+                BorderLayout.CENTER
+        );
+
+
+        String linkedin =
+                internship.getRecruiterLinkedin();
+
+        if (
+                linkedin != null
+                        && !linkedin.isBlank()
+        ) {
+
+            final String linkedinUrl =
+                    linkedin;
+
+            JButton linkedinButton =
+                    createButton(
+                            "Open LinkedIn",
+                            BLUE
+                    );
+
+            linkedinButton.addActionListener(
+                    e -> {
+
+                        try {
+
+                            Desktop.getDesktop()
+                                    .browse(
+                                            new URI(
+                                                    linkedinUrl
+                                            )
+                                    );
+
+                        } catch (Exception ex) {
+
+                            JOptionPane.showMessageDialog(
+                                    dialog,
+                                    "Unable to open the LinkedIn profile.",
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE
+                            );
+                        }
+                    }
+            );
+
+            JPanel linkedinPanel =
+                    new JPanel(
+                            new FlowLayout(
+                                    FlowLayout.LEFT,
+                                    0,
+                                    8
+                            )
+                    );
+
+            linkedinPanel.setOpaque(false);
+
+            linkedinPanel.add(
+                    linkedinButton
+            );
+
+            recruiterSection.add(
+                    linkedinPanel,
+                    BorderLayout.SOUTH
+            );
+        }
+
+        body.add(
+                recruiterSection,
+                bodyGbc
+        );
+
+
+        // =========================================================
+        // BOTTOM SPACER
+        // =========================================================
+
+        bodyGbc.gridy++;
+        bodyGbc.weighty = 1;
+        bodyGbc.fill = GridBagConstraints.BOTH;
+        bodyGbc.insets = new Insets(0, 0, 0, 0);
+
+        body.add(
+                Box.createGlue(),
+                bodyGbc
+        );
+
+
+        JScrollPane scrollPane =
+                new JScrollPane(
+                        body
+                );
+
+        scrollPane.setBorder(null);
+
+        scrollPane.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
+
+        scrollPane.setVerticalScrollBarPolicy(
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
+        );
+
+        scrollPane.getVerticalScrollBar()
+                .setUnitIncrement(16);
+
+
+        // =========================================================
+        // BOTTOM ACTIONS
+        // =========================================================
+
+        JPanel bottom =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.RIGHT,
+                                10,
+                                12
+                        )
+                );
+
+        bottom.setBackground(
+                BACKGROUND
+        );
+
+        bottom.setBorder(
+                new EmptyBorder(
+                        0,
+                        20,
+                        5,
+                        20
+                )
+        );
+
+        JButton closeButton =
+                createButton(
+                        "Close",
+                        new Color(
+                                107,
+                                114,
+                                128
+                        )
+                );
+
+        closeButton.addActionListener(
+                e -> dialog.dispose()
+        );
+
+        bottom.add(
+                closeButton
+        );
+
+
+        dialog.add(
+                header,
+                BorderLayout.NORTH
+        );
+
+        dialog.add(
+                scrollPane,
+                BorderLayout.CENTER
+        );
+
+        dialog.add(
+                bottom,
+                BorderLayout.SOUTH
+        );
 
         dialog.setVisible(true);
     }
@@ -2921,6 +3625,12 @@ JLabel deadline =
         locationBox.setSelectedIndex(0);
 
         workModeBox.setSelectedIndex(0);
+
+        sourceBox.setSelectedIndex(0);
+
+        sortBox.setSelectedIndex(0);
+
+        skillsOnlyCheckBox.setSelected(false);
 
         loadAllInternships();
     }
