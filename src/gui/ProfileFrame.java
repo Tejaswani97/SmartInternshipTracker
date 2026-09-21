@@ -1,13 +1,19 @@
 package gui;
 
 import model.User;
-import dao.UserDAO;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.awt.geom.Ellipse2D;
+import java.awt.image.BufferedImage;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import javax.imageio.ImageIO;
 
 public class ProfileFrame extends JFrame {
 
@@ -37,6 +43,18 @@ public class ProfileFrame extends JFrame {
     private static final Color BORDER =
             new Color(229, 231, 235);
 
+    private static final Color BLUE_LIGHT =
+            new Color(239, 246, 255);
+
+    private static final Color GREEN_LIGHT =
+            new Color(240, 253, 244);
+
+    private static final Color CHIP_TEXT =
+            new Color(30, 64, 175);
+
+    private static final Color SHADOW =
+            new Color(15, 23, 42, 18);
+
 
     private JLabel avatarLabel;
 
@@ -65,10 +83,20 @@ public class ProfileFrame extends JFrame {
 
 
         setSize(
-                1100,
-                700
+                1280,
+                820
         );
-            setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+        setMinimumSize(
+                new Dimension(
+                        1100,
+                        700
+                )
+        );
+
+        setExtendedState(
+                JFrame.MAXIMIZED_BOTH
+        );
 
         setLocationRelativeTo(null);
 
@@ -146,8 +174,8 @@ public class ProfileFrame extends JFrame {
 
         sidebar.setPreferredSize(
                 new Dimension(
-                        220,
-                        700
+                        240,
+                        820
                 )
         );
 
@@ -328,749 +356,927 @@ public class ProfileFrame extends JFrame {
     // =========================================================
     // MAIN CONTENT
     // =========================================================
-   private JPanel createMainContent() {
 
-    JPanel content = new JPanel(new BorderLayout(0, 20));
+    private JPanel createMainContent() {
 
-    content.setBackground(BACKGROUND);
+        JPanel content =
+                new JPanel(
+                        new BorderLayout(0, 18)
+                );
 
-    content.setBorder(
-            new EmptyBorder(
-                    30,
-                    30,
-                    30,
-                    30
-            )
-    );
+        content.setBackground(
+                BACKGROUND
+        );
 
-    // =========================================================
-    // HEADER
-    // =========================================================
+        content.setBorder(
+                new EmptyBorder(
+                        28,
+                        34,
+                        28,
+                        34
+                )
+        );
 
-    JPanel header = new JPanel(new BorderLayout());
+        JPanel header =
+                new JPanel(
+                        new BorderLayout(20, 0)
+                );
 
-    header.setOpaque(false);
+        header.setOpaque(false);
 
-    JPanel heading = new JPanel();
-    heading.setOpaque(false);
-    heading.setLayout(
-            new BoxLayout(
-                    heading,
-                    BoxLayout.Y_AXIS
-            )
-    );
+        JPanel titleBlock =
+                new JPanel();
 
-    JLabel title = new JLabel("My Profile");
+        titleBlock.setOpaque(false);
+        titleBlock.setLayout(
+                new BoxLayout(
+                        titleBlock,
+                        BoxLayout.Y_AXIS
+                )
+        );
 
-    title.setFont(
-            new Font(
-                    "SansSerif",
-                    Font.BOLD,
-                    28
-            )
-    );
+        JLabel title =
+                new JLabel(
+                        "My Profile"
+                );
 
-    title.setForeground(TEXT);
+        title.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        30
+                )
+        );
 
-    JLabel subtitle = new JLabel(
-            "Manage your personal information, skills and resume"
-    );
+        title.setForeground(TEXT);
 
-    subtitle.setFont(
-            new Font(
-                    "SansSerif",
-                    Font.PLAIN,
-                    14
-            )
-    );
+        JLabel subtitle =
+                new JLabel(
+                        "Build a recruiter-ready profile that represents your skills and experience."
+                );
 
-    subtitle.setForeground(MUTED);
+        subtitle.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        14
+                )
+        );
 
-    heading.add(title);
+        subtitle.setForeground(MUTED);
 
-    heading.add(
-            Box.createVerticalStrut(5)
-    );
+        titleBlock.add(title);
+        titleBlock.add(Box.createVerticalStrut(5));
+        titleBlock.add(subtitle);
 
-    heading.add(subtitle);
+        header.add(
+                titleBlock,
+                BorderLayout.CENTER
+        );
 
-    header.add(
-            heading,
-            BorderLayout.WEST
-    );
+        header.add(
+                createProfileStrengthCard(),
+                BorderLayout.EAST
+        );
 
-    content.add(
-            header,
-            BorderLayout.NORTH
-    );
+        content.add(
+                header,
+                BorderLayout.NORTH
+        );
 
-    // =========================================================
-    // MAIN SCROLLABLE AREA
-    // =========================================================
+        JPanel heroCard =
+                createCard();
 
-    JPanel mainPanel = new JPanel();
-    mainPanel.setOpaque(false);
+        heroCard.setLayout(
+                new BorderLayout(26, 0)
+        );
 
-    mainPanel.setLayout(
-            new BoxLayout(
-                    mainPanel,
-                    BoxLayout.Y_AXIS
-            )
-    );
+        heroCard.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(BORDER),
+                        new EmptyBorder(24, 28, 24, 28)
+                )
+        );
 
-    // =========================================================
-    // TOP PROFILE CARD
-    // =========================================================
+        heroCard.setPreferredSize(
+                new Dimension(
+                        0,
+                        220
+                )
+        );
 
-    JPanel profileCard = new JPanel(
-            new BorderLayout(
-                    35,
-                    0
-            )
-    );
+        // ---------------------------------------------------------
+        // PROFILE PHOTO
+        // ---------------------------------------------------------
 
-    profileCard.setBackground(CARD);
+        JPanel avatarWrap =
+                new JPanel(
+                        new BorderLayout(0, 10)
+                );
 
-    profileCard.setBorder(
-            BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(BORDER),
-                    new EmptyBorder(
-                            25,
-                            25,
-                            25,
-                            25
-                    )
-            )
-    );
+        avatarWrap.setOpaque(false);
+        avatarWrap.setPreferredSize(
+                new Dimension(170, 175)
+        );
 
-    profileCard.setMaximumSize(
-            new Dimension(
-                    Integer.MAX_VALUE,
-                    240
-            )
-    );
+        avatarLabel = createAvatar();
 
-    // ---------------------------------------------------------
-    // LEFT - AVATAR
-    // ---------------------------------------------------------
+        JPanel avatarCenter =
+                new JPanel(
+                        new GridBagLayout()
+                );
 
-    JPanel left = new JPanel();
+        avatarCenter.setOpaque(false);
+        avatarCenter.add(avatarLabel);
 
-    left.setOpaque(false);
+        avatarWrap.add(
+                avatarCenter,
+                BorderLayout.CENTER
+        );
 
-    left.setPreferredSize(
-            new Dimension(
-                    220,
-                    180
-            )
-    );
+        JButton changePhotoButton =
+                createOutlineButton(
+                        "Change photo",
+                        BLUE
+                );
 
-    left.setLayout(
-            new BoxLayout(
-                    left,
-                    BoxLayout.Y_AXIS
-            )
-    );
+        changePhotoButton.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        11
+                )
+        );
 
-    avatarLabel = createAvatar();
+        changePhotoButton.setPreferredSize(
+                new Dimension(126, 31)
+        );
 
-    avatarLabel.setAlignmentX(
-            Component.CENTER_ALIGNMENT
-    );
+        changePhotoButton.addActionListener(
+                e -> showPhotoMenu()
+        );
 
-    left.add(avatarLabel);
+        JPanel photoButtonWrap =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.CENTER,
+                                0,
+                                0
+                        )
+                );
 
-    left.add(
-            Box.createVerticalStrut(12)
-    );
+        photoButtonWrap.setOpaque(false);
+        photoButtonWrap.add(changePhotoButton);
 
-    JLabel profileText = new JLabel(
-            "Your Profile"
-    );
+        avatarWrap.add(
+                photoButtonWrap,
+                BorderLayout.SOUTH
+        );
 
-    profileText.setFont(
-            new Font(
-                    "SansSerif",
-                    Font.BOLD,
-                    13
-            )
-    );
+        heroCard.add(
+                avatarWrap,
+                BorderLayout.WEST
+        );
 
-    profileText.setForeground(MUTED);
+        // ---------------------------------------------------------
+        // IDENTITY
+        // ---------------------------------------------------------
 
-    profileText.setAlignmentX(
-            Component.CENTER_ALIGNMENT
-    );
+        JPanel identityText =
+                new JPanel();
 
-    left.add(profileText);
+        identityText.setOpaque(false);
+        identityText.setLayout(
+                new BoxLayout(
+                        identityText,
+                        BoxLayout.Y_AXIS
+                )
+        );
 
-    // ---------------------------------------------------------
-    // RIGHT - PERSONAL INFORMATION
-    // ---------------------------------------------------------
+        nameLabel =
+                new JLabel(
+                        safe(user.getName())
+                );
 
-    JPanel right = new JPanel(
-            new GridBagLayout()
-    );
+        nameLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        30
+                )
+        );
 
-    right.setOpaque(false);
+        nameLabel.setForeground(TEXT);
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-    GridBagConstraints gbc =
-            new GridBagConstraints();
+        emailLabel =
+                new JLabel(
+                        safe(user.getEmail())
+                );
 
-    gbc.insets =
-            new Insets(
-                    7,
-                    10,
-                    7,
-                    10
+        emailLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        14
+                )
+        );
+
+        emailLabel.setForeground(MUTED);
+        emailLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel roleHint =
+                new JLabel(
+                        "STUDENT / JOB SEEKER"
+                );
+
+        roleHint.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        11
+                )
+        );
+
+        roleHint.setForeground(BLUE);
+        roleHint.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel locationRow =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.LEFT,
+                                0,
+                                0
+                        )
+                );
+
+        locationRow.setOpaque(false);
+        locationRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel locationIcon =
+                new JLabel("●");
+
+        locationIcon.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        9
+                )
+        );
+
+        locationIcon.setForeground(BLUE);
+
+        locationLabel =
+                new JLabel(
+                        displayLocation()
+                );
+
+        locationLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        14
+                )
+        );
+
+        locationLabel.setForeground(MUTED);
+
+        locationRow.add(locationIcon);
+        locationRow.add(Box.createHorizontalStrut(7));
+        locationRow.add(locationLabel);
+
+        identityText.add(nameLabel);
+        identityText.add(Box.createVerticalStrut(5));
+        identityText.add(emailLabel);
+        identityText.add(Box.createVerticalStrut(14));
+        identityText.add(roleHint);
+        identityText.add(Box.createVerticalStrut(9));
+        identityText.add(locationRow);
+        identityText.add(Box.createVerticalGlue());
+
+        JLabel profileHint =
+                new JLabel(
+                        "Keep your profile specific, concise, and focused on skills recruiters search for."
+                );
+
+        profileHint.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        12
+                )
+        );
+
+        profileHint.setForeground(MUTED);
+        profileHint.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        identityText.add(Box.createVerticalStrut(14));
+        identityText.add(profileHint);
+
+        heroCard.add(
+                identityText,
+                BorderLayout.CENTER
+        );
+
+        // ---------------------------------------------------------
+        // CAREER SNAPSHOT + EDIT
+        // ---------------------------------------------------------
+
+        JPanel snapshotSide =
+                new JPanel();
+
+        snapshotSide.setOpaque(false);
+        snapshotSide.setLayout(
+                new BoxLayout(
+                        snapshotSide,
+                        BoxLayout.Y_AXIS
+                )
+        );
+
+        JLabel snapshotTitle =
+                createSectionTitle("Career Snapshot");
+
+        snapshotTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+        snapshotSide.add(snapshotTitle);
+        snapshotSide.add(Box.createVerticalStrut(12));
+
+        snapshotSide.add(
+                createSnapshotRow(
+                        "Location",
+                        displayLocation()
+                )
+        );
+
+        snapshotSide.add(Box.createVerticalStrut(10));
+
+        snapshotSide.add(
+                createSnapshotRow(
+                        "Resume",
+                        resumeStatusText()
+                )
+        );
+
+        snapshotSide.add(Box.createVerticalGlue());
+
+        JButton editButton =
+                createButton(
+                        "Edit Profile",
+                        BLUE
+                );
+
+        editButton.setPreferredSize(
+                new Dimension(170, 40)
+        );
+
+        editButton.setMaximumSize(
+                new Dimension(
+                        170,
+                        40
+                )
+        );
+
+        editButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        editButton.addActionListener(
+                e -> editProfile()
+        );
+
+        snapshotSide.add(editButton);
+
+        heroCard.add(
+                snapshotSide,
+                BorderLayout.EAST
+        );
+
+        // ---------------------------------------------------------
+        // LOWER PROFILE CONTENT
+        // ---------------------------------------------------------
+
+        JPanel lower =
+                new JPanel(
+                        new GridLayout(
+                                1,
+                                2,
+                                18,
+                                0
+                        )
+                );
+
+        lower.setOpaque(false);
+
+        JPanel leftColumn =
+                new JPanel();
+
+        leftColumn.setOpaque(false);
+        leftColumn.setLayout(
+                new BoxLayout(
+                        leftColumn,
+                        BoxLayout.Y_AXIS
+                )
+        );
+
+        leftColumn.add(createAboutCard());
+        leftColumn.add(Box.createVerticalStrut(16));
+        leftColumn.add(createSkillsCard());
+
+        JPanel rightColumn =
+                new JPanel();
+
+        rightColumn.setOpaque(false);
+        rightColumn.setLayout(
+                new BoxLayout(
+                        rightColumn,
+                        BoxLayout.Y_AXIS
+                )
+        );
+
+        rightColumn.add(createResumeCard());
+
+        lower.add(leftColumn);
+        lower.add(rightColumn);
+
+        JPanel contentStack =
+                new JPanel();
+
+        contentStack.setOpaque(false);
+        contentStack.setLayout(
+                new BoxLayout(
+                        contentStack,
+                        BoxLayout.Y_AXIS
+                )
+        );
+
+        contentStack.add(heroCard);
+        contentStack.add(Box.createVerticalStrut(18));
+        contentStack.add(lower);
+
+        JScrollPane scrollPane =
+                new JScrollPane(contentStack);
+
+        scrollPane.setBorder(null);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setHorizontalScrollBarPolicy(
+                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
+        );
+
+        content.add(
+                scrollPane,
+                BorderLayout.CENTER
+        );
+
+        return content;
+    }
+
+
+    private JPanel createProfileStrengthCard() {
+
+        JPanel card =
+                new JPanel(
+                        new BorderLayout(10, 0)
+                );
+
+        card.setBackground(BLUE_LIGHT);
+        card.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(
+                                new Color(191, 219, 254)
+                        ),
+                        new EmptyBorder(10, 14, 10, 14)
+                )
+        );
+
+        JLabel label =
+                new JLabel(
+                        "Profile strength"
+                );
+
+        label.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        12
+                )
+        );
+
+        label.setForeground(CHIP_TEXT);
+
+        JProgressBar progress =
+                new JProgressBar(0, 100);
+
+        int value = calculateProfileStrength();
+        progress.setValue(value);
+        progress.setPreferredSize(
+                new Dimension(110, 8)
+        );
+        progress.setForeground(BLUE);
+        progress.setBackground(Color.WHITE);
+        progress.setBorderPainted(false);
+
+        JLabel valueLabel =
+                new JLabel(value + "%");
+
+        valueLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        12
+                )
+        );
+
+        valueLabel.setForeground(TEXT);
+
+        JPanel meter =
+                new JPanel(
+                        new BorderLayout(8, 0)
+                );
+
+        meter.setOpaque(false);
+        meter.add(label, BorderLayout.WEST);
+        meter.add(progress, BorderLayout.CENTER);
+        meter.add(valueLabel, BorderLayout.EAST);
+
+        card.add(
+                meter,
+                BorderLayout.CENTER
+        );
+
+        return card;
+    }
+
+
+    private int calculateProfileStrength() {
+
+        int score = 0;
+
+        if (user.getName() != null && !user.getName().isBlank()) score += 15;
+        if (user.getEmail() != null && !user.getEmail().isBlank()) score += 15;
+        if (user.getLocation() != null && !user.getLocation().isBlank()) score += 10;
+        if (user.getBio() != null && !user.getBio().isBlank()) score += 20;
+        if (user.getSkills() != null && !user.getSkills().isBlank()) score += 20;
+        if (user.getResumePath() != null && !user.getResumePath().isBlank()) score += 20;
+
+        return score;
+    }
+
+
+    private JPanel createAboutCard() {
+
+        JPanel card = createCard();
+
+        card.setLayout(
+                new BorderLayout(0, 12)
+        );
+
+        card.add(
+                createSectionTitle("About Me"),
+                BorderLayout.NORTH
+        );
+
+        bioArea =
+                new JTextArea(
+                        safe(user.getBio())
+                );
+
+        bioArea.setEditable(false);
+        bioArea.setLineWrap(true);
+        bioArea.setWrapStyleWord(true);
+        bioArea.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        14
+                )
+        );
+        bioArea.setForeground(TEXT);
+        bioArea.setBackground(CARD);
+        bioArea.setBorder(new EmptyBorder(0, 0, 0, 0));
+
+        JScrollPane bioScroll =
+                new JScrollPane(bioArea);
+
+        bioScroll.setBorder(null);
+        bioScroll.setOpaque(false);
+        bioScroll.getViewport().setOpaque(false);
+        bioScroll.setPreferredSize(
+                new Dimension(0, 130)
+        );
+
+        card.add(
+                bioScroll,
+                BorderLayout.CENTER
+        );
+
+        return card;
+    }
+
+
+    private JPanel createSkillsCard() {
+
+        JPanel card = createCard();
+
+        card.setLayout(
+                new BorderLayout(0, 12)
+        );
+
+        card.add(
+                createSectionTitle("Skills & Technologies"),
+                BorderLayout.NORTH
+        );
+
+        skillsPanel =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.LEFT,
+                                8,
+                                6
+                        )
+                );
+
+        skillsPanel.setOpaque(false);
+        updateSkillsPanel();
+
+        JScrollPane skillsScroll =
+                new JScrollPane(skillsPanel);
+
+        skillsScroll.setBorder(null);
+        skillsScroll.setOpaque(false);
+        skillsScroll.getViewport().setOpaque(false);
+        skillsScroll.setVerticalScrollBarPolicy(
+                ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER
+        );
+        skillsScroll.setHorizontalScrollBarPolicy(
+                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
+        );
+        skillsScroll.setPreferredSize(
+                new Dimension(0, 118)
+        );
+
+        card.add(
+                skillsScroll,
+                BorderLayout.CENTER
+        );
+
+        return card;
+    }
+
+
+    private JPanel createResumeCard() {
+
+        JPanel card = createCard();
+
+        card.setLayout(
+                new BorderLayout(18, 0)
+        );
+
+        JPanel resumeInfo =
+                new JPanel(
+                        new BorderLayout(12, 0)
+                );
+
+        resumeInfo.setOpaque(false);
+
+        JLabel icon =
+                new JLabel("PDF", SwingConstants.CENTER);
+
+        icon.setPreferredSize(
+                new Dimension(52, 52)
+        );
+
+        icon.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        14
+                )
+        );
+
+        icon.setForeground(GREEN);
+        icon.setOpaque(true);
+        icon.setBackground(GREEN_LIGHT);
+        icon.setBorder(
+                BorderFactory.createLineBorder(
+                        new Color(187, 247, 208)
+                )
+        );
+
+        resumeInfo.add(
+                icon,
+                BorderLayout.WEST
+        );
+
+        JPanel text = new JPanel();
+        text.setOpaque(false);
+        text.setLayout(
+                new BoxLayout(
+                        text,
+                        BoxLayout.Y_AXIS
+                )
+        );
+
+        JLabel title =
+                new JLabel("Resume");
+
+        title.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        14
+                )
+        );
+
+        title.setForeground(TEXT);
+
+        resumeLabel =
+                new JLabel(resumeText());
+
+        resumeLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        12
+                )
+        );
+
+        resumeLabel.setForeground(MUTED);
+
+        text.add(title);
+        text.add(Box.createVerticalStrut(4));
+        text.add(resumeLabel);
+
+        resumeInfo.add(
+                text,
+                BorderLayout.CENTER
+        );
+
+        card.add(
+                resumeInfo,
+                BorderLayout.CENTER
+        );
+
+        JPanel actions =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.RIGHT,
+                                8,
+                                0
+                        )
+                );
+
+        actions.setOpaque(false);
+
+        JButton uploadButton =
+                createOutlineButton(
+                        "Upload / Replace",
+                        GREEN
+                );
+
+        uploadButton.addActionListener(
+                e -> uploadResume()
+        );
+
+        JButton viewResume =
+                createOutlineButton(
+                        "Open Resume",
+                        BLUE
+                );
+
+        viewResume.addActionListener(
+                e -> openResume()
+        );
+
+        actions.add(uploadButton);
+        actions.add(viewResume);
+
+        card.add(
+                actions,
+                BorderLayout.EAST
+        );
+
+        return card;
+    }
+
+
+    private JPanel createSnapshotRow(
+            String title,
+            String value
+    ) {
+
+        JPanel row =
+                new JPanel(
+                        new BorderLayout(8, 0)
+                );
+
+        row.setOpaque(false);
+
+        JLabel titleLabel =
+                new JLabel(title);
+
+        titleLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        12
+                )
+        );
+
+        titleLabel.setForeground(MUTED);
+
+        JLabel valueLabel =
+                new JLabel(value);
+
+        valueLabel.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        12
+                )
+        );
+
+        valueLabel.setForeground(TEXT);
+
+        row.add(titleLabel, BorderLayout.WEST);
+        row.add(valueLabel, BorderLayout.CENTER);
+
+        return row;
+    }
+
+
+    private JPanel createCard() {
+
+        return new RoundedPanel(
+                CARD,
+                BORDER,
+                18
+        );
+    }
+
+
+    private static class RoundedPanel extends JPanel {
+
+        private final Color backgroundColor;
+        private final Color borderColor;
+        private final int radius;
+
+        private RoundedPanel(
+                Color backgroundColor,
+                Color borderColor,
+                int radius
+        ) {
+
+            this.backgroundColor = backgroundColor;
+            this.borderColor = borderColor;
+            this.radius = radius;
+            setOpaque(false);
+        }
+
+        @Override
+        protected void paintComponent(
+                Graphics graphics
+        ) {
+
+            Graphics2D g2 =
+                    (Graphics2D) graphics.create();
+
+            g2.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON
             );
 
-    gbc.fill =
-            GridBagConstraints.HORIZONTAL;
-
-    gbc.anchor =
-            GridBagConstraints.WEST;
-
-    // Section title
-
-    JLabel personalTitle =
-            createSectionTitle(
-                    "Personal Information"
+            g2.setColor(SHADOW);
+            g2.fillRoundRect(
+                    3,
+                    3,
+                    getWidth() - 4,
+                    getHeight() - 4,
+                    radius,
+                    radius
             );
 
-    gbc.gridx = 0;
-    gbc.gridy = 0;
-    gbc.gridwidth = 2;
-    gbc.weightx = 1;
-
-    right.add(
-            personalTitle,
-            gbc
-    );
-
-    // ---------------------------------------------------------
-    // NAME
-    // ---------------------------------------------------------
-
-    JLabel nameTitle =
-            new JLabel("Name");
-
-    nameTitle.setFont(
-            new Font(
-                    "SansSerif",
-                    Font.BOLD,
-                    12
-            )
-    );
-
-    nameTitle.setForeground(MUTED);
-
-    nameLabel =
-            new JLabel(
-                    safe(
-                            user.getName()
-                    )
-            );
-
-    nameLabel.setFont(
-            new Font(
-                    "SansSerif",
-                    Font.BOLD,
-                    14
-            )
-    );
-
-    nameLabel.setForeground(TEXT);
-
-    gbc.gridy = 1;
-    gbc.gridx = 0;
-    gbc.gridwidth = 1;
-    gbc.weightx = 0.25;
-
-    right.add(
-            nameTitle,
-            gbc
-    );
-
-    gbc.gridx = 1;
-    gbc.weightx = 0.75;
-
-    right.add(
-            nameLabel,
-            gbc
-    );
-
-    // ---------------------------------------------------------
-    // EMAIL
-    // ---------------------------------------------------------
-
-    JLabel emailTitle =
-            new JLabel("Email");
-
-    emailTitle.setFont(
-            new Font(
-                    "SansSerif",
-                    Font.BOLD,
-                    12
-            )
-    );
-
-    emailTitle.setForeground(MUTED);
-
-    emailLabel =
-            new JLabel(
-                    safe(
-                            user.getEmail()
-                    )
-            );
-
-    emailLabel.setFont(
-            new Font(
-                    "SansSerif",
-                    Font.PLAIN,
-                    14
-            )
-    );
-
-    emailLabel.setForeground(TEXT);
-
-    gbc.gridy = 2;
-    gbc.gridx = 0;
-    gbc.weightx = 0.25;
-
-    right.add(
-            emailTitle,
-            gbc
-    );
-
-    gbc.gridx = 1;
-    gbc.weightx = 0.75;
-
-    right.add(
-            emailLabel,
-            gbc
-    );
-
-    // ---------------------------------------------------------
-    // LOCATION
-    // ---------------------------------------------------------
-
-    JLabel locationTitle =
-            new JLabel("Location");
-
-    locationTitle.setFont(
-            new Font(
-                    "SansSerif",
-                    Font.BOLD,
-                    12
-            )
-    );
-
-    locationTitle.setForeground(MUTED);
-
-    locationLabel =
-            new JLabel(
-                    displayLocation()
-            );
-
-    locationLabel.setFont(
-            new Font(
-                    "SansSerif",
-                    Font.PLAIN,
-                    14
-            )
-    );
-
-    locationLabel.setForeground(TEXT);
-
-    gbc.gridy = 3;
-    gbc.gridx = 0;
-    gbc.weightx = 0.25;
-
-    right.add(
-            locationTitle,
-            gbc
-    );
-
-    gbc.gridx = 1;
-    gbc.weightx = 0.75;
-
-    right.add(
-            locationLabel,
-            gbc
-    );
-
-    // ---------------------------------------------------------
-    // EDIT BUTTON
-    // ---------------------------------------------------------
-
-    JButton editButton =
-            createButton(
-                    "Edit Profile",
-                    BLUE
-            );
-
-    editButton.addActionListener(
-            e -> editProfile()
-    );
-
-    gbc.gridy = 4;
-    gbc.gridx = 1;
-    gbc.weightx = 0;
-
-    gbc.anchor =
-            GridBagConstraints.EAST;
-
-    right.add(
-            editButton,
-            gbc
-    );
-
-    profileCard.add(
-            left,
-            BorderLayout.WEST
-    );
-
-    profileCard.add(
-            right,
-            BorderLayout.CENTER
-    );
-
-    mainPanel.add(profileCard);
-
-    mainPanel.add(
-            Box.createVerticalStrut(20)
-    );
-
-    // =========================================================
-    // ABOUT ME CARD
-    // =========================================================
-
-    JPanel aboutCard =
-            new JPanel(
-                    new BorderLayout(
-                            0,
-                            10
-                    )
-            );
-
-    aboutCard.setBackground(CARD);
-
-    aboutCard.setBorder(
-            BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(BORDER),
-                    new EmptyBorder(
-                            20,
-                            20,
-                            20,
-                            20
-                    )
-            )
-    );
-
-    aboutCard.setMaximumSize(
-            new Dimension(
-                    Integer.MAX_VALUE,
-                    170
-            )
-    );
-
-    aboutCard.add(
-            createSectionTitle(
-                    "About Me"
-            ),
-            BorderLayout.NORTH
-    );
-
-    bioArea =
-            new JTextArea(
-                    safe(
-                            user.getBio()
-                    )
-            );
-
-    bioArea.setEditable(false);
-
-    bioArea.setLineWrap(true);
-
-    bioArea.setWrapStyleWord(true);
-
-    bioArea.setFont(
-            new Font(
-                    "SansSerif",
-                    Font.PLAIN,
-                    14
-            )
-    );
-
-    bioArea.setForeground(TEXT);
-
-    bioArea.setBackground(CARD);
-
-    bioArea.setBorder(
-            new EmptyBorder(
-                    5,
+            g2.setColor(backgroundColor);
+            g2.fillRoundRect(
                     0,
-                    5,
-                    0
-            )
-    );
-
-    aboutCard.add(
-            bioArea,
-            BorderLayout.CENTER
-    );
-
-    mainPanel.add(aboutCard);
-
-    mainPanel.add(
-            Box.createVerticalStrut(20)
-    );
-
-    // =========================================================
-    // SKILLS CARD
-    // =========================================================
-
-    JPanel skillsCard =
-            new JPanel(
-                    new BorderLayout(
-                            0,
-                            12
-                    )
+                    0,
+                    getWidth() - 4,
+                    getHeight() - 4,
+                    radius,
+                    radius
             );
 
-    skillsCard.setBackground(CARD);
-
-    skillsCard.setBorder(
-            BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(BORDER),
-                    new EmptyBorder(
-                            20,
-                            20,
-                            20,
-                            20
-                    )
-            )
-    );
-
-    skillsCard.setMaximumSize(
-            new Dimension(
-                    Integer.MAX_VALUE,
-                    140
-            )
-    );
-
-    skillsCard.add(
-            createSectionTitle(
-                    "Skills"
-            ),
-            BorderLayout.NORTH
-    );
-
-    skillsPanel =
-            new JPanel(
-                    new FlowLayout(
-                            FlowLayout.LEFT,
-                            8,
-                            5
-                    )
+            g2.setColor(borderColor);
+            g2.drawRoundRect(
+                    0,
+                    0,
+                    getWidth() - 4,
+                    getHeight() - 4,
+                    radius,
+                    radius
             );
 
-    skillsPanel.setOpaque(false);
-
-    updateSkillsPanel();
-
-    skillsCard.add(
-            skillsPanel,
-            BorderLayout.CENTER
-    );
-
-    mainPanel.add(skillsCard);
-
-    mainPanel.add(
-            Box.createVerticalStrut(20)
-    );
-
-    // =========================================================
-    // RESUME CARD
-    // =========================================================
-
-    JPanel resumeCard =
-            new JPanel(
-                    new BorderLayout(
-                            15,
-                            0
-                    )
-            );
-
-    resumeCard.setBackground(CARD);
-
-    resumeCard.setBorder(
-            BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(BORDER),
-                    new EmptyBorder(
-                            20,
-                            20,
-                            20,
-                            20
-                    )
-            )
-    );
-
-    resumeCard.setMaximumSize(
-            new Dimension(
-                    Integer.MAX_VALUE,
-                    100
-            )
-    );
-
-    // Resume icon
-
-    JLabel fileIcon =
-            new JLabel("📄");
-
-    fileIcon.setFont(
-            new Font(
-                    "SansSerif",
-                    Font.PLAIN,
-                    28
-            )
-    );
-
-    resumeCard.add(
-            fileIcon,
-            BorderLayout.WEST
-    );
-
-    // Resume text
-
-    JPanel resumeInfo =
-            new JPanel();
-
-    resumeInfo.setOpaque(false);
-
-    resumeInfo.setLayout(
-            new BoxLayout(
-                    resumeInfo,
-                    BoxLayout.Y_AXIS
-            )
-    );
-
-    JLabel resumeTitle =
-            new JLabel(
-                    "Resume"
-            );
-
-    resumeTitle.setFont(
-            new Font(
-                    "SansSerif",
-                    Font.BOLD,
-                    15
-            )
-    );
-
-    resumeTitle.setForeground(TEXT);
-
-    resumeLabel =
-            new JLabel(
-                    resumeText()
-            );
-
-    resumeLabel.setFont(
-            new Font(
-                    "SansSerif",
-                    Font.PLAIN,
-                    13
-            )
-    );
-
-    resumeLabel.setForeground(MUTED);
-
-    resumeInfo.add(resumeTitle);
-
-    resumeInfo.add(
-            Box.createVerticalStrut(5)
-    );
-
-    resumeInfo.add(resumeLabel);
-
-    resumeCard.add(
-            resumeInfo,
-            BorderLayout.CENTER
-    );
-
-    // Resume buttons
-
-    JPanel resumeButtons =
-            new JPanel(
-                    new FlowLayout(
-                            FlowLayout.RIGHT,
-                            8,
-                            0
-                    )
-            );
-
-    resumeButtons.setOpaque(false);
-
-    JButton viewResume =
-            createButton(
-                    "Open Resume",
-                    BLUE
-            );
-
-    viewResume.addActionListener(
-            e -> openResume()
-    );
-
-    JButton uploadButton =
-            createButton(
-                    "Upload / Replace",
-                    GREEN
-            );
-
-    uploadButton.addActionListener(
-            e -> uploadResume()
-    );
-
-    resumeButtons.add(viewResume);
-
-    resumeButtons.add(uploadButton);
-
-    resumeCard.add(
-            resumeButtons,
-            BorderLayout.EAST
-    );
-
-    mainPanel.add(resumeCard);
-
-    // =========================================================
-    // SCROLL PANE
-    // =========================================================
-
-    JScrollPane scrollPane =
-            new JScrollPane(
-                    mainPanel
-            );
-
-    scrollPane.setBorder(null);
-
-    scrollPane.setHorizontalScrollBarPolicy(
-            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
-    );
-
-    scrollPane.getVerticalScrollBar()
-            .setUnitIncrement(16);
-
-    scrollPane.getViewport()
-            .setBackground(BACKGROUND);
-
-    content.add(
-            scrollPane,
-            BorderLayout.CENTER
-    );
-
-    return content;
-}
+            g2.dispose();
+            super.paintComponent(graphics);
+        }
+    }
 
 
     // =========================================================
@@ -1079,68 +1285,464 @@ public class ProfileFrame extends JFrame {
 
     private JLabel createAvatar() {
 
-        String initials =
-                getInitials(
-                        user.getName()
-                );
+        AvatarLabel label =
+                new AvatarLabel();
 
-
-        JLabel label =
-                new JLabel(
-                        initials,
-                        SwingConstants.CENTER
-                );
-
-
-        label.setPreferredSize(
-                new Dimension(
-                        130,
-                        130
-                )
+        label.setPreferredSize(new Dimension(148, 148));
+        label.setMinimumSize(new Dimension(148, 148));
+        label.setMaximumSize(new Dimension(148, 148));
+        label.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        label.setToolTipText(
+                "Click to change your profile photo"
         );
 
+        label.setInitials(getInitials(user.getName()));
 
-        label.setMinimumSize(
-                new Dimension(
-                        130,
-                        130
-                )
+        label.addMouseListener(
+                new java.awt.event.MouseAdapter() {
+                    @Override
+                    public void mouseClicked(
+                            java.awt.event.MouseEvent e
+                    ) {
+                        showPhotoMenu();
+                    }
+                }
         );
 
-
-        label.setMaximumSize(
-                new Dimension(
-                        130,
-                        130
-                )
-        );
-
-
-        label.setOpaque(
-                true
-        );
-
-
-        label.setBackground(
-                BLUE
-        );
-
-
-        label.setForeground(
-                Color.WHITE
-        );
-
-
-        label.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        38
-                )
-        );
-
-
+        loadSavedPhoto(label);
         return label;
+    }
+
+
+    private void showPhotoMenu() {
+
+        String[] options = {
+                "Choose from Gallery",
+                "Take Photo",
+                "Remove Photo",
+                "Cancel"
+        };
+
+        int choice =
+                JOptionPane.showOptionDialog(
+                        this,
+                        "Update your profile photo",
+                        "Profile Photo",
+                        JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.PLAIN_MESSAGE,
+                        null,
+                        options,
+                        options[0]
+                );
+
+        if (choice == 0) {
+            chooseProfilePhoto();
+        } else if (choice == 1) {
+            openCameraAndChooseSavedPhoto();
+        } else if (choice == 2) {
+            removeProfilePhoto();
+        }
+    }
+
+
+    private void chooseProfilePhoto() {
+
+        JFileChooser chooser = new JFileChooser();
+
+        chooser.setDialogTitle(
+                "Choose Profile Photo"
+        );
+
+        chooser.setFileFilter(
+                new javax.swing.filechooser.FileNameExtensionFilter(
+                        "Image files",
+                        "jpg", "jpeg", "png", "gif", "bmp"
+                )
+        );
+
+        if (chooser.showOpenDialog(this)
+                != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        saveProfilePhoto(
+                chooser.getSelectedFile()
+        );
+    }
+
+
+    private void openCameraAndChooseSavedPhoto() {
+
+        try {
+
+            if (System.getProperty("os.name")
+                    .toLowerCase()
+                    .contains("win")) {
+
+                new ProcessBuilder(
+                        "cmd",
+                        "/c",
+                        "start",
+                        "",
+                        "microsoft.windows.camera:"
+                ).start();
+
+            } else {
+
+                Desktop.getDesktop()
+                        .browse(
+                                new URI("ms-camera:")
+                        );
+            }
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Camera opened.\n\n"
+                            + "Take your photo and save it.\n"
+                            + "Then select that saved image.",
+                    "Take Photo",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            chooseProfilePhoto();
+
+        } catch (Exception ex) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Could not open the camera app.\n\n"
+                            + "You can still choose a photo from Gallery.",
+                    "Camera Unavailable",
+                    JOptionPane.WARNING_MESSAGE
+            );
+        }
+    }
+
+
+    private void saveProfilePhoto(File source) {
+
+        try {
+
+            BufferedImage image = ImageIO.read(source);
+
+            if (image == null) {
+                throw new IllegalArgumentException(
+                        "Unsupported image format"
+                );
+            }
+
+            Path directory =
+                    Path.of(
+                            System.getProperty("user.home"),
+                            "SmartInternshipTracker",
+                            "profile_photos"
+                    );
+
+            Files.createDirectories(directory);
+
+            Path destination =
+                    directory.resolve(
+                            "avatar_"
+                                    + profilePhotoKey()
+                                    + ".png"
+                    );
+
+            BufferedImage normalized =
+                    normalizeAvatarImage(image);
+
+            ImageIO.write(
+                    normalized,
+                    "png",
+                    destination.toFile()
+            );
+
+            ((AvatarLabel) avatarLabel)
+                    .setAvatarImage(normalized);
+
+            avatarLabel.repaint();
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Profile photo updated successfully!",
+                    "Photo Updated",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+        } catch (Exception ex) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to use that image. Please choose another photo.",
+                    "Photo Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+
+    private BufferedImage normalizeAvatarImage(
+            BufferedImage source
+    ) {
+
+        int size = Math.min(
+                source.getWidth(),
+                source.getHeight()
+        );
+
+        int x = (source.getWidth() - size) / 2;
+        int y = (source.getHeight() - size) / 2;
+
+        BufferedImage square =
+                source.getSubimage(x, y, size, size);
+
+        BufferedImage output =
+                new BufferedImage(
+                        500,
+                        500,
+                        BufferedImage.TYPE_INT_ARGB
+                );
+
+        Graphics2D g2 = output.createGraphics();
+
+        g2.setRenderingHint(
+                RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BICUBIC
+        );
+
+        g2.setRenderingHint(
+                RenderingHints.KEY_RENDERING,
+                RenderingHints.VALUE_RENDER_QUALITY
+        );
+
+        g2.drawImage(
+                square,
+                0, 0, 500, 500, null
+        );
+
+        g2.dispose();
+        return output;
+    }
+
+
+    private void loadSavedPhoto(JLabel label) {
+
+        Path photo = savedPhotoPath();
+
+        if (!Files.exists(photo)) {
+            label.setText(
+                    getInitials(user.getName())
+            );
+            return;
+        }
+
+        try {
+
+            BufferedImage image =
+                    ImageIO.read(photo.toFile());
+
+            ((AvatarLabel) label)
+                    .setAvatarImage(image);
+
+        } catch (Exception ignored) {
+
+            label.setText(
+                    getInitials(user.getName())
+            );
+        }
+    }
+
+
+    private void removeProfilePhoto() {
+
+        try {
+
+            Files.deleteIfExists(savedPhotoPath());
+
+            AvatarLabel avatar =
+                    (AvatarLabel) avatarLabel;
+
+            avatar.setAvatarImage(null);
+            avatar.setInitials(
+                    getInitials(user.getName())
+            );
+            avatar.repaint();
+
+        } catch (Exception ex) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to remove the profile photo.",
+                    "Photo Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+
+    private Path savedPhotoPath() {
+
+        return Path.of(
+                System.getProperty("user.home"),
+                "SmartInternshipTracker",
+                "profile_photos",
+                "avatar_"
+                        + profilePhotoKey()
+                        + ".png"
+        );
+    }
+
+
+    private String profilePhotoKey() {
+
+        String email = user.getEmail();
+
+        if (email == null || email.isBlank()) {
+            email = safe(user.getName());
+        }
+
+        return Integer.toUnsignedString(
+                email.hashCode()
+        );
+    }
+
+
+    private static class AvatarLabel extends JLabel {
+
+        private BufferedImage avatarImage;
+        private String initials = "U";
+
+        private AvatarLabel() {
+            super();
+            setOpaque(false);
+            setFont(
+                    new Font(
+                            "SansSerif",
+                            Font.BOLD,
+                            46
+                    )
+            );
+            setForeground(Color.WHITE);
+        }
+
+        private void setAvatarImage(BufferedImage image) {
+            this.avatarImage = image;
+            repaint();
+        }
+
+        private void setInitials(String initials) {
+            this.initials =
+                    (initials == null || initials.isBlank())
+                            ? "U"
+                            : initials;
+            repaint();
+        }
+
+        @Override
+        protected void paintComponent(Graphics graphics) {
+
+            Graphics2D g2 =
+                    (Graphics2D) graphics.create();
+
+            g2.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON
+            );
+
+            int width = getWidth();
+            int height = getHeight();
+            int size = Math.min(width, height) - 4;
+            int x = (width - size) / 2;
+            int y = (height - size) / 2;
+
+            g2.setColor(
+                    new Color(59, 130, 246)
+            );
+
+            g2.fillOval(x, y, size, size);
+
+            if (avatarImage != null) {
+
+                Shape clip =
+                        new Ellipse2D.Double(
+                                x, y, size, size
+                        );
+
+                g2.clip(clip);
+
+                double scale = Math.max(
+                        (double) size / avatarImage.getWidth(),
+                        (double) size / avatarImage.getHeight()
+                );
+
+                int drawWidth =
+                        (int) (avatarImage.getWidth() * scale);
+
+                int drawHeight =
+                        (int) (avatarImage.getHeight() * scale);
+
+                int drawX =
+                        x + (size - drawWidth) / 2;
+
+                int drawY =
+                        y + (size - drawHeight) / 2;
+
+                g2.setRenderingHint(
+                        RenderingHints.KEY_INTERPOLATION,
+                        RenderingHints.VALUE_INTERPOLATION_BICUBIC
+                );
+
+                g2.drawImage(
+                        avatarImage,
+                        drawX, drawY,
+                        drawWidth, drawHeight,
+                        null
+                );
+
+            } else {
+
+                g2.setFont(
+                        new Font(
+                                "SansSerif",
+                                Font.BOLD,
+                                Math.max(
+                                        30,
+                                        size / 3
+                                )
+                        )
+                );
+
+                g2.setColor(Color.WHITE);
+
+                String text = initials;
+
+                if (text == null || text.isBlank()) {
+                    text = "U";
+                }
+
+                FontMetrics fm = g2.getFontMetrics();
+
+                int tx =
+                        width / 2 - fm.stringWidth(text) / 2;
+
+                int ty =
+                        height / 2
+                                - (fm.getAscent()
+                                + fm.getDescent()) / 2;
+
+                g2.drawString(text, tx, ty);
+            }
+
+            g2.setColor(Color.WHITE);
+            g2.setStroke(new BasicStroke(4f));
+            g2.drawOval(
+                    x + 2,
+                    y + 2,
+                    size - 4,
+                    size - 4
+            );
+
+            g2.dispose();
+        }
     }
 
 
@@ -1151,185 +1753,251 @@ public class ProfileFrame extends JFrame {
     private void editProfile() {
 
         JTextField nameField =
-                new JTextField(
-                        user.getName()
-                );
-
+                createFormField(user.getName());
 
         JTextField locationField =
-                new JTextField(
-                        user.getLocation()
-                );
-
+                createFormField(user.getLocation());
 
         JTextArea bioField =
                 new JTextArea(
                         user.getBio(),
-                        4,
-                        20
+                        6,
+                        30
                 );
 
-
-        bioField.setLineWrap(
-                true
-        );
-
-
-        bioField.setWrapStyleWord(
-                true
-        );
-
+        styleTextArea(bioField);
 
         JTextField skillsField =
-                new JTextField(
-                        user.getSkills()
-                );
+                createFormField(user.getSkills());
 
-
-        JPanel panel =
+        JPanel form =
                 new JPanel(
-                        new GridLayout(
-                                4,
-                                2,
-                                10,
-                                10
-                        )
+                        new GridBagLayout()
                 );
 
+        form.setBackground(CARD);
+        form.setBorder(
+                new EmptyBorder(
+                        12, 12, 4, 12
+                )
+        );
 
-        panel.add(
+        GridBagConstraints gbc =
+                new GridBagConstraints();
+
+        gbc.insets =
+                new Insets(8, 8, 8, 8);
+
+        gbc.fill =
+                GridBagConstraints.HORIZONTAL;
+
+        addFormLabel(form, gbc, 0, "Full name");
+        addFormComponent(form, gbc, 0, nameField);
+
+        addFormLabel(form, gbc, 1, "Location");
+        addFormComponent(form, gbc, 1, locationField);
+
+        addFormLabel(form, gbc, 2, "Bio");
+
+        JScrollPane bioScroll =
+                new JScrollPane(bioField);
+
+        bioScroll.setBorder(
+                BorderFactory.createLineBorder(BORDER)
+        );
+
+        gbc.gridy = 2;
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+
+        form.add(bioScroll, gbc);
+
+        addFormLabel(form, gbc, 3, "Skills");
+        addFormComponent(form, gbc, 3, skillsField);
+
+        JLabel skillHint =
                 new JLabel(
-                        "Name:"
+                        "Use commas, for example: Java, SQL, Spring Boot, Git"
+                );
+
+        skillHint.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        11
                 )
         );
 
+        skillHint.setForeground(MUTED);
 
-        panel.add(
-                nameField
-        );
+        gbc.gridy = 4;
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.insets =
+                new Insets(0, 8, 10, 8);
 
+        form.add(skillHint, gbc);
 
-        panel.add(
+        JLabel dialogHint =
                 new JLabel(
-                        "Location:"
+                        "Keep your profile specific, concise, and focused on skills recruiters search for."
+                );
+
+        dialogHint.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        12
                 )
         );
 
+        dialogHint.setForeground(MUTED);
 
-        panel.add(
-                locationField
+        JPanel wrapper =
+                new JPanel(
+                        new BorderLayout(0, 8)
+                );
+
+        wrapper.setBackground(CARD);
+        wrapper.add(
+                dialogHint,
+                BorderLayout.NORTH
         );
-
-
-        panel.add(
-                new JLabel(
-                        "Bio:"
-                )
+        wrapper.add(
+                form,
+                BorderLayout.CENTER
         );
-
-
-        panel.add(
-                new JScrollPane(
-                        bioField
-                )
-        );
-
-
-        panel.add(
-                new JLabel(
-                        "Skills:"
-                )
-        );
-
-
-        panel.add(
-                skillsField
-        );
-
 
         int answer =
                 JOptionPane.showConfirmDialog(
                         this,
-                        panel,
+                        wrapper,
                         "Edit Profile",
                         JOptionPane.OK_CANCEL_OPTION,
                         JOptionPane.PLAIN_MESSAGE
                 );
 
+        if (answer != JOptionPane.OK_OPTION) {
+            return;
+        }
 
-        if (
-                answer ==
-                        JOptionPane.OK_OPTION
-        ) {
+        String name =
+                nameField.getText().trim();
 
-            String name =
-                    nameField
-                            .getText()
-                            .trim();
+        if (name.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Name cannot be empty.",
+                    "Invalid Profile",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+        user.setName(name);
+        user.setLocation(
+                locationField.getText().trim()
+        );
+        user.setBio(
+                bioField.getText().trim()
+        );
+        user.setSkills(
+                skillsField.getText().trim()
+        );
+
+        refreshProfile();
+    }
 
 
-            if (
-                    name.isEmpty()
-            ) {
+    private JTextField createFormField(String value) {
 
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Name cannot be empty.",
-                        "Invalid Profile",
-                        JOptionPane.WARNING_MESSAGE
+        JTextField field =
+                new JTextField(
+                        value == null ? "" : value
                 );
 
+        field.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        14
+                )
+        );
 
-                return;
-            }
+        field.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(BORDER),
+                        new EmptyBorder(8, 10, 8, 10)
+                )
+        );
+
+        return field;
+    }
 
 
-            user.setName(name);
+    private void styleTextArea(JTextArea area) {
 
-user.setLocation(
-        locationField
-                .getText()
-                .trim()
-);
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
+        area.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.PLAIN,
+                        14
+                )
+        );
 
-user.setBio(
-        bioField
-                .getText()
-                .trim()
-);
+        area.setBorder(
+                new EmptyBorder(
+                        8, 10, 8, 10
+                )
+        );
+    }
 
-user.setSkills(
-        skillsField
-                .getText()
-                .trim()
-);
 
-UserDAO userDAO = new UserDAO();
+    private void addFormLabel(
+            JPanel panel,
+            GridBagConstraints gbc,
+            int row,
+            String text
+    ) {
 
-boolean updated =
-        userDAO.updateProfile(user);
+        gbc.gridy = row;
+        gbc.gridx = 0;
+        gbc.weightx = 0.0;
+        gbc.gridwidth = 1;
 
-if (updated) {
+        JLabel label =
+                new JLabel(text);
 
-    refreshProfile();
+        label.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        12
+                )
+        );
 
-    JOptionPane.showMessageDialog(
-            this,
-            "Profile updated successfully!",
-            "Profile Updated",
-            JOptionPane.INFORMATION_MESSAGE
-    );
+        label.setForeground(MUTED);
+        panel.add(label, gbc);
+    }
 
-} else {
 
-    JOptionPane.showMessageDialog(
-            this,
-            "Unable to save your profile.",
-            "Update Failed",
-            JOptionPane.ERROR_MESSAGE
-    );
-}
-        }
+    private void addFormComponent(
+            JPanel panel,
+            GridBagConstraints gbc,
+            int row,
+            Component component
+    ) {
+
+        gbc.gridy = row;
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.gridwidth = 1;
+
+        panel.add(component, gbc);
     }
 
 
@@ -1340,37 +2008,36 @@ if (updated) {
     private void refreshProfile() {
 
         nameLabel.setText(
-                safe(
-                        user.getName()
-                )
+                safe(user.getName())
         );
 
+        emailLabel.setText(
+                safe(user.getEmail())
+        );
 
         locationLabel.setText(
                 displayLocation()
         );
 
-
         bioArea.setText(
-                safe(
-                        user.getBio()
-                )
+                safe(user.getBio())
         );
 
+        Path path = savedPhotoPath();
 
-        avatarLabel.setText(
-                getInitials(
-                        user.getName()
-                )
-        );
-
+        if (Files.exists(path)) {
+            loadSavedPhoto(avatarLabel);
+        } else {
+            AvatarLabel avatar =
+                    (AvatarLabel) avatarLabel;
+            avatar.setAvatarImage(null);
+            avatar.setInitials(
+                    getInitials(user.getName())
+            );
+        }
 
         updateSkillsPanel();
-
-
-        resumeLabel.setText(
-                resumeText()
-        );
+        resumeLabel.setText(resumeText());
     }
 
 
@@ -1382,58 +2049,40 @@ if (updated) {
 
         skillsPanel.removeAll();
 
+        String skills = user.getSkills();
 
-        String skills =
-                user.getSkills();
-
-
-        if (
-                skills == null
-                        || skills.isBlank()
-        ) {
+        if (skills == null || skills.isBlank()) {
 
             JLabel empty =
                     new JLabel(
-                            "Add your skills from Edit Profile"
+                            "Add skills such as Java, SQL, Git, Spring Boot..."
                     );
 
-
-            empty.setForeground(
-                    MUTED
+            empty.setForeground(MUTED);
+            empty.setFont(
+                    new Font(
+                            "SansSerif",
+                            Font.PLAIN,
+                            13
+                    )
             );
 
-
-            skillsPanel.add(
-                    empty
-            );
+            skillsPanel.add(empty);
 
         } else {
 
             String[] skillList =
                     skills.split(",");
 
+            for (String skill : skillList) {
 
-            for (
-                    String skill :
-                    skillList
-            ) {
+                String clean = skill.trim();
 
-                String clean =
-                        skill.trim();
-
-
-                if (
-                        clean.isEmpty()
-                ) {
+                if (clean.isEmpty()) {
                     continue;
                 }
 
-
-                JLabel pill =
-                        new JLabel(
-                                clean
-                        );
-
+                JLabel pill = new JLabel(clean);
 
                 pill.setFont(
                         new Font(
@@ -1443,40 +2092,25 @@ if (updated) {
                         )
                 );
 
-
-                pill.setForeground(
-                        BLUE
-                );
-
-
+                pill.setForeground(CHIP_TEXT);
+                pill.setOpaque(true);
+                pill.setBackground(BLUE_LIGHT);
                 pill.setBorder(
                         BorderFactory.createCompoundBorder(
                                 BorderFactory.createLineBorder(
-                                        new Color(
-                                                191,
-                                                219,
-                                                254
-                                        )
+                                        new Color(191, 219, 254)
                                 ),
                                 new EmptyBorder(
-                                        6,
-                                        10,
-                                        6,
-                                        10
+                                        7, 11, 7, 11
                                 )
                         )
                 );
 
-
-                skillsPanel.add(
-                        pill
-                );
+                skillsPanel.add(pill);
             }
         }
 
-
         skillsPanel.revalidate();
-
         skillsPanel.repaint();
     }
 
@@ -1512,36 +2146,14 @@ if (updated) {
 
 
             user.setResumePath(
-        file.getAbsolutePath()
-);
+                    file.getAbsolutePath()
+            );
 
-UserDAO userDAO = new UserDAO();
 
-boolean updated =
-        userDAO.updateProfile(user);
+            resumeLabel.setText(
+                    file.getName()
+            );
 
-if (updated) {
-
-    resumeLabel.setText(
-            file.getName()
-    );
-
-    JOptionPane.showMessageDialog(
-            this,
-            "Resume saved successfully!",
-            "Resume Updated",
-            JOptionPane.INFORMATION_MESSAGE
-    );
-
-} else {
-
-    JOptionPane.showMessageDialog(
-            this,
-            "Resume selected, but could not be saved to the database.",
-            "Save Failed",
-            JOptionPane.ERROR_MESSAGE
-    );
-}
 
             JOptionPane.showMessageDialog(
                     this,
@@ -1605,6 +2217,20 @@ if (updated) {
     // =========================================================
     // HELPERS
     // =========================================================
+
+    private String resumeStatusText() {
+
+        if (
+                user.getResumePath() == null
+                        || user.getResumePath().isBlank()
+        ) {
+
+            return "Not uploaded";
+        }
+
+        return "Ready";
+    }
+
 
     private String resumeText() {
 
@@ -1734,11 +2360,7 @@ if (updated) {
             Color color
     ) {
 
-        JButton button =
-                new JButton(
-                        text
-                );
-
+        JButton button = new JButton(text);
 
         button.setFont(
                 new Font(
@@ -1748,37 +2370,58 @@ if (updated) {
                 )
         );
 
-
-        button.setForeground(
-                Color.WHITE
+        button.setForeground(Color.WHITE);
+        button.setBackground(color);
+        button.setFocusPainted(false);
+        button.setCursor(
+                new Cursor(Cursor.HAND_CURSOR)
         );
-
-
-        button.setBackground(
-                color
-        );
-
-
-        button.setFocusPainted(
-                false
-        );
-
-
         button.setBorder(
                 BorderFactory.createEmptyBorder(
-                        9,
-                        14,
-                        9,
-                        14
+                        10, 16, 10, 16
                 )
         );
 
+        return button;
+    }
+
+
+    private JButton createOutlineButton(
+            String text,
+            Color color
+    ) {
+
+        JButton button = new JButton(text);
+
+        button.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        12
+                )
+        );
+
+        button.setForeground(color);
+        button.setBackground(CARD);
+        button.setFocusPainted(false);
+        button.setCursor(
+                new Cursor(Cursor.HAND_CURSOR)
+        );
+        button.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(color),
+                        BorderFactory.createEmptyBorder(
+                                9, 13, 9, 13
+                        )
+                )
+        );
 
         return button;
     }
 
 
     private JButton sidebarButton(
+
             String text,
             boolean selected,
             java.awt.event.ActionListener action
