@@ -8,6 +8,10 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 public class ApplicationsFrame extends JFrame {
@@ -293,16 +297,19 @@ public class ApplicationsFrame extends JFrame {
         panel.setBackground(BACKGROUND);
 
         JButton refreshButton = new JButton("Refresh");
+        JButton exportButton = new JButton("Export CSV");
         JButton detailsButton = new JButton("View Details");
         JButton updateButton = new JButton("Update");
         JButton deleteButton = new JButton("Delete");
 
         refreshButton.addActionListener(e -> loadApplications());
+        exportButton.addActionListener(e -> exportApplicationsToCsv());
         detailsButton.addActionListener(e -> viewDetails());
         updateButton.addActionListener(e -> updateApplication());
         deleteButton.addActionListener(e -> deleteApplication());
 
         panel.add(refreshButton);
+        panel.add(exportButton);
         panel.add(detailsButton);
         panel.add(updateButton);
         panel.add(deleteButton);
@@ -484,6 +491,96 @@ public class ApplicationsFrame extends JFrame {
                 "",
                 ""
         ).setVisible(true);
+    }
+
+    private void exportApplicationsToCsv() {
+
+        ApplicationDAO dao = new ApplicationDAO();
+
+        List<Application> applications =
+                dao.getApplicationsByUser(user.getUserId());
+
+        if (applications.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "There are no applications to export.",
+                    "Nothing to Export",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            return;
+        }
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save Applications CSV");
+        fileChooser.setSelectedFile(
+                new File("my_internship_applications.csv")
+        );
+
+        int choice = fileChooser.showSaveDialog(this);
+
+        if (choice != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        File file = fileChooser.getSelectedFile();
+
+        if (!file.getName().toLowerCase().endsWith(".csv")) {
+            file = new File(file.getAbsolutePath() + ".csv");
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+
+            writer.write(
+                    "application_id,company_name,job_role,application_date,deadline,status,job_link,notes"
+            );
+            writer.newLine();
+
+            for (Application app : applications) {
+
+                writer.write(
+                        csv(app.getApplicationId()) + "," +
+                        csv(app.getCompanyName()) + "," +
+                        csv(app.getJobRole()) + "," +
+                        csv(app.getApplicationDate()) + "," +
+                        csv(app.getDeadline()) + "," +
+                        csv(app.getStatus()) + "," +
+                        csv(app.getJobLink()) + "," +
+                        csv(app.getNotes())
+                );
+                writer.newLine();
+            }
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Applications exported successfully.\n\nSaved to:\n" + file.getAbsolutePath(),
+                    "Export Complete",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+        } catch (IOException ex) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Failed to export applications.\n\n" + ex.getMessage(),
+                    "Export Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    private String csv(Object value) {
+
+        if (value == null) {
+            return "";
+        }
+
+        String text = String.valueOf(value);
+
+        text = text.replace("\"", "\"\"");
+
+        return "\"" + text + "\"";
     }
 
     private void deleteApplication() {
