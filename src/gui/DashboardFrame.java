@@ -9,6 +9,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -16,427 +18,125 @@ public class DashboardFrame extends JFrame {
 
     private final User user;
 
-    // =========================================================
-    // THEME
-    // =========================================================
-
-    private final Color SIDEBAR = new Color(31, 41, 55);
-    private final Color SIDEBAR_SELECTED = new Color(55, 65, 81);
-
-    private final Color BACKGROUND = new Color(245, 247, 250);
-    private final Color CARD = Color.WHITE;
-
-    private final Color TEXT = new Color(31, 41, 55);
-    private final Color MUTED = new Color(107, 114, 128);
-
-    private final Color BLUE = new Color(59, 130, 246);
-    private final Color BORDER = new Color(229, 231, 235);
-
-    private final Color GREEN = new Color(22, 163, 74);
-    private final Color PURPLE = new Color(124, 58, 237);
-    private final Color RED = new Color(220, 38, 38);
-    private final Color ORANGE = new Color(234, 88, 12);
-
-
-    // =========================================================
-    // CONSTRUCTOR
-    // =========================================================
+    private static final Color SIDEBAR = new Color(31, 41, 55);
+    private static final Color SIDEBAR_SELECTED = new Color(55, 65, 81);
+    private static final Color BACKGROUND = new Color(245, 247, 250);
+    private static final Color CARD = Color.WHITE;
+    private static final Color TEXT = new Color(31, 41, 55);
+    private static final Color MUTED = new Color(107, 114, 128);
+    private static final Color BLUE = new Color(59, 130, 246);
+    private static final Color BLUE_LIGHT = new Color(239, 246, 255);
+    private static final Color BORDER = new Color(229, 231, 235);
+    private static final Color GREEN = new Color(22, 163, 74);
+    private static final Color GREEN_LIGHT = new Color(240, 253, 244);
+    private static final Color PURPLE = new Color(124, 58, 237);
+    private static final Color PURPLE_LIGHT = new Color(245, 243, 255);
+    private static final Color RED = new Color(220, 38, 38);
+    private static final Color RED_LIGHT = new Color(254, 242, 242);
+    private static final Color ORANGE = new Color(234, 88, 12);
+    private static final Color ORANGE_LIGHT = new Color(255, 247, 237);
+    private static final Color GRAY = new Color(75, 85, 99);
+    private static final Color GRAY_LIGHT = new Color(249, 250, 251);
 
     public DashboardFrame(User user) {
 
         this.user = user;
 
-        setTitle(
-                "Smart Internship Tracker - Dashboard"
-        );
-
-        setSize(
-                1200,
-                750
-        );
+        setTitle("Smart Internship Tracker - Dashboard");
+        setSize(1280, 820);
+        setMinimumSize(new Dimension(1100, 700));
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-
         setLocationRelativeTo(null);
-
-        setDefaultCloseOperation(
-                JFrame.EXIT_ON_CLOSE
-        );
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         buildUI();
     }
 
-
-    // =========================================================
-    // BUILD UI
-    // =========================================================
-
     private void buildUI() {
 
-        JPanel root =
-                new JPanel(
-                        new BorderLayout()
-                );
+        JPanel root = new JPanel(new BorderLayout());
+        root.setBackground(BACKGROUND);
 
-        root.setBackground(
-                BACKGROUND
-        );
-
-        root.add(
-                createSidebar(),
-                BorderLayout.WEST
-        );
-
-        root.add(
-                createMainContent(),
-                BorderLayout.CENTER
-        );
+        root.add(createSidebar(), BorderLayout.WEST);
+        root.add(createMainContent(), BorderLayout.CENTER);
 
         setContentPane(root);
     }
 
-
-    // =========================================================
-    // SIDEBAR
-    // =========================================================
-
     private JPanel createSidebar() {
 
-        JPanel sidebar =
-                new JPanel();
+        JPanel sidebar = new JPanel(new BorderLayout());
+        sidebar.setBackground(SIDEBAR);
+        sidebar.setPreferredSize(new Dimension(235, 820));
 
-        sidebar.setBackground(
-                SIDEBAR
-        );
-
-        sidebar.setPreferredSize(
-                new Dimension(
-                        220,
-                        750
-                )
-        );
-
-        sidebar.setLayout(
-                new BorderLayout()
-        );
-
-
-        // -----------------------------------------------------
-        // TOP
-        // -----------------------------------------------------
-
-        JPanel top =
-                new JPanel();
-
+        JPanel top = new JPanel();
         top.setOpaque(false);
+        top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
+        top.setBorder(new EmptyBorder(30, 20, 20, 20));
 
-        top.setLayout(
-                new BoxLayout(
-                        top,
-                        BoxLayout.Y_AXIS
-                )
-        );
+        JLabel logo = new JLabel("SmartIntern");
+        logo.setForeground(Color.WHITE);
+        logo.setFont(new Font("SansSerif", Font.BOLD, 22));
+        logo.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        top.setBorder(
-                new EmptyBorder(
-                        30,
-                        20,
-                        20,
-                        20
-                )
-        );
-
-
-        // Logo
-
-        JLabel logo =
-                new JLabel(
-                        "SmartIntern"
-                );
-
-        logo.setForeground(
-                Color.WHITE
-        );
-
-        logo.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        21
-                )
-        );
-
-        logo.setAlignmentX(
-                Component.LEFT_ALIGNMENT
-        );
-
-
-        // Subtitle
-
-        JLabel tracker =
-                new JLabel(
-                        "Internship Tracker"
-                );
-
-        tracker.setForeground(
-                new Color(
-                        156,
-                        163,
-                        175
-                )
-        );
-
-        tracker.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.PLAIN,
-                        12
-                )
-        );
-
-        tracker.setAlignmentX(
-                Component.LEFT_ALIGNMENT
-        );
-
+        JLabel tracker = new JLabel("Internship Tracker");
+        tracker.setForeground(new Color(156, 163, 175));
+        tracker.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        tracker.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         top.add(logo);
-
-        top.add(
-                Box.createVerticalStrut(2)
-        );
-
+        top.add(Box.createVerticalStrut(2));
         top.add(tracker);
+        top.add(Box.createVerticalStrut(32));
 
-        top.add(
-                Box.createVerticalStrut(30)
-        );
+        top.add(createSidebarButton("Dashboard", true, e -> { }));
+        top.add(Box.createVerticalStrut(8));
+        top.add(createSidebarButton("My Profile", false, e -> openFrame(() -> new ProfileFrame(user))));
+        top.add(Box.createVerticalStrut(8));
+        top.add(createSidebarButton("Internship Opportunities", false, e -> openFrame(() -> new InternshipsFrame(user))));
+        top.add(Box.createVerticalStrut(8));
+        top.add(createSidebarButton("My Applications", false, e -> openFrame(() -> new ApplicationsFrame(user))));
+        top.add(Box.createVerticalStrut(8));
+        top.add(createSidebarButton("Add Application", false, e -> openFrame(() -> new AddApplicationFrame(user))));
+        top.add(Box.createVerticalStrut(8));
+        top.add(createSidebarButton("Upcoming Deadlines", false, e -> showUpcomingDeadlines()));
+        top.add(Box.createVerticalStrut(8));
+        top.add(createSidebarButton("Analytics", false, e -> openFrame(() -> new AnalyticsFrame(user))));
 
+        sidebar.add(top, BorderLayout.NORTH);
 
-        // -----------------------------------------------------
-        // DASHBOARD
-        // -----------------------------------------------------
-
-        top.add(
-                createSidebarButton(
-                        "Dashboard",
-                        true,
-                        e -> {
-                            // Already on dashboard
-                        }
-                )
-        );
-
-
-        top.add(
-                Box.createVerticalStrut(8)
-        );
-
-
-        // -----------------------------------------------------
-        // PROFILE
-        // -----------------------------------------------------
-
-        top.add(
-                createSidebarButton(
-                        "My Profile",
-                        false,
-                        e -> {
-                              dispose();
-                            new ProfileFrame(user)
-                                    .setVisible(true);
-
-                        }
-                )
-        );
-
-
-        top.add(
-                Box.createVerticalStrut(8)
-        );
-
-
-        // -----------------------------------------------------
-        // INTERNSHIP OPPORTUNITIES
-        // -----------------------------------------------------
-
-        top.add(
-                createSidebarButton(
-                        "Internship Opportunities",
-                        false,
-                        e -> {
-                               dispose();
-                            new InternshipsFrame(user)
-                                    .setVisible(true);
-
-                        }
-                )
-        );
-
-
-        top.add(
-                Box.createVerticalStrut(8)
-        );
-
-
-        // -----------------------------------------------------
-        // MY APPLICATIONS
-        // -----------------------------------------------------
-
-        top.add(
-                createSidebarButton(
-                        "My Applications",
-                        false,
-                        e -> {
-                             dispose();
-                            new ApplicationsFrame(user)
-                                    .setVisible(true);
-
-                        }
-                )
-        );
-
-
-        top.add(
-                Box.createVerticalStrut(8)
-        );
-
-
-        // -----------------------------------------------------
-        // ADD APPLICATION
-        // -----------------------------------------------------
-
-        top.add(
-                createSidebarButton(
-                        "Add Application",
-                        false,
-                        e -> {
-                                  dispose();
-                            new AddApplicationFrame(user)
-                                    .setVisible(true);
-
-                        }
-                )
-        );
-
-
-        top.add(
-                Box.createVerticalStrut(8)
-        );
-
-
-        // -----------------------------------------------------
-        // UPCOMING DEADLINES
-        // -----------------------------------------------------
-
-        top.add(
-                createSidebarButton(
-                        "Upcoming Deadlines",
-                        false,
-                        e -> {
-
-                            showUpcomingDeadlines();
-
-                        }
-                )
-        );
-
-
-        top.add(
-                Box.createVerticalStrut(8)
-        );
-
-
-        // -----------------------------------------------------
-        // ANALYTICS
-        // -----------------------------------------------------
-
-        top.add(
-                createSidebarButton(
-                        "Analytics",
-                        false,
-                        e -> {
-                              dispose();
-                            new AnalyticsFrame(user)
-                                    .setVisible(true);
-
-                        }
-                )
-        );
-
-
-        sidebar.add(
-                top,
-                BorderLayout.NORTH
-        );
-
-
-        // =====================================================
-        // BOTTOM
-        // =====================================================
-
-        JPanel bottom =
-                new JPanel();
-
+        JPanel bottom = new JPanel();
         bottom.setOpaque(false);
+        bottom.setLayout(new BoxLayout(bottom, BoxLayout.Y_AXIS));
+        bottom.setBorder(new EmptyBorder(15, 20, 25, 20));
 
-        bottom.setLayout(
-                new BoxLayout(
-                        bottom,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-        bottom.setBorder(
-                new EmptyBorder(
-                        15,
-                        20,
-                        25,
-                        20
-                )
-        );
-
-
-        JButton logout =
-                createSidebarButton(
-                        "Logout",
-                        false,
-                        e -> {
-
-                            int answer =
-                                    JOptionPane.showConfirmDialog(
-                                            this,
-                                            "Are you sure you want to logout?",
-                                            "Logout",
-                                            JOptionPane.YES_NO_OPTION
-                                    );
-
-                            if (answer ==
-                                    JOptionPane.YES_OPTION) {
-
-                                dispose();
-
-                                new LoginFrame()
-                                        .setVisible(true);
-                            }
-                        }
-                );
-
-
-        bottom.add(logout);
-
-
-        sidebar.add(
-                bottom,
-                BorderLayout.SOUTH
-        );
-
+        bottom.add(createSidebarButton("Logout", false, e -> logout()));
+        sidebar.add(bottom, BorderLayout.SOUTH);
 
         return sidebar;
     }
 
+    private void openFrame(java.util.function.Supplier<JFrame> supplier) {
 
-    // =========================================================
-    // SIDEBAR BUTTON
-    // =========================================================
+        dispose();
+        JFrame frame = supplier.get();
+        frame.setVisible(true);
+    }
+
+    private void logout() {
+
+        int answer = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to logout?",
+                "Logout",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (answer == JOptionPane.YES_OPTION) {
+            dispose();
+            new LoginFrame().setVisible(true);
+        }
+    }
 
     private JButton createSidebarButton(
             String text,
@@ -444,1226 +144,636 @@ public class DashboardFrame extends JFrame {
             java.awt.event.ActionListener action
     ) {
 
-        JButton button =
-                new JButton(
-                        text
-                );
-
-
-        button.setAlignmentX(
-                Component.LEFT_ALIGNMENT
-        );
-
-        button.setHorizontalAlignment(
-                SwingConstants.LEFT
-        );
-
-
-        button.setMaximumSize(
-                new Dimension(
-                        Integer.MAX_VALUE,
-                        42
-                )
-        );
-
-
-        button.setPreferredSize(
-                new Dimension(
-                        180,
-                        42
-                )
-        );
-
-
-        button.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.PLAIN,
-                        14
-                )
-        );
-
-
-        button.setForeground(
-                Color.WHITE
-        );
-
-
-        button.setBackground(
-                selected
-                        ? SIDEBAR_SELECTED
-                        : SIDEBAR
-        );
-
-
-        button.setBorder(
-                BorderFactory.createEmptyBorder(
-                        0,
-                        14,
-                        0,
-                        10
-                )
-        );
-
-
-        button.setFocusPainted(
-                false
-        );
-
-
-        button.setOpaque(
-                true
-        );
-
-
-        button.addActionListener(
-                action
-        );
-
-
+        JButton button = new JButton(text);
+        button.setAlignmentX(Component.LEFT_ALIGNMENT);
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        button.setPreferredSize(new Dimension(195, 44));
+        button.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        button.setForeground(Color.WHITE);
+        button.setBackground(selected ? SIDEBAR_SELECTED : SIDEBAR);
+        button.setBorder(BorderFactory.createEmptyBorder(0, 14, 0, 10));
+        button.setFocusPainted(false);
+        button.setOpaque(true);
+        button.addActionListener(action);
         return button;
     }
 
-
-    // =========================================================
-    // MAIN CONTENT
-    // =========================================================
-
     private JPanel createMainContent() {
 
-        JPanel main =
-                new JPanel(
-                        new BorderLayout(
-                                0,
-                                20
-                        )
-                );
+        JPanel main = new JPanel(new BorderLayout(0, 18));
+        main.setBackground(BACKGROUND);
+        main.setBorder(new EmptyBorder(28, 30, 25, 30));
 
+        main.add(createHeader(), BorderLayout.NORTH);
 
-        main.setBackground(
-                BACKGROUND
-        );
+        JPanel body = new JPanel();
+        body.setOpaque(false);
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
 
+        body.add(createStatisticsPanel());
+        body.add(Box.createVerticalStrut(18));
+        body.add(createMiddleSection());
+        body.add(Box.createVerticalStrut(18));
+        body.add(createQuickActionsPanel());
 
-        main.setBorder(
-                new EmptyBorder(
-                        30,
-                        30,
-                        30,
-                        30
-                )
-        );
+        JScrollPane scrollPane = new JScrollPane(body);
+        scrollPane.setBorder(null);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.getViewport().setBackground(BACKGROUND);
 
-
-        // -----------------------------------------------------
-        // HEADER
-        // -----------------------------------------------------
-
-        JPanel header =
-                new JPanel();
-
-
-        header.setBackground(
-                BACKGROUND
-        );
-
-
-        header.setLayout(
-                new BoxLayout(
-                        header,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-
-        JLabel welcome =
-                new JLabel(
-                        "Welcome back, "
-                                + user.getName()
-                                + " 👋"
-                );
-
-
-        welcome.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        28
-                )
-        );
-
-
-        welcome.setForeground(
-                TEXT
-        );
-
-
-        JLabel email =
-                new JLabel(
-                        user.getEmail()
-                );
-
-
-        email.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.PLAIN,
-                        14
-                )
-        );
-
-
-        email.setForeground(
-                MUTED
-        );
-
-
-        header.add(
-                welcome
-        );
-
-
-        header.add(
-                Box.createVerticalStrut(5)
-        );
-
-
-        header.add(
-                email
-        );
-
-
-        main.add(
-                header,
-                BorderLayout.NORTH
-        );
-
-
-        // -----------------------------------------------------
-        // CENTER
-        // -----------------------------------------------------
-
-        JPanel center =
-                new JPanel();
-
-
-        center.setBackground(
-                BACKGROUND
-        );
-
-
-        center.setLayout(
-                new BoxLayout(
-                        center,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-
-        center.add(
-                createStatisticsPanel()
-        );
-
-
-        center.add(
-                Box.createVerticalStrut(20)
-        );
-
-
-        center.add(
-                createDeadlinePanel()
-        );
-
-
-        center.add(
-                Box.createVerticalStrut(20)
-        );
-
-
-        center.add(
-                createQuickActionsPanel()
-        );
-
-
-        main.add(
-                center,
-                BorderLayout.CENTER
-        );
-
+        main.add(scrollPane, BorderLayout.CENTER);
 
         return main;
     }
 
+    private JPanel createHeader() {
 
-    // =========================================================
-    // STATISTICS
-    // =========================================================
+        JPanel header = new JPanel(new BorderLayout(20, 0));
+        header.setBackground(BACKGROUND);
+
+        JPanel text = new JPanel();
+        text.setOpaque(false);
+        text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+
+        JLabel welcome = new JLabel(
+                "Welcome back, " + safe(user.getName(), "Student") + " 👋"
+        );
+        welcome.setFont(new Font("SansSerif", Font.BOLD, 30));
+        welcome.setForeground(TEXT);
+
+        JLabel email = new JLabel(
+                safe(user.getEmail(), "") + "  •  Here's your internship progress at a glance."
+        );
+        email.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        email.setForeground(MUTED);
+
+        text.add(welcome);
+        text.add(Box.createVerticalStrut(5));
+        text.add(email);
+
+        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        right.setOpaque(false);
+
+        JButton refresh = createToolbarButton("Refresh Dashboard", BLUE);
+        refresh.addActionListener(e -> refreshDashboard());
+        right.add(refresh);
+
+        header.add(text, BorderLayout.CENTER);
+        header.add(right, BorderLayout.EAST);
+
+        return header;
+    }
+
+    private void refreshDashboard() {
+
+        Container root = getContentPane();
+        root.removeAll();
+        root.setLayout(new BorderLayout());
+        root.setBackground(BACKGROUND);
+        root.add(createSidebar(), BorderLayout.WEST);
+        root.add(createMainContent(), BorderLayout.CENTER);
+        root.revalidate();
+        root.repaint();
+    }
 
     private JPanel createStatisticsPanel() {
 
-        JPanel statsPanel =
-                new JPanel(
-                        new GridLayout(
-                                1,
-                                5,
-                                15,
-                                0
-                        )
-                );
+        JPanel wrapper = new JPanel(new BorderLayout(0, 10));
+        wrapper.setOpaque(false);
 
+        JLabel title = new JLabel("Application Overview");
+        title.setFont(new Font("SansSerif", Font.BOLD, 18));
+        title.setForeground(TEXT);
+        wrapper.add(title, BorderLayout.NORTH);
 
-        statsPanel.setBackground(
-                BACKGROUND
-        );
-
-
-        ApplicationDAO dao =
-                new ApplicationDAO();
-
+        JPanel statsPanel = new JPanel(new GridLayout(1, 6, 12, 0));
+        statsPanel.setOpaque(false);
 
         Map<String, Integer> stats =
-                dao.getApplicationStatistics(
-                        user.getUserId()
-                );
+                new ApplicationDAO().getApplicationStatistics(user.getUserId());
 
+        int total = stats.values().stream().mapToInt(Integer::intValue).sum();
+        int applied = stats.getOrDefault("Applied", 0);
+        int shortlisted = stats.getOrDefault("Shortlisted", 0);
+        int interview = stats.getOrDefault("Interview", 0);
+        int selected = stats.getOrDefault("Selected", 0);
+        int rejected = stats.getOrDefault("Rejected", 0);
 
-        int total = 0;
+        statsPanel.add(createStatCard("Total", String.valueOf(total), BLUE, BLUE_LIGHT));
+        statsPanel.add(createStatCard("Applied", String.valueOf(applied), BLUE, BLUE_LIGHT));
+        statsPanel.add(createStatCard("Shortlisted", String.valueOf(shortlisted), PURPLE, PURPLE_LIGHT));
+        statsPanel.add(createStatCard("Interview", String.valueOf(interview), GREEN, GREEN_LIGHT));
+        statsPanel.add(createStatCard("Selected", String.valueOf(selected), GREEN, GREEN_LIGHT));
+        statsPanel.add(createStatCard("Rejected", String.valueOf(rejected), RED, RED_LIGHT));
 
-
-        int applied =
-                stats.getOrDefault(
-                        "Applied",
-                        0
-                );
-
-
-        int shortlisted =
-                stats.getOrDefault(
-                        "Shortlisted",
-                        0
-                );
-
-
-        int interview =
-                stats.getOrDefault(
-                        "Interview",
-                        0
-                );
-
-
-        int rejected =
-                stats.getOrDefault(
-                        "Rejected",
-                        0
-                );
-
-
-        for (int value :
-                stats.values()) {
-
-            total += value;
-        }
-
-
-        statsPanel.add(
-                createStatCard(
-                        "Total",
-                        String.valueOf(total),
-                        BLUE
-                )
-        );
-
-
-        statsPanel.add(
-                createStatCard(
-                        "Applied",
-                        String.valueOf(applied),
-                        BLUE
-                )
-        );
-
-
-        statsPanel.add(
-                createStatCard(
-                        "Shortlisted",
-                        String.valueOf(shortlisted),
-                        PURPLE
-                )
-        );
-
-
-        statsPanel.add(
-                createStatCard(
-                        "Interview",
-                        String.valueOf(interview),
-                        GREEN
-                )
-        );
-
-
-        statsPanel.add(
-                createStatCard(
-                        "Rejected",
-                        String.valueOf(rejected),
-                        RED
-                )
-        );
-
-
-        return statsPanel;
+        wrapper.add(statsPanel, BorderLayout.CENTER);
+        return wrapper;
     }
-
-
-    // =========================================================
-    // STAT CARD
-    // =========================================================
 
     private JPanel createStatCard(
             String title,
             String value,
-            Color accent
+            Color accent,
+            Color lightBackground
     ) {
 
-        JPanel card =
-                new JPanel();
+        JPanel card = new JPanel(new BorderLayout(12, 0));
+        card.setBackground(CARD);
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(14, 14, 14, 14)
+        ));
 
+        JPanel accentBar = new JPanel();
+        accentBar.setBackground(accent);
+        accentBar.setPreferredSize(new Dimension(5, 55));
 
-        card.setBackground(
-                CARD
-        );
+        JPanel icon = new JPanel(new GridBagLayout());
+        icon.setBackground(lightBackground);
+        icon.setPreferredSize(new Dimension(40, 40));
+        icon.add(new JLabel("●"));
+        ((JLabel) icon.getComponent(0)).setForeground(accent);
 
+        JPanel text = new JPanel();
+        text.setOpaque(false);
+        text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
 
-        card.setBorder(
-                BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(
-                                BORDER
-                        ),
-                        new EmptyBorder(
-                                18,
-                                18,
-                                18,
-                                18
-                        )
-                )
-        );
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        titleLabel.setForeground(MUTED);
 
+        JLabel valueLabel = new JLabel(value);
+        valueLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
+        valueLabel.setForeground(TEXT);
 
-        card.setLayout(
-                new BoxLayout(
-                        card,
-                        BoxLayout.Y_AXIS
-                )
-        );
+        text.add(titleLabel);
+        text.add(Box.createVerticalStrut(2));
+        text.add(valueLabel);
 
-
-        JPanel accentBar =
-                new JPanel();
-
-
-        accentBar.setBackground(
-                accent
-        );
-
-
-        accentBar.setMaximumSize(
-                new Dimension(
-                        45,
-                        4
-                )
-        );
-
-
-        accentBar.setPreferredSize(
-                new Dimension(
-                        45,
-                        4
-                )
-        );
-
-
-        accentBar.setAlignmentX(
-                Component.LEFT_ALIGNMENT
-        );
-
-
-        JLabel titleLabel =
-                new JLabel(
-                        title
-                );
-
-
-        titleLabel.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.PLAIN,
-                        13
-                )
-        );
-
-
-        titleLabel.setForeground(
-                MUTED
-        );
-
-
-        titleLabel.setAlignmentX(
-                Component.LEFT_ALIGNMENT
-        );
-
-
-        JLabel valueLabel =
-                new JLabel(
-                        value
-                );
-
-
-        valueLabel.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        28
-                )
-        );
-
-
-        valueLabel.setForeground(
-                TEXT
-        );
-
-
-        valueLabel.setAlignmentX(
-                Component.LEFT_ALIGNMENT
-        );
-
-
-        card.add(
-                accentBar
-        );
-
-
-        card.add(
-                Box.createVerticalStrut(12)
-        );
-
-
-        card.add(
-                titleLabel
-        );
-
-
-        card.add(
-                Box.createVerticalStrut(4)
-        );
-
-
-        card.add(
-                valueLabel
-        );
-
+        card.add(accentBar, BorderLayout.WEST);
+        card.add(icon, BorderLayout.CENTER);
+        card.add(text, BorderLayout.EAST);
 
         return card;
     }
 
+    private JPanel createMiddleSection() {
 
-    // =========================================================
-    // UPCOMING DEADLINES
-    // =========================================================
+        JPanel middle = new JPanel(new GridLayout(1, 2, 18, 0));
+        middle.setOpaque(false);
+
+        middle.add(createDeadlinePanel());
+        middle.add(createRecentApplicationsPanel());
+
+        return middle;
+    }
 
     private JPanel createDeadlinePanel() {
 
-        JPanel panel =
-                new JPanel(
-                        new BorderLayout()
-                );
-
-
-        panel.setBackground(
-                CARD
-        );
-
-
-        panel.setBorder(
-                BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(
-                                BORDER
-                        ),
-                        new EmptyBorder(
-                                20,
-                                20,
-                                20,
-                                20
-                        )
-                )
-        );
-
-
-        JLabel title =
-                new JLabel(
-                        "Upcoming Deadlines"
-                );
-
-
-        title.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        18
-                )
-        );
-
-
-        title.setForeground(
-                TEXT
-        );
-
-
-        panel.add(
-                title,
-                BorderLayout.NORTH
-        );
-
-
-        JPanel listPanel =
-                new JPanel();
-
-
-        listPanel.setBackground(
-                CARD
-        );
-
-
-        listPanel.setLayout(
-                new BoxLayout(
-                        listPanel,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-
-        listPanel.setBorder(
-                new EmptyBorder(
-                        15,
-                        0,
-                        0,
-                        0
-                )
-        );
-
-
-        ApplicationDAO dao =
-                new ApplicationDAO();
-
+        JPanel panel = createCardPanel();
 
         List<Application> applications =
-                dao.getUpcomingDeadlines(
-                        user.getUserId()
-                );
+                new ApplicationDAO().getUpcomingDeadlines(user.getUserId());
 
+        JPanel header = new JPanel(new BorderLayout());
+        header.setOpaque(false);
 
-        if (applications.isEmpty()) {
+        JLabel title = createSectionTitle("Upcoming Deadlines");
+        header.add(title, BorderLayout.WEST);
 
-            JLabel empty =
-                    new JLabel(
-                            "No upcoming deadlines."
-                    );
+        int urgentCount = countUrgentDeadlines(applications);
+        JLabel reminder = new JLabel();
+        reminder.setFont(new Font("SansSerif", Font.BOLD, 11));
 
+        if (urgentCount > 0) {
+            reminder.setText("⚠ " + urgentCount + " deadline"
+                    + (urgentCount == 1 ? "" : "s")
+                    + " within 3 days");
+            reminder.setForeground(ORANGE);
+        } else {
+            reminder.setText("No urgent deadlines");
+            reminder.setForeground(GREEN);
+        }
 
-            empty.setFont(
-                    new Font(
-                            "SansSerif",
-                            Font.PLAIN,
-                            14
-                    )
-            );
+        header.add(reminder, BorderLayout.EAST);
+        panel.add(header, BorderLayout.NORTH);
 
+        JPanel list = new JPanel();
+        list.setOpaque(false);
+        list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
 
-            empty.setForeground(
-                    MUTED
-            );
+        int count = Math.min(applications.size(), 5);
 
+        if (count == 0) {
 
-            listPanel.add(
-                    empty
-            );
+            JLabel empty = new JLabel("No upcoming deadlines.");
+            empty.setFont(new Font("SansSerif", Font.PLAIN, 14));
+            empty.setForeground(MUTED);
+            list.add(empty);
 
         } else {
 
-            int count =
-                    Math.min(
-                            applications.size(),
-                            5
-                    );
-
-
-            for (
-                    int i = 0;
-                    i < count;
-                    i++
-            ) {
-
-                Application app =
-                        applications.get(i);
-
-
-                JPanel row =
-                        new JPanel(
-                                new BorderLayout()
-                        );
-
-
-                row.setBackground(
-                        CARD
-                );
-
-
-                row.setBorder(
-                        new EmptyBorder(
-                                8,
-                                0,
-                                8,
-                                0
-                        )
-                );
-
-
-                row.setMaximumSize(
-                        new Dimension(
-                                Integer.MAX_VALUE,
-                                65
-                        )
-                );
-
-
-                JPanel left =
-                        new JPanel();
-
-
-                left.setOpaque(
-                        false
-                );
-
-
-                left.setLayout(
-                        new BoxLayout(
-                                left,
-                                BoxLayout.Y_AXIS
-                        )
-                );
-
-
-                JLabel company =
-                        new JLabel(
-                                app.getCompanyName()
-                        );
-
-
-                company.setFont(
-                        new Font(
-                                "SansSerif",
-                                Font.BOLD,
-                                14
-                        )
-                );
-
-
-                company.setForeground(
-                        TEXT
-                );
-
-
-                JLabel role =
-                        new JLabel(
-                                app.getJobRole()
-                        );
-
-
-                role.setFont(
-                        new Font(
-                                "SansSerif",
-                                Font.PLAIN,
-                                12
-                        )
-                );
-
-
-                role.setForeground(
-                        MUTED
-                );
-
-
-                left.add(
-                        company
-                );
-
-
-                left.add(
-                        role
-                );
-
-
-                long daysLeft =
-                        ChronoUnit.DAYS.between(
-                                LocalDate.now(),
-                                app.getDeadline()
-                        );
-
-
-                JLabel date =
-                        new JLabel(
-                                app.getDeadline()
-                                        .toString()
-                                        + "  "
-                                        + formatDaysLeft(
-                                                daysLeft
-                                        )
-                        );
-
-
-                date.setFont(
-                        new Font(
-                                "SansSerif",
-                                Font.BOLD,
-                                12
-                        )
-                );
-
-
-                if (daysLeft <= 3) {
-
-                    date.setForeground(
-                            ORANGE
-                    );
-
-                } else {
-
-                    date.setForeground(
-                            BLUE
-                    );
+            for (int i = 0; i < count; i++) {
+                Application app = applications.get(i);
+                list.add(createDeadlineRow(app));
+                if (i < count - 1) {
+                    list.add(Box.createVerticalStrut(6));
                 }
-
-
-                row.add(
-                        left,
-                        BorderLayout.WEST
-                );
-
-
-                row.add(
-                        date,
-                        BorderLayout.EAST
-                );
-
-
-                listPanel.add(
-                        row
-                );
             }
         }
 
+        JScrollPane scroll = new JScrollPane(list);
+        scroll.setBorder(null);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.setPreferredSize(new Dimension(0, 250));
 
-        panel.add(
-                listPanel,
-                BorderLayout.CENTER
-        );
+        panel.add(scroll, BorderLayout.CENTER);
 
+        JButton viewAll = createTextButton("View all deadlines →", BLUE);
+        viewAll.addActionListener(e -> showUpcomingDeadlines());
+
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        footer.setOpaque(false);
+        footer.add(viewAll);
+        panel.add(footer, BorderLayout.SOUTH);
 
         return panel;
     }
 
+    private JPanel createDeadlineRow(Application app) {
 
-    // =========================================================
-    // QUICK ACTIONS
-    // =========================================================
+        JPanel row = new JPanel(new BorderLayout(12, 0));
+        row.setBackground(CARD);
+        row.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(10, 10, 10, 10)
+        ));
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 62));
+
+        JPanel left = new JPanel();
+        left.setOpaque(false);
+        left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
+
+        JLabel company = new JLabel(safe(app.getCompanyName(), "Unknown company"));
+        company.setFont(new Font("SansSerif", Font.BOLD, 13));
+        company.setForeground(TEXT);
+
+        JLabel role = new JLabel(safe(app.getJobRole(), "Internship"));
+        role.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        role.setForeground(MUTED);
+
+        left.add(company);
+        left.add(role);
+
+        LocalDate deadline = app.getDeadline();
+        long days = deadline == null
+                ? Long.MAX_VALUE
+                : ChronoUnit.DAYS.between(LocalDate.now(), deadline);
+
+        String urgency = formatDaysLeft(days);
+        JLabel deadlineLabel = new JLabel(
+                deadline == null ? "No deadline" : deadline + "  " + urgency
+        );
+        deadlineLabel.setFont(new Font("SansSerif", Font.BOLD, 11));
+
+        if (days == 0) {
+            deadlineLabel.setForeground(RED);
+        } else if (days <= 3) {
+            deadlineLabel.setForeground(ORANGE);
+        } else {
+            deadlineLabel.setForeground(BLUE);
+        }
+
+        row.add(left, BorderLayout.CENTER);
+        row.add(deadlineLabel, BorderLayout.EAST);
+
+        return row;
+    }
+
+    private JPanel createRecentApplicationsPanel() {
+
+        JPanel panel = createCardPanel();
+
+        JLabel title = createSectionTitle("Recent Applications");
+        panel.add(title, BorderLayout.NORTH);
+
+        List<Application> applications =
+                new ApplicationDAO().getApplicationsByUser(user.getUserId());
+
+        List<Application> recent = new ArrayList<>(applications);
+        recent.sort(Comparator.comparing(
+                Application::getApplicationDate,
+                Comparator.nullsLast(Comparator.reverseOrder())
+        ));
+
+        JPanel list = new JPanel();
+        list.setOpaque(false);
+        list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
+
+        int count = Math.min(recent.size(), 5);
+
+        if (count == 0) {
+
+            JLabel empty = new JLabel("You haven't tracked any applications yet.");
+            empty.setFont(new Font("SansSerif", Font.PLAIN, 14));
+            empty.setForeground(MUTED);
+            list.add(empty);
+
+        } else {
+
+            for (int i = 0; i < count; i++) {
+                list.add(createRecentApplicationRow(recent.get(i)));
+                if (i < count - 1) {
+                    list.add(Box.createVerticalStrut(6));
+                }
+            }
+        }
+
+        JScrollPane scroll = new JScrollPane(list);
+        scroll.setBorder(null);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.setPreferredSize(new Dimension(0, 250));
+
+        panel.add(scroll, BorderLayout.CENTER);
+
+        JButton viewAll = createTextButton("Open My Applications →", BLUE);
+        viewAll.addActionListener(e -> openFrame(() -> new ApplicationsFrame(user)));
+
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        footer.setOpaque(false);
+        footer.add(viewAll);
+        panel.add(footer, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    private JPanel createRecentApplicationRow(Application app) {
+
+        JPanel row = new JPanel(new BorderLayout(12, 0));
+        row.setBackground(CARD);
+        row.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(10, 10, 10, 10)
+        ));
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 62));
+
+        JPanel left = new JPanel();
+        left.setOpaque(false);
+        left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
+
+        JLabel company = new JLabel(safe(app.getCompanyName(), "Unknown company"));
+        company.setFont(new Font("SansSerif", Font.BOLD, 13));
+        company.setForeground(TEXT);
+
+        JLabel role = new JLabel(safe(app.getJobRole(), "Internship"));
+        role.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        role.setForeground(MUTED);
+
+        left.add(company);
+        left.add(role);
+
+        JLabel status = new JLabel(safe(app.getStatus(), "Applied"));
+        status.setFont(new Font("SansSerif", Font.BOLD, 11));
+        status.setOpaque(true);
+        status.setBorder(new EmptyBorder(5, 8, 5, 8));
+        status.setForeground(statusForeground(app.getStatus()));
+        status.setBackground(statusBackground(app.getStatus()));
+
+        row.add(left, BorderLayout.CENTER);
+        row.add(status, BorderLayout.EAST);
+
+        return row;
+    }
 
     private JPanel createQuickActionsPanel() {
 
-        JPanel panel =
-                new JPanel(
-                        new BorderLayout(
-                                0,
-                                12
-                        )
-                );
+        JPanel panel = new JPanel(new BorderLayout(0, 10));
+        panel.setOpaque(false);
 
+        JLabel title = createSectionTitle("Quick Actions");
+        panel.add(title, BorderLayout.NORTH);
 
-        panel.setBackground(
-                BACKGROUND
-        );
+        JPanel actions = new JPanel(new GridLayout(1, 4, 12, 0));
+        actions.setOpaque(false);
 
+        JButton browse = createQuickActionButton("Browse Internships", BLUE);
+        JButton applications = createQuickActionButton("My Applications", PURPLE);
+        JButton profile = createQuickActionButton("My Profile", GREEN);
+        JButton analytics = createQuickActionButton("View Analytics", GRAY);
 
-        JLabel title =
-                new JLabel(
-                        "Quick Actions"
-                );
+        browse.addActionListener(e -> openFrame(() -> new InternshipsFrame(user)));
+        applications.addActionListener(e -> openFrame(() -> new ApplicationsFrame(user)));
+        profile.addActionListener(e -> openFrame(() -> new ProfileFrame(user)));
+        analytics.addActionListener(e -> openFrame(() -> new AnalyticsFrame(user)));
 
+        actions.add(browse);
+        actions.add(applications);
+        actions.add(profile);
+        actions.add(analytics);
 
-        title.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        18
-                )
-        );
-
-
-        title.setForeground(
-                TEXT
-        );
-
-
-        panel.add(
-                title,
-                BorderLayout.NORTH
-        );
-
-
-        JPanel actions =
-                new JPanel(
-                        new GridLayout(
-                                1,
-                                3,
-                                15,
-                                0
-                        )
-                );
-
-
-        actions.setBackground(
-                BACKGROUND
-        );
-
-
-        JButton browseButton =
-                createQuickActionButton(
-                        "Browse Internships",
-                        BLUE
-                );
-
-
-        JButton addButton =
-                createQuickActionButton(
-                        "Add Application",
-                        GREEN
-                );
-
-
-        JButton analyticsButton =
-                createQuickActionButton(
-                        "View Analytics",
-                        PURPLE
-                );
-
-
-        browseButton.addActionListener(
-                e -> {
-                     dispose();
-                    new InternshipsFrame(user)
-                            .setVisible(true);
-
-                }
-        );
-
-
-        addButton.addActionListener(
-                e -> {
-                      dispose();
-                    new AddApplicationFrame(user)
-                            .setVisible(true);
-
-                }
-        );
-
-
-        analyticsButton.addActionListener(
-                e -> {
-                          dispose();
-                    new AnalyticsFrame(user)
-                            .setVisible(true);
-
-                }
-        );
-
-
-        actions.add(
-                browseButton
-        );
-
-
-        actions.add(
-                addButton
-        );
-
-
-        actions.add(
-                analyticsButton
-        );
-
-
-        panel.add(
-                actions,
-                BorderLayout.CENTER
-        );
-
-
+        panel.add(actions, BorderLayout.CENTER);
         return panel;
     }
 
+    private JPanel createCardPanel() {
 
-    // =========================================================
-    // QUICK ACTION BUTTON
-    // =========================================================
+        JPanel panel = new JPanel(new BorderLayout(0, 10));
+        panel.setBackground(CARD);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(16, 16, 12, 16)
+        ));
+        return panel;
+    }
 
-    private JButton createQuickActionButton(
-            String text,
-            Color color
-    ) {
+    private JLabel createSectionTitle(String text) {
 
-        JButton button =
-                new JButton(
-                        text
-                );
+        JLabel title = new JLabel(text);
+        title.setFont(new Font("SansSerif", Font.BOLD, 18));
+        title.setForeground(TEXT);
+        return title;
+    }
 
+    private JButton createQuickActionButton(String text, Color color) {
 
-        button.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        14
-                )
-        );
-
-
-        button.setForeground(
-                Color.WHITE
-        );
-
-
-        button.setBackground(
-                color
-        );
-
-
-        button.setFocusPainted(
-                false
-        );
-
-
-        button.setBorder(
-                BorderFactory.createEmptyBorder(
-                        15,
-                        15,
-                        15,
-                        15
-                )
-        );
-
-
+        JButton button = new JButton(text);
+        button.setFont(new Font("SansSerif", Font.BOLD, 13));
+        button.setForeground(Color.WHITE);
+        button.setBackground(color);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(14, 12, 14, 12));
         return button;
     }
 
+    private JButton createToolbarButton(String text, Color color) {
 
-    // =========================================================
-    // FORMAT DAYS LEFT
-    // =========================================================
+        JButton button = new JButton(text);
+        button.setFont(new Font("SansSerif", Font.BOLD, 12));
+        button.setForeground(Color.WHITE);
+        button.setBackground(color);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(9, 13, 9, 13));
+        return button;
+    }
 
-    private String formatDaysLeft(
-            long daysLeft
-    ) {
+    private JButton createTextButton(String text, Color color) {
+
+        JButton button = new JButton(text);
+        button.setFont(new Font("SansSerif", Font.BOLD, 11));
+        button.setForeground(color);
+        button.setBackground(CARD);
+        button.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        button.setFocusPainted(false);
+        return button;
+    }
+
+    private Color statusForeground(String status) {
+
+        if (status == null) {
+            return BLUE;
+        }
+
+        switch (status.toLowerCase()) {
+            case "selected":
+                return GREEN;
+            case "rejected":
+                return RED;
+            case "interview":
+                return PURPLE;
+            case "shortlisted":
+                return ORANGE;
+            default:
+                return BLUE;
+        }
+    }
+
+    private Color statusBackground(String status) {
+
+        if (status == null) {
+            return BLUE_LIGHT;
+        }
+
+        switch (status.toLowerCase()) {
+            case "selected":
+                return GREEN_LIGHT;
+            case "rejected":
+                return RED_LIGHT;
+            case "interview":
+                return PURPLE_LIGHT;
+            case "shortlisted":
+                return ORANGE_LIGHT;
+            default:
+                return BLUE_LIGHT;
+        }
+    }
+
+    private int countUrgentDeadlines(List<Application> applications) {
+
+        int count = 0;
+        LocalDate today = LocalDate.now();
+
+        for (Application app : applications) {
+            LocalDate deadline = app.getDeadline();
+
+            if (deadline == null) {
+                continue;
+            }
+
+            long days = ChronoUnit.DAYS.between(today, deadline);
+
+            if (days >= 0 && days <= 3) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private String formatDaysLeft(long daysLeft) {
+
+        if (daysLeft == Long.MAX_VALUE) {
+            return "";
+        }
 
         if (daysLeft < 0) {
-
             return "(Expired)";
-
         }
 
         if (daysLeft == 0) {
-
             return "(Today)";
-
         }
 
         if (daysLeft == 1) {
-
             return "(Tomorrow)";
-
         }
 
-        return "("
-                + daysLeft
-                + " days left)";
+        return "(" + daysLeft + " days left)";
     }
-
-
-    // =========================================================
-    // FULL DEADLINE POPUP
-    // =========================================================
 
     private void showUpcomingDeadlines() {
 
-        ApplicationDAO dao =
-                new ApplicationDAO();
-
-
+        ApplicationDAO dao = new ApplicationDAO();
         List<Application> applications =
-                dao.getUpcomingDeadlines(
-                        user.getUserId()
-                );
-
+                dao.getUpcomingDeadlines(user.getUserId());
 
         if (applications.isEmpty()) {
-
             JOptionPane.showMessageDialog(
                     this,
                     "You have no upcoming deadlines.",
                     "Upcoming Deadlines",
                     JOptionPane.INFORMATION_MESSAGE
             );
-
-
             return;
         }
 
+        StringBuilder message = new StringBuilder("UPCOMING DEADLINES\n\n");
 
-        StringBuilder message =
-                new StringBuilder();
+        for (Application app : applications) {
 
+            LocalDate deadline = app.getDeadline();
+            long days = deadline == null
+                    ? Long.MAX_VALUE
+                    : ChronoUnit.DAYS.between(LocalDate.now(), deadline);
 
-        message.append(
-                "UPCOMING DEADLINES\n"
-        );
-
-
-        message.append(
-                "============================\n\n"
-        );
-
-
-        for (
-                Application app :
-                applications
-        ) {
-
-            LocalDate deadline =
-                    app.getDeadline();
-
-
-            long days =
-                    ChronoUnit.DAYS.between(
-                            LocalDate.now(),
-                            deadline
-                    );
-
-
-            message.append(
-                    app.getCompanyName()
-            );
-
-
-            message.append(
-                    " - "
-            );
-
-
-            message.append(
-                    app.getJobRole()
-            );
-
-
-            message.append(
-                    "\nDeadline: "
-            );
-
-
-            message.append(
-                    deadline
-            );
-
+            message.append(safe(app.getCompanyName(), "Unknown company"))
+                    .append(" - ")
+                    .append(safe(app.getJobRole(), "Internship"))
+                    .append("\nDeadline: ")
+                    .append(deadline == null ? "Not provided" : deadline);
 
             if (days == 0) {
-
-                message.append(
-                        "  ⚠ TODAY"
-                );
-
+                message.append("  ⚠ TODAY");
             } else if (days == 1) {
-
-                message.append(
-                        "  ⚠ TOMORROW"
-                );
-
+                message.append("  ⚠ TOMORROW");
             } else if (days > 1) {
-
-                message.append(
-                        "  ("
-                );
-
-
-                message.append(
-                        days
-                );
-
-
-                message.append(
-                        " days left)"
-                );
+                message.append("  (").append(days).append(" days left)");
             }
 
-
-            message.append(
-                    "\n\n"
-            );
+            message.append("\n\n");
         }
 
+        JTextArea area = new JTextArea(message.toString());
+        area.setEditable(false);
+        area.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        area.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        JTextArea area =
-                new JTextArea(
-                        message.toString()
-                );
-
-
-        area.setEditable(
-                false
-        );
-
-
-        area.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.PLAIN,
-                        14
-                )
-        );
-
-
-        area.setBorder(
-                new EmptyBorder(
-                        10,
-                        10,
-                        10,
-                        10
-                )
-        );
-
-
-        JScrollPane scrollPane =
-                new JScrollPane(
-                        area
-                );
-
-
-        scrollPane.setPreferredSize(
-                new Dimension(
-                        550,
-                        400
-                )
-        );
-
+        JScrollPane scroll = new JScrollPane(area);
+        scroll.setPreferredSize(new Dimension(560, 420));
 
         JOptionPane.showMessageDialog(
                 this,
-                scrollPane,
+                scroll,
                 "Upcoming Deadlines",
                 JOptionPane.INFORMATION_MESSAGE
         );
+    }
+
+    private String safe(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value;
     }
 }
