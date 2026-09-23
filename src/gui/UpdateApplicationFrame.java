@@ -1,7 +1,6 @@
 package gui;
 
 import dao.ApplicationDAO;
-import model.Application;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

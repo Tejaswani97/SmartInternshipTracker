@@ -60,14 +60,14 @@ public class ApplicationsFrame extends JFrame {
 
         JPanel sidebar = new JPanel(new BorderLayout());
         sidebar.setBackground(SIDEBAR);
-        sidebar.setPreferredSize(new Dimension(220, 750));
+        sidebar.setPreferredSize(new Dimension(270, 750));
 
         JPanel top = new JPanel();
         top.setOpaque(false);
         top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
         top.setBorder(new EmptyBorder(30, 20, 20, 20));
 
-        JLabel logo = new JLabel("SmartIntern");
+        JLabel logo = new JLabel("Smart Internship");
         logo.setForeground(Color.WHITE);
         logo.setFont(new Font("SansSerif", Font.BOLD, 21));
         logo.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -146,7 +146,7 @@ public class ApplicationsFrame extends JFrame {
         button.setAlignmentX(Component.LEFT_ALIGNMENT);
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
-        button.setPreferredSize(new Dimension(180, 42));
+        button.setPreferredSize(new Dimension(230, 42));
 
         button.setForeground(Color.WHITE);
         button.setBackground(selected
@@ -157,6 +157,20 @@ public class ApplicationsFrame extends JFrame {
         button.setBorder(BorderFactory.createEmptyBorder(0, 14, 0, 10));
         button.setFocusPainted(false);
         button.setOpaque(true);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (!selected) {
+                    button.setBackground(new Color(43, 54, 70));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(selected ? new Color(55, 65, 81) : SIDEBAR);
+            }
+        });
 
         button.addActionListener(action);
 
@@ -210,7 +224,12 @@ public class ApplicationsFrame extends JFrame {
         toolbar.setBackground(BACKGROUND);
 
         searchField = new JTextField();
-        searchField.setPreferredSize(new Dimension(230, 38));
+        searchField.setPreferredSize(new Dimension(260, 40));
+        searchField.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        searchField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(8, 12, 8, 12)
+        ));
 
         JButton searchButton = new JButton("Search");
         JButton showAllButton = new JButton("Show All");
@@ -225,7 +244,9 @@ public class ApplicationsFrame extends JFrame {
                 }
         );
 
-        statusCombo.setPreferredSize(new Dimension(140, 38));
+        statusCombo.setPreferredSize(new Dimension(145, 40));
+        statusCombo.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        statusCombo.setBackground(CARD);
 
         JButton filterButton = new JButton("Filter");
 
@@ -270,8 +291,16 @@ public class ApplicationsFrame extends JFrame {
 
         table = new JTable(tableModel);
 
-        table.setRowHeight(32);
+        table.setRowHeight(36);
         table.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        table.setForeground(TEXT);
+        table.setBackground(Color.WHITE);
+        table.setGridColor(new Color(239, 241, 245));
+        table.setShowVerticalLines(false);
+        table.setShowHorizontalLines(true);
+        table.setFillsViewportHeight(true);
+        table.setSelectionBackground(new Color(239, 246, 255));
+        table.setSelectionForeground(TEXT);
         table.getTableHeader().setFont(
                 new Font("SansSerif", Font.BOLD, 13)
         );
@@ -279,6 +308,9 @@ public class ApplicationsFrame extends JFrame {
         table.getTableHeader().setBackground(
                 new Color(249, 250, 251)
         );
+        table.getTableHeader().setForeground(TEXT);
+        table.getTableHeader().setOpaque(true);
+        table.getTableHeader().setReorderingAllowed(false);
 
         table.setSelectionMode(
                 ListSelectionModel.SINGLE_SELECTION
@@ -308,6 +340,12 @@ public class ApplicationsFrame extends JFrame {
         updateButton.addActionListener(e -> updateApplication());
         deleteButton.addActionListener(e -> deleteApplication());
 
+        styleSecondaryButton(refreshButton);
+        styleSecondaryButton(exportButton);
+        styleSecondaryButton(detailsButton);
+        stylePrimaryButton(updateButton);
+        styleDangerButton(deleteButton);
+
         panel.add(refreshButton);
         panel.add(exportButton);
         panel.add(detailsButton);
@@ -315,6 +353,53 @@ public class ApplicationsFrame extends JFrame {
         panel.add(deleteButton);
 
         return panel;
+    }
+
+    private void styleSecondaryButton(JButton button) {
+        button.setFont(new Font("SansSerif", Font.BOLD, 12));
+        button.setForeground(TEXT);
+        button.setBackground(CARD);
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(8, 13, 8, 13)
+        ));
+        addButtonHover(button, CARD, new Color(243, 246, 250));
+    }
+
+    private void stylePrimaryButton(JButton button) {
+        button.setFont(new Font("SansSerif", Font.BOLD, 12));
+        button.setForeground(Color.WHITE);
+        button.setBackground(BLUE);
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setBorder(new EmptyBorder(9, 14, 9, 14));
+        addButtonHover(button, BLUE, new Color(37, 99, 235).darker());
+    }
+
+    private void styleDangerButton(JButton button) {
+        button.setFont(new Font("SansSerif", Font.BOLD, 12));
+        button.setForeground(Color.WHITE);
+        button.setBackground(new Color(220, 38, 38));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setBorder(new EmptyBorder(9, 14, 9, 14));
+        addButtonHover(button, new Color(220, 38, 38), new Color(185, 28, 28));
+    }
+
+    private void addButtonHover(JButton button, Color normal, Color hover) {
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                button.setBackground(hover);
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(normal);
+            }
+        });
     }
 
     private void loadApplications() {

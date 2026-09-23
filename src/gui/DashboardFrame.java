@@ -67,14 +67,14 @@ public class DashboardFrame extends JFrame {
 
         JPanel sidebar = new JPanel(new BorderLayout());
         sidebar.setBackground(SIDEBAR);
-        sidebar.setPreferredSize(new Dimension(235, 820));
+        sidebar.setPreferredSize(new Dimension(240, 820));
 
         JPanel top = new JPanel();
         top.setOpaque(false);
         top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
         top.setBorder(new EmptyBorder(30, 20, 20, 20));
 
-        JLabel logo = new JLabel("SmartIntern");
+        JLabel logo = new JLabel("Smart Internship");
         logo.setForeground(Color.WHITE);
         logo.setFont(new Font("SansSerif", Font.BOLD, 22));
         logo.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -148,13 +148,27 @@ public class DashboardFrame extends JFrame {
         button.setAlignmentX(Component.LEFT_ALIGNMENT);
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-        button.setPreferredSize(new Dimension(195, 44));
+        button.setPreferredSize(new Dimension(205, 44));
         button.setFont(new Font("SansSerif", Font.PLAIN, 14));
         button.setForeground(Color.WHITE);
         button.setBackground(selected ? SIDEBAR_SELECTED : SIDEBAR);
         button.setBorder(BorderFactory.createEmptyBorder(0, 14, 0, 10));
         button.setFocusPainted(false);
         button.setOpaque(true);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (!selected) {
+                    button.setBackground(new Color(43, 54, 70));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(selected ? SIDEBAR_SELECTED : SIDEBAR);
+            }
+        });
         button.addActionListener(action);
         return button;
     }
@@ -262,12 +276,12 @@ public class DashboardFrame extends JFrame {
         int selected = stats.getOrDefault("Selected", 0);
         int rejected = stats.getOrDefault("Rejected", 0);
 
-        statsPanel.add(createStatCard("Total", String.valueOf(total), BLUE, BLUE_LIGHT));
-        statsPanel.add(createStatCard("Applied", String.valueOf(applied), BLUE, BLUE_LIGHT));
-        statsPanel.add(createStatCard("Shortlisted", String.valueOf(shortlisted), PURPLE, PURPLE_LIGHT));
-        statsPanel.add(createStatCard("Interview", String.valueOf(interview), GREEN, GREEN_LIGHT));
-        statsPanel.add(createStatCard("Selected", String.valueOf(selected), GREEN, GREEN_LIGHT));
-        statsPanel.add(createStatCard("Rejected", String.valueOf(rejected), RED, RED_LIGHT));
+        statsPanel.add(createStatCard("Total", String.valueOf(total), BLUE));
+        statsPanel.add(createStatCard("Applied", String.valueOf(applied), BLUE));
+        statsPanel.add(createStatCard("Shortlisted", String.valueOf(shortlisted), PURPLE));
+        statsPanel.add(createStatCard("Interview", String.valueOf(interview), GREEN));
+        statsPanel.add(createStatCard("Selected", String.valueOf(selected), GREEN));
+        statsPanel.add(createStatCard("Rejected", String.valueOf(rejected), RED));
 
         wrapper.add(statsPanel, BorderLayout.CENTER);
         return wrapper;
@@ -276,8 +290,7 @@ public class DashboardFrame extends JFrame {
     private JPanel createStatCard(
             String title,
             String value,
-            Color accent,
-            Color lightBackground
+            Color accent
     ) {
 
         JPanel card = new JPanel(new BorderLayout(12, 0));
@@ -290,12 +303,6 @@ public class DashboardFrame extends JFrame {
         JPanel accentBar = new JPanel();
         accentBar.setBackground(accent);
         accentBar.setPreferredSize(new Dimension(5, 55));
-
-        JPanel icon = new JPanel(new GridBagLayout());
-        icon.setBackground(lightBackground);
-        icon.setPreferredSize(new Dimension(40, 40));
-        icon.add(new JLabel("●"));
-        ((JLabel) icon.getComponent(0)).setForeground(accent);
 
         JPanel text = new JPanel();
         text.setOpaque(false);
@@ -314,8 +321,7 @@ public class DashboardFrame extends JFrame {
         text.add(valueLabel);
 
         card.add(accentBar, BorderLayout.WEST);
-        card.add(icon, BorderLayout.CENTER);
-        card.add(text, BorderLayout.EAST);
+        card.add(text, BorderLayout.CENTER);
 
         return card;
     }
@@ -606,7 +612,19 @@ public class DashboardFrame extends JFrame {
         button.setForeground(Color.WHITE);
         button.setBackground(color);
         button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setBorder(BorderFactory.createEmptyBorder(14, 12, 14, 12));
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                button.setBackground(color.darker());
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(color);
+            }
+        });
         return button;
     }
 
@@ -617,7 +635,19 @@ public class DashboardFrame extends JFrame {
         button.setForeground(Color.WHITE);
         button.setBackground(color);
         button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setBorder(BorderFactory.createEmptyBorder(9, 13, 9, 13));
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                button.setBackground(color.darker());
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(color);
+            }
+        });
         return button;
     }
 

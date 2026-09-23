@@ -174,7 +174,7 @@ public class ProfileFrame extends JFrame {
 
         sidebar.setPreferredSize(
                 new Dimension(
-                        240,
+                        235,
                         820
                 )
         );
@@ -205,7 +205,7 @@ public class ProfileFrame extends JFrame {
 
         JLabel logo =
                 new JLabel(
-                        "SmartIntern"
+                        "Smart Internship"
                 );
 
 
@@ -364,18 +364,20 @@ public class ProfileFrame extends JFrame {
                         new BorderLayout(0, 18)
                 );
 
-        content.setBackground(
-                BACKGROUND
-        );
+        content.setBackground(BACKGROUND);
 
         content.setBorder(
                 new EmptyBorder(
                         28,
-                        34,
+                        30,
                         28,
-                        34
+                        30
                 )
         );
+
+        // =========================================================
+        // HEADER
+        // =========================================================
 
         JPanel header =
                 new JPanel(
@@ -395,6 +397,8 @@ public class ProfileFrame extends JFrame {
                 )
         );
 
+        titleBlock.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         JLabel title =
                 new JLabel(
                         "My Profile"
@@ -409,6 +413,7 @@ public class ProfileFrame extends JFrame {
         );
 
         title.setForeground(TEXT);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel subtitle =
                 new JLabel(
@@ -424,6 +429,7 @@ public class ProfileFrame extends JFrame {
         );
 
         subtitle.setForeground(MUTED);
+        subtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         titleBlock.add(title);
         titleBlock.add(Box.createVerticalStrut(5));
@@ -434,8 +440,38 @@ public class ProfileFrame extends JFrame {
                 BorderLayout.CENTER
         );
 
-        header.add(
+        JPanel strengthWrap =
+                new JPanel(
+                        new BorderLayout()
+                );
+
+        strengthWrap.setOpaque(false);
+        strengthWrap.setPreferredSize(
+                new Dimension(
+                        280,
+                        52
+                )
+        );
+        strengthWrap.setMinimumSize(
+                new Dimension(
+                        280,
+                        52
+                )
+        );
+        strengthWrap.setMaximumSize(
+                new Dimension(
+                        280,
+                        52
+                )
+        );
+
+        strengthWrap.add(
                 createProfileStrengthCard(),
+                BorderLayout.CENTER
+        );
+
+        header.add(
+                strengthWrap,
                 BorderLayout.EAST
         );
 
@@ -444,39 +480,82 @@ public class ProfileFrame extends JFrame {
                 BorderLayout.NORTH
         );
 
+        // =========================================================
+        // SCROLLABLE PROFILE BODY
+        // =========================================================
+
+        JPanel contentStack =
+                new JPanel();
+
+        contentStack.setOpaque(false);
+        contentStack.setLayout(
+                new BoxLayout(
+                        contentStack,
+                        BoxLayout.Y_AXIS
+                )
+        );
+
+        // =========================================================
+        // PROFILE HERO
+        // =========================================================
+
         JPanel heroCard =
                 createCard();
 
         heroCard.setLayout(
-                new BorderLayout(26, 0)
+                new BorderLayout(
+                        24,
+                        0
+                )
         );
 
         heroCard.setBorder(
                 BorderFactory.createCompoundBorder(
                         BorderFactory.createLineBorder(BORDER),
-                        new EmptyBorder(24, 28, 24, 28)
+                        new EmptyBorder(
+                                22,
+                                24,
+                                22,
+                                24
+                        )
                 )
         );
 
-        heroCard.setPreferredSize(
+        heroCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+        heroCard.setMaximumSize(
                 new Dimension(
-                        0,
+                        Integer.MAX_VALUE,
                         220
                 )
         );
 
         // ---------------------------------------------------------
-        // PROFILE PHOTO
+        // AVATAR COLUMN
         // ---------------------------------------------------------
 
         JPanel avatarWrap =
                 new JPanel(
-                        new BorderLayout(0, 10)
+                        new BorderLayout(0, 8)
                 );
 
         avatarWrap.setOpaque(false);
         avatarWrap.setPreferredSize(
-                new Dimension(170, 175)
+                new Dimension(
+                        170,
+                        174
+                )
+        );
+        avatarWrap.setMinimumSize(
+                new Dimension(
+                        170,
+                        174
+                )
+        );
+        avatarWrap.setMaximumSize(
+                new Dimension(
+                        170,
+                        174
+                )
         );
 
         avatarLabel = createAvatar();
@@ -487,7 +566,10 @@ public class ProfileFrame extends JFrame {
                 );
 
         avatarCenter.setOpaque(false);
-        avatarCenter.add(avatarLabel);
+
+        avatarCenter.add(
+                avatarLabel
+        );
 
         avatarWrap.add(
                 avatarCenter,
@@ -509,7 +591,10 @@ public class ProfileFrame extends JFrame {
         );
 
         changePhotoButton.setPreferredSize(
-                new Dimension(126, 31)
+                new Dimension(
+                        126,
+                        31
+                )
         );
 
         changePhotoButton.addActionListener(
@@ -539,7 +624,7 @@ public class ProfileFrame extends JFrame {
         );
 
         // ---------------------------------------------------------
-        // IDENTITY
+        // IDENTITY COLUMN
         // ---------------------------------------------------------
 
         JPanel identityText =
@@ -552,6 +637,8 @@ public class ProfileFrame extends JFrame {
                         BoxLayout.Y_AXIS
                 )
         );
+
+        identityText.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         nameLabel =
                 new JLabel(
@@ -601,31 +688,6 @@ public class ProfileFrame extends JFrame {
         roleHint.setForeground(BLUE);
         roleHint.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel locationRow =
-                new JPanel(
-                        new FlowLayout(
-                                FlowLayout.LEFT,
-                                0,
-                                0
-                        )
-                );
-
-        locationRow.setOpaque(false);
-        locationRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JLabel locationIcon =
-                new JLabel("●");
-
-        locationIcon.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        9
-                )
-        );
-
-        locationIcon.setForeground(BLUE);
-
         locationLabel =
                 new JLabel(
                         displayLocation()
@@ -641,22 +703,44 @@ public class ProfileFrame extends JFrame {
 
         locationLabel.setForeground(MUTED);
 
-        locationRow.add(locationIcon);
-        locationRow.add(Box.createHorizontalStrut(7));
-        locationRow.add(locationLabel);
+        JPanel locationRow =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.LEFT,
+                                0,
+                                0
+                        )
+                );
 
-        identityText.add(nameLabel);
-        identityText.add(Box.createVerticalStrut(5));
-        identityText.add(emailLabel);
-        identityText.add(Box.createVerticalStrut(14));
-        identityText.add(roleHint);
-        identityText.add(Box.createVerticalStrut(9));
-        identityText.add(locationRow);
-        identityText.add(Box.createVerticalGlue());
+        locationRow.setOpaque(false);
+        locationRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel locationDot =
+                new JLabel(
+                        "●"
+                );
+
+        locationDot.setFont(
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        8
+                )
+        );
+
+        locationDot.setForeground(BLUE);
+
+        locationRow.add(locationDot);
+        locationRow.add(
+                Box.createHorizontalStrut(7)
+        );
+        locationRow.add(locationLabel);
 
         JLabel profileHint =
                 new JLabel(
-                        "Keep your profile specific, concise, and focused on skills recruiters search for."
+                        "<html><div style='width:360px;'>"
+                                + "Keep your profile specific, concise, and focused on skills recruiters search for."
+                                + "</div></html>"
                 );
 
         profileHint.setFont(
@@ -670,7 +754,14 @@ public class ProfileFrame extends JFrame {
         profileHint.setForeground(MUTED);
         profileHint.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        identityText.add(Box.createVerticalStrut(14));
+        identityText.add(nameLabel);
+        identityText.add(Box.createVerticalStrut(5));
+        identityText.add(emailLabel);
+        identityText.add(Box.createVerticalStrut(13));
+        identityText.add(roleHint);
+        identityText.add(Box.createVerticalStrut(8));
+        identityText.add(locationRow);
+        identityText.add(Box.createVerticalStrut(12));
         identityText.add(profileHint);
 
         heroCard.add(
@@ -679,13 +770,32 @@ public class ProfileFrame extends JFrame {
         );
 
         // ---------------------------------------------------------
-        // CAREER SNAPSHOT + EDIT
+        // SNAPSHOT COLUMN
         // ---------------------------------------------------------
 
         JPanel snapshotSide =
                 new JPanel();
 
         snapshotSide.setOpaque(false);
+        snapshotSide.setPreferredSize(
+                new Dimension(
+                        230,
+                        174
+                )
+        );
+        snapshotSide.setMinimumSize(
+                new Dimension(
+                        230,
+                        174
+                )
+        );
+        snapshotSide.setMaximumSize(
+                new Dimension(
+                        230,
+                        174
+                )
+        );
+
         snapshotSide.setLayout(
                 new BoxLayout(
                         snapshotSide,
@@ -694,28 +804,41 @@ public class ProfileFrame extends JFrame {
         );
 
         JLabel snapshotTitle =
-                createSectionTitle("Career Snapshot");
+                createSectionTitle(
+                        "Career Snapshot"
+                );
 
-        snapshotTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+        snapshotTitle.setAlignmentX(
+                Component.LEFT_ALIGNMENT
+        );
+
         snapshotSide.add(snapshotTitle);
         snapshotSide.add(Box.createVerticalStrut(12));
 
-        snapshotSide.add(
+        JPanel locationSnapshot =
                 createSnapshotRow(
                         "Location",
                         displayLocation()
-                )
+                );
+
+        locationSnapshot.setAlignmentX(
+                Component.LEFT_ALIGNMENT
         );
 
-        snapshotSide.add(Box.createVerticalStrut(10));
+        snapshotSide.add(locationSnapshot);
+        snapshotSide.add(Box.createVerticalStrut(9));
 
-        snapshotSide.add(
+        JPanel resumeSnapshot =
                 createSnapshotRow(
                         "Resume",
                         resumeStatusText()
-                )
+                );
+
+        resumeSnapshot.setAlignmentX(
+                Component.LEFT_ALIGNMENT
         );
 
+        snapshotSide.add(resumeSnapshot);
         snapshotSide.add(Box.createVerticalGlue());
 
         JButton editButton =
@@ -725,7 +848,17 @@ public class ProfileFrame extends JFrame {
                 );
 
         editButton.setPreferredSize(
-                new Dimension(170, 40)
+                new Dimension(
+                        170,
+                        40
+                )
+        );
+
+        editButton.setMinimumSize(
+                new Dimension(
+                        170,
+                        40
+                )
         );
 
         editButton.setMaximumSize(
@@ -735,7 +868,10 @@ public class ProfileFrame extends JFrame {
                 )
         );
 
-        editButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        editButton.setAlignmentX(
+                Component.LEFT_ALIGNMENT
+        );
+
         editButton.addActionListener(
                 e -> editProfile()
         );
@@ -747,9 +883,12 @@ public class ProfileFrame extends JFrame {
                 BorderLayout.EAST
         );
 
-        // ---------------------------------------------------------
-        // LOWER PROFILE CONTENT
-        // ---------------------------------------------------------
+        contentStack.add(heroCard);
+        contentStack.add(Box.createVerticalStrut(18));
+
+        // =========================================================
+        // LOWER CONTENT
+        // =========================================================
 
         JPanel lower =
                 new JPanel(
@@ -762,6 +901,7 @@ public class ProfileFrame extends JFrame {
                 );
 
         lower.setOpaque(false);
+        lower.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JPanel leftColumn =
                 new JPanel();
@@ -774,48 +914,58 @@ public class ProfileFrame extends JFrame {
                 )
         );
 
-        leftColumn.add(createAboutCard());
-        leftColumn.add(Box.createVerticalStrut(16));
-        leftColumn.add(createSkillsCard());
-
-        JPanel rightColumn =
-                new JPanel();
-
-        rightColumn.setOpaque(false);
-        rightColumn.setLayout(
-                new BoxLayout(
-                        rightColumn,
-                        BoxLayout.Y_AXIS
+        JPanel aboutCard = createAboutCard();
+        aboutCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+        aboutCard.setMaximumSize(
+                new Dimension(
+                        Integer.MAX_VALUE,
+                        180
                 )
         );
 
-        rightColumn.add(createResumeCard());
+        JPanel skillsCard = createSkillsCard();
+        skillsCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+        skillsCard.setMaximumSize(
+                new Dimension(
+                        Integer.MAX_VALUE,
+                        160
+                )
+        );
+
+        leftColumn.add(aboutCard);
+        leftColumn.add(Box.createVerticalStrut(16));
+        leftColumn.add(skillsCard);
+
+        JPanel rightColumn =
+                new JPanel(
+                        new BorderLayout()
+                );
+
+        rightColumn.setOpaque(false);
+
+        JPanel resumeCard = createResumeCard();
+        resumeCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        rightColumn.add(
+                resumeCard,
+                BorderLayout.NORTH
+        );
 
         lower.add(leftColumn);
         lower.add(rightColumn);
 
-        JPanel contentStack =
-                new JPanel();
-
-        contentStack.setOpaque(false);
-        contentStack.setLayout(
-                new BoxLayout(
-                        contentStack,
-                        BoxLayout.Y_AXIS
-                )
-        );
-
-        contentStack.add(heroCard);
-        contentStack.add(Box.createVerticalStrut(18));
         contentStack.add(lower);
 
         JScrollPane scrollPane =
-                new JScrollPane(contentStack);
+                new JScrollPane(
+                        contentStack
+                );
 
         scrollPane.setBorder(null);
         scrollPane.setOpaque(false);
         scrollPane.getViewport().setOpaque(false);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
         scrollPane.setHorizontalScrollBarPolicy(
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
         );
@@ -827,7 +977,6 @@ public class ProfileFrame extends JFrame {
 
         return content;
     }
-
 
     private JPanel createProfileStrengthCard() {
 
@@ -2264,6 +2413,20 @@ public class ProfileFrame extends JFrame {
     }
 
 
+    private void addButtonHover(JButton button, Color normal, Color hover) {
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                button.setBackground(hover);
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(normal);
+            }
+        });
+    }
+
     private String safe(
             String text
     ) {
@@ -2381,6 +2544,7 @@ public class ProfileFrame extends JFrame {
                         10, 16, 10, 16
                 )
         );
+        addButtonHover(button, color, color.darker());
 
         return button;
     }
@@ -2415,6 +2579,7 @@ public class ProfileFrame extends JFrame {
                         )
                 )
         );
+        addButtonHover(button, CARD, new Color(248, 250, 252));
 
         return button;
     }
@@ -2453,7 +2618,7 @@ public class ProfileFrame extends JFrame {
 
         button.setPreferredSize(
                 new Dimension(
-                        180,
+                        205,
                         42
                 )
         );
@@ -2486,6 +2651,12 @@ public class ProfileFrame extends JFrame {
 
         button.setFocusPainted(
                 false
+        );
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        addButtonHover(
+                button,
+                selected ? new Color(55, 65, 81) : SIDEBAR,
+                selected ? new Color(67, 78, 95) : new Color(43, 54, 70)
         );
 
 
