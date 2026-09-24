@@ -1,17 +1,37 @@
 package util;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class DatabaseConnection {
 
-    private static final String URL =
-            "jdbc:mysql://localhost:3306/internship_tracker";
+    private static String URL;
+    private static String USER;
+    private static String PASSWORD;
 
-    private static final String USER = "root";
+    static {
 
-    private static final String PASSWORD = "";
+        Properties properties = new Properties();
+
+        try (FileInputStream input =
+                     new FileInputStream("config.properties")) {
+
+            properties.load(input);
+
+            URL = properties.getProperty("DB_URL");
+            USER = properties.getProperty("DB_USERNAME");
+            PASSWORD = properties.getProperty("DB_PASSWORD");
+
+        } catch (IOException e) {
+
+            System.out.println("Could not load config.properties.");
+            e.printStackTrace();
+        }
+    }
 
     public static Connection getConnection() {
 
@@ -31,7 +51,6 @@ public class DatabaseConnection {
         } catch (SQLException e) {
 
             System.out.println("Database connection failed!");
-
             e.printStackTrace();
 
             return null;
