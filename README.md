@@ -193,5 +193,5 @@ SmartInternshipTracker/
 │   └── gson-2.14.0.jar
 │
 ├── .gitignore
-├── config.properties
+├── config.properties   # local only, not committed
 └── README.md
