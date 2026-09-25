@@ -195,3 +195,24 @@ SmartInternshipTracker/
 ├── .gitignore
 ├── config.properties   # local only, not committed
 └── README.md
+
+## Architecture
+
+Smart Internship Tracker follows a layered Java application structure.
+
+```text
+User
+  ↓
+GUI Layer (Java Swing)
+  ↓
+DAO Layer
+  ↓
+MySQL Database
+
+External internship data
+  ↓
+API Layer (Greenhouse / Lever)
+  ↓
+DAO Layer
+  ↓
+MySQL Database
