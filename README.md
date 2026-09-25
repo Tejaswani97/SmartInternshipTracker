@@ -1,8 +1,40 @@
 # Smart Internship Tracker
 
-Smart Internship Tracker is a Java desktop application that helps students discover real internship opportunities, save interesting roles, apply through the employer's official application page, and track their internship applications in one place.
+Smart Internship Tracker is a Java desktop application that helps students discover real internship opportunities, save opportunities they are interested in, apply through official employer application pages, and track their internship applications in one place.
 
-The project is designed around real public internship listings rather than fake/demo job data.
+The application uses public internship listings from supported Greenhouse and Lever job boards rather than generated or fake internship data.
+
+## Demo
+
+### Download
+
+[Download Smart Internship Tracker v1.0.0](https://github.com/Tejaswani97/SmartInternshipTracker/releases/latest)
+
+The release contains the runnable desktop application, required libraries, database schema, configuration template, and setup instructions.
+
+### Screenshots
+
+#### Login
+
+![Login](docs/screenshots/login.png)
+
+#### Dashboard
+
+![Dashboard](docs/screenshots/Dashboard.png)
+
+#### Internship Discovery
+
+![Internships](docs/screenshots/internships.png)
+
+#### Application Tracking
+
+![Applications](docs/screenshots/applications.png)
+
+#### Profile
+
+![Profile](docs/screenshots/Profile.png)
+
+---
 
 ## Features
 
@@ -10,109 +42,88 @@ The project is designed around real public internship listings rather than fake/
 - Email OTP verification during registration
 - Student profile management
 - Profile photo support
-- Resume information
-- Real internship listings from public Greenhouse and Lever job boards
-- Internship search and filtering
-- Filter by category, location, work mode, and source
+- Resume management
+- Real internship listings from supported Greenhouse and Lever job boards
+- Internship search
+- Internship filtering
+- Filtering by category, location, work mode, and source
 - Skill-based internship matching
 - Save and unsave internships
-- View internship details
-- Open the official employer application page
-- Mark an internship as applied only after the user confirms the application was submitted
-- Prevent duplicate applications
-- Track application status
+- Saved Internships section
+- Internship details view
+- Public recruiter contact information when available
+- Official employer application links
+- Duplicate application prevention
+- Application status tracking
 - Application search and filtering
 - Upcoming application deadlines
 - Dashboard statistics
 - Deadline reminders
 - CSV export for applications
-- Public recruiter contact information when provided by the source
 - Automatic refreshing of supported internship sources
 
-## Tech Stack
+---
 
-### Frontend / GUI
-- Java Swing
-
-### Backend
-- Java
-- JDBC
-
-### Database
-- MySQL
-
-### APIs / Data Sources
-- Greenhouse public job board API
-- Lever public postings API
-
-### Libraries
-- MySQL Connector/J
-- Gson
-
-### Development Tools
-- IntelliJ IDEA / VS Code
-- MySQL
-- Git
-- GitHub
-
-## How the Application Works
+## How It Works
 
 ### 1. Register
 
-A student creates an account using their name, email, and password.
+A student creates an account using their name, email address, and password.
 
 An OTP is sent to the registered email address for verification.
 
 ### 2. Login
 
-After registration and verification, the student can log into the application.
+After successful registration and email verification, the student can log in to the application.
 
 ### 3. Build a Profile
 
-The student can maintain profile information such as:
+Students can manage their profile information, including:
 
 - Name
 - Location
 - Skills
 - Bio
-- Resume information
+- Resume
 - Profile photo
 
 ### 4. Discover Internships
 
 The application retrieves internship opportunities from supported public Greenhouse and Lever job boards.
 
-The internship listings are stored in the MySQL database so they can be searched and displayed efficiently.
+The retrieved opportunities are stored in MySQL and displayed inside the application.
 
 ### 5. Search and Filter
 
-Students can search for internships and filter opportunities using information such as:
+Students can search and filter internships using information such as:
 
 - Role
 - Category
 - Location
 - Work mode
 - Source
-- Skills
+- Required skills
 - Latest postings
 - Deadline
 - Skill match
 
 ### 6. Save Internships
 
-Students can save internships that they are interested in and access them later from the Saved Internships section.
+Students can save internships they are interested in and access them later from the Saved Internships section.
 
 ### 7. Apply
 
-The application does not submit applications on behalf of the student.
+Smart Internship Tracker does not automatically submit job applications.
 
-Instead, the student is taken to the official employer application page.
+Instead, the application opens the official employer application page in the user's browser.
 
-After submitting the application on the employer's website, the student can confirm the submission in Smart Internship Tracker and record it as an application.
+After the student submits the application on the employer's website, the application asks the student to confirm the submission before adding it to My Applications.
 
 ### 8. Track Applications
 
-Students can track applications and update their status, for example:
+Students can track their applications and update their status.
+
+Supported statuses include:
 
 - Applied
 - Shortlisted
@@ -120,37 +131,183 @@ Students can track applications and update their status, for example:
 - Selected
 - Rejected
 
-The application also shows upcoming deadlines and provides dashboard statistics.
+The dashboard also provides application statistics and upcoming deadline information.
+
+---
 
 ## Data Sources
 
-The project currently integrates with publicly available job board APIs.
+The application integrates with publicly available job-board APIs.
 
 ### Greenhouse
 
-Public Greenhouse job boards are retrieved through the Greenhouse job board API.
+Internship opportunities are retrieved from supported public Greenhouse job boards through the Greenhouse job board API.
 
 ### Lever
 
-Public Lever postings are retrieved through the Lever postings API.
+Internship opportunities are retrieved from supported public Lever postings through the Lever postings API.
 
-Only opportunities returned by the supported public sources are imported.
+Only opportunities returned by the supported sources are imported into the application.
 
 The application does not generate fake internship listings.
 
-## Database
+---
 
-The project uses MySQL.
+## Tech Stack
 
-The main tables include:
+### Programming Language
 
-- `users`
-- `applications`
-- `internships`
-- `saved_internships`
-- `email_verifications`
+- Java
 
-The `internships` table also stores source and external-job information to support synchronization and duplicate prevention.
+### GUI
+
+- Java Swing
+
+### Database
+
+- MySQL
+- JDBC
+
+### APIs
+
+- Greenhouse Job Board API
+- Lever Postings API
+
+### Libraries
+
+- MySQL Connector/J
+- Gson
+
+### Email
+
+- Brevo
+
+### Tools
+
+- Git
+- GitHub
+- VS Code / IntelliJ IDEA
+
+---
+
+## Architecture
+
+Smart Internship Tracker follows a layered Java application structure.
+
+```text
+                         ┌─────────────────────┐
+                         │       Student       │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │     GUI Layer       │
+                         │     Java Swing      │
+                         └──────────┬──────────┘
+                                    │
+                         ┌──────────▼──────────┐
+                         │      DAO Layer      │
+                         │ Database Operations │
+                         └──────────┬──────────┘
+                                    │
+                         ┌──────────▼──────────┐
+                         │    MySQL Database   │
+                         └─────────────────────┘
+
+
+     Greenhouse API ─────┐
+                         │
+                         ▼
+                    ┌─────────────┐
+                    │  API Layer  │
+                    │ Greenhouse  │
+                    │   + Lever   │
+                    └──────┬──────┘
+                           │
+                           ▼
+                       DAO Layer
+                           │
+                           ▼
+                     MySQL Database
+```
+
+### GUI Layer
+
+Located in:
+
+```text
+src/gui/
+```
+
+Contains the Java Swing screens and dialogs used by students.
+
+Examples include:
+
+- Login
+- Registration
+- Dashboard
+- Internship Opportunities
+- Applications
+- Profile
+- Analytics
+- Internship Details
+
+### API Layer
+
+Located in:
+
+```text
+src/api/
+```
+
+Handles retrieval of internship information from supported public sources.
+
+### DAO Layer
+
+Located in:
+
+```text
+src/dao/
+```
+
+Handles database operations for:
+
+- Users
+- Applications
+- Internships
+- Saved internships
+- Email verification
+
+### Model Layer
+
+Located in:
+
+```text
+src/model/
+```
+
+Contains the application's core models such as:
+
+- User
+- Internship
+- Application
+
+### Utility Layer
+
+Located in:
+
+```text
+src/util/
+```
+
+Contains supporting functionality such as:
+
+- Database connection
+- Email service
+- Skill matching
+- Skill match results
+
+---
 
 ## Project Structure
 
@@ -164,55 +321,307 @@ SmartInternshipTracker/
 │   │
 │   ├── dao/
 │   │   ├── ApplicationDAO.java
+│   │   ├── EmailVerificationDAO.java
 │   │   ├── InternshipDAO.java
 │   │   ├── SavedInternshipDAO.java
-│   │   ├── UserDAO.java
-│   │   └── ...
+│   │   └── UserDAO.java
 │   │
 │   ├── gui/
-│   │   ├── LoginFrame.java
-│   │   ├── RegisterFrame.java
-│   │   ├── DashboardFrame.java
-│   │   ├── InternshipsFrame.java
+│   │   ├── AddApplicationFrame.java
+│   │   ├── AnalyticsFrame.java
 │   │   ├── ApplicationsFrame.java
+│   │   ├── DashboardFrame.java
+│   │   ├── InternshipDetailsDialog.java
+│   │   ├── InternshipsFrame.java
+│   │   ├── LoginFrame.java
 │   │   ├── ProfileFrame.java
-│   │   └── ...
+│   │   ├── RegisterFrame.java
+│   │   └── UpdateApplicationFrame.java
 │   │
 │   ├── model/
-│   │   ├── User.java
-│   │   ├── Internship.java
 │   │   ├── Application.java
-│   │   └── ...
+│   │   ├── Internship.java
+│   │   └── User.java
 │   │
-│   └── service/
-│       ├── EmailService.java
-│       └── ...
+│   ├── util/
+│   │   ├── DatabaseConnection.java
+│   │   ├── EmailService.java
+│   │   ├── SkillMatcher.java
+│   │   └── SkillMatchResult.java
+│   │
+│   └── Main.java
 │
 ├── lib/
-│   ├── mysql-connector-j-26.7.0.jar
-│   └── gson-2.14.0.jar
+│   ├── gson-2.14.0.jar
+│   └── mysql-connector-j-26.7.0.jar
+│
+├── docs/
+│   └── screenshots/
+│       ├── login.png
+│       ├── Dashboard.png
+│       ├── internships.png
+│       ├── applications.png
+│       └── Profile.png
 │
 ├── .gitignore
-├── config.properties   # local only, not committed
+├── config.properties
 └── README.md
+```
 
-## Architecture
+> `config.properties` is a local configuration file and should not be committed to GitHub.
 
-Smart Internship Tracker follows a layered Java application structure.
+---
+
+## Database
+
+The application uses MySQL for persistent data storage.
+
+Main tables include:
+
+- `users`
+- `applications`
+- `internships`
+- `email_verifications`
+- `saved_internships`
+
+The `internships` table also stores source information and external job identifiers to support internship synchronization and duplicate prevention.
+
+---
+
+## Setup
+
+### Requirements
+
+- Java JDK
+- MySQL
+- Git
+- Internet connection for internship source refresh and email verification
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Tejaswani97/SmartInternshipTracker.git
+cd SmartInternshipTracker
+```
+
+### 2. Create the database
+
+Run:
+
+```sql
+CREATE DATABASE IF NOT EXISTS internship_tracker;
+```
+
+Then run the database schema provided in:
 
 ```text
-User
-  ↓
-GUI Layer (Java Swing)
-  ↓
-DAO Layer
-  ↓
-MySQL Database
+database.sql
+```
 
-External internship data
-  ↓
-API Layer (Greenhouse / Lever)
-  ↓
-DAO Layer
-  ↓
-MySQL Database
+### 3. Configure the application
+
+Create a local:
+
+```text
+config.properties
+```
+
+using:
+
+```text
+config.properties.example
+```
+
+Example:
+
+```properties
+DB_URL=jdbc:mysql://localhost:3306/internship_tracker
+DB_USERNAME=root
+DB_PASSWORD=YOUR_MYSQL_PASSWORD
+
+BREVO_API_KEY=YOUR_BREVO_API_KEY
+BREVO_SENDER_EMAIL=YOUR_EMAIL
+BREVO_SENDER_NAME=Smart Internship Tracker
+```
+
+Replace the placeholder values with your local configuration.
+
+### 4. Run from source
+
+Compile the application using the required libraries and run:
+
+```text
+Main
+```
+
+The application starts with the Smart Internship Tracker login screen.
+
+---
+
+## Running the v1.0.0 Demo
+
+Download the latest release:
+
+[Smart Internship Tracker v1.0.0](https://github.com/Tejaswani97/SmartInternshipTracker/releases/latest)
+
+Extract the ZIP file.
+
+The release contains:
+
+```text
+SmartInternshipTracker.jar
+lib/
+config.properties.example
+database.sql
+SETUP.md
+run.bat
+```
+
+Copy:
+
+```text
+config.properties.example
+```
+
+to:
+
+```text
+config.properties
+```
+
+and configure your local MySQL and Brevo settings.
+
+Then run:
+
+```text
+run.bat
+```
+
+or use:
+
+```bash
+java -cp "SmartInternshipTracker.jar;lib/*" Main
+```
+
+---
+
+## Application Flow
+
+```text
+Register
+   │
+   ▼
+Email OTP Verification
+   │
+   ▼
+Login
+   │
+   ▼
+Dashboard
+   │
+   ├───────────────┐
+   ▼               ▼
+Profile       Internship Discovery
+                  │
+                  ├── Search
+                  ├── Filter
+                  ├── Skill Match
+                  └── Save
+                       │
+                       ▼
+                Internship Details
+                       │
+                       ▼
+             Official Employer Page
+                       │
+                       ▼
+              Submit Application
+                       │
+                       ▼
+              Confirm Submission
+                       │
+                       ▼
+              My Applications
+                       │
+                       ▼
+             Track Application
+```
+
+---
+
+## Application Tracking
+
+The tracker helps students maintain their own application records.
+
+It supports:
+
+- Application dates
+- Deadlines
+- Status updates
+- Job links
+- Notes
+- Search
+- Filtering
+- Duplicate prevention
+- CSV export
+
+The application does not automatically read employer emails or ATS systems to determine whether a student received an interview or offer.
+
+---
+
+## Security and Configuration
+
+Sensitive credentials are kept outside the committed source code.
+
+The following local files should not be committed:
+
+```text
+config.properties
+.env
+*.class
+```
+
+The real MySQL password and Brevo API key should never be placed directly in Java source code or the public README.
+
+Use:
+
+```text
+config.properties.example
+```
+
+as the configuration template.
+
+---
+
+## Release
+
+Current stable release:
+
+**v1.0.0**
+
+[Download the latest release](https://github.com/Tejaswani97/SmartInternshipTracker/releases/latest)
+
+---
+
+## Future Improvements
+
+Possible future improvements include:
+
+- More public internship source integrations
+- Advanced internship recommendations
+- Improved resume-to-internship matching
+- Application notifications
+- Email-based application status detection
+- Cloud database support
+- Web-based version of the application
+- Mobile application support
+
+---
+
+## Author
+
+**Chinni Tejaswani**
+
+- GitHub: https://github.com/Tejaswani97
+- LinkedIn: https://www.linkedin.com/in/tejaswani-chinni-b02409340
+- Email: tejaswani.chinni7@gmail.com
