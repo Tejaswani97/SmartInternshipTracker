@@ -12,3 +12,5 @@
 Thumbs.db
 config.properties
 SmartInternshipTracker_details_upgrade*
+release/
+*.zip
